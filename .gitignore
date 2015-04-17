@@ -2,7 +2,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+//*.obj Using obj files for meshes
 
 # Precompiled Headers
 *.gch
@@ -26,3 +26,12 @@
 *.exe
 *.out
 *.app
+
+#Small Gameproject
+*.tlog
+*.log
+*.opensdf
+*.pdb
+*.idb
+*.ilk
+*.sdf
