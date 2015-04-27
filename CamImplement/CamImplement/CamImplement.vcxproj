@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="GameDummy.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Input.h" />

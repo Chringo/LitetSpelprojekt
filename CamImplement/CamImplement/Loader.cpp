@@ -23,7 +23,7 @@ Loader::~Loader()
 	delete[] m_fileCounts;
 }
 
-void Loader::Initialize(int nObjects)
+void Loader::Initialize(ID3D11Device* device, int nObjects)
 {
 	if (nObjects > 0)
 	{
@@ -47,6 +47,9 @@ void Loader::Initialize(int nObjects)
 		LoadDataStructures(filename);
 		nObjectsCurrent++;
 	}
+
+	//filename = "dummyTexture.png";
+	//LoadTextures(device, filename);
 }
 
 ObjectType& Loader::getObject(Object obj) const
@@ -62,6 +65,11 @@ int Loader::getVertexCount(Object index) const
 int Loader::getIndexCount(Object index) const
 {
 	return m_fileCounts[index].nFaces * 3;
+}
+
+int Loader::getNormalCount(Object index) const
+{
+	return m_fileCounts[index].nNormals;
 }
 
 void Loader::FindModelFilename(Object object, char* filename)
@@ -277,4 +285,24 @@ bool Loader::LoadDataStructures(char* filename)
 	fout.close();
 
 	return true;
+}
+
+bool Loader::LoadTextures(ID3D11Device* device, char* filename)
+{
+
+
+	D3D11_TEXTURE2D_DESC desc;
+	desc.Width = 800;
+	desc.Height = 600;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	return false;
 }

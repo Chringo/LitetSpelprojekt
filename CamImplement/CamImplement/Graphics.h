@@ -16,10 +16,16 @@
 class Graphics
 {
 private:
-	struct constBufferWVP
+	struct constBufferPerFrame
+	{
+
+	} cbPerFrame;
+
+	struct constBufferPerObject
 	{
 		DirectX::XMFLOAT4X4 WVP;
-	} cBufWVP;
+		DirectX::XMFLOAT4X4 World;
+	} cbPerObject;
 
 	DirectX::XMMATRIX world;
 
@@ -29,16 +35,20 @@ private:
 
 	VertexType* vertices;
 	UINT* indices;
+	NormalType* normals;
 
+	int nObjects;
 	int nVertices;
 	int nIndices;
+	int nNormals;
 
-	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT3 playerPosition;
 	float size;
 
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
-	ID3D11Buffer* constantBuffer;
+	ID3D11Buffer* cbPerFrameBuffer;
+	ID3D11Buffer* cbPerObjectBuffer;
 
 	ID3D11InputLayout* rVertexLayout;
 	ID3D11VertexShader* rVS;
@@ -58,7 +68,7 @@ private:
 	HRESULT CreateDepthBuffer(int width, int height);
 	HRESULT CreateShaders();
 	void InitVertices();
-	void SetVertices();
+	void SetVertices(const ObjectType& obj);
 	void CreateBuffers();
 	void CreateCamera();
 

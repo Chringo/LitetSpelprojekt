@@ -15,7 +15,8 @@ Graphics::Graphics()
 
 	vertexBuffer = nullptr;
 	indexBuffer = nullptr;
-	constantBuffer = nullptr;
+	cbPerFrameBuffer = nullptr;
+	cbPerObjectBuffer = nullptr;
 
 	rVertexLayout = nullptr;
 	vertices = nullptr;
@@ -132,7 +133,8 @@ HRESULT Graphics::CreateShaders()
 	HRESULT hr;
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 12, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	ID3DBlob* pVS = nullptr;
@@ -181,14 +183,16 @@ HRESULT Graphics::CreateShaders()
 
 void Graphics::InitVertices()
 {
+	ObjectType temp = loader->getObject(Player);
 	nVertices = loader->getVertexCount(Player);
+	nNormals = loader->getVertexCount(Player);
 	vertices = new VertexType[nVertices];
-	SetVertices();
-
+	normals = new NormalType[nNormals];
+	SetVertices(temp);
+	
 	nIndices = loader->getIndexCount(Player);
 	indices = new UINT[nIndices];
-
-	ObjectType temp = loader->getObject(Player);
+	
 	int j = 0;
 	for (int i = 0; i < nIndices / 3; i++)
 	{
@@ -212,14 +216,18 @@ void Graphics::InitVertices()
 	//indices[33] = 5; indices[34] = 6; indices[35] = 7; //Top
 }
 
-void Graphics::SetVertices()
+void Graphics::SetVertices(const ObjectType& obj)
 {
 	for (int i = 0; i < nVertices; i++)
 	{
-		vertices[i] = loader->getObject(Player).vertices[i];
-		vertices[i].x += position.x;
-		vertices[i].y += position.y;
-		vertices[i].z += position.z;
+		vertices[i] = obj.vertices[i];
+		vertices[i].x += playerPosition.x;
+		vertices[i].y += playerPosition.y;
+		vertices[i].z += playerPosition.z;
+	}
+	for (int i = 0; i < nNormals; i++)
+	{
+		normals[i] = obj.normals[i];
 	}
 
 	/*vertices[0] = VertexType(position.x - size, position.y, position.z + size);
@@ -267,20 +275,20 @@ void Graphics::CreateBuffers()
 	rDevice->CreateBuffer(&indexBufferDesc, &iData, &indexBuffer);
 
 	//Constant buffer
-	D3D11_BUFFER_DESC constantBufferDesc;
-	constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constantBufferDesc.ByteWidth = sizeof(constBufferWVP);
-	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	constantBufferDesc.MiscFlags = 0;
-	constantBufferDesc.StructureByteStride = 0;
+	D3D11_BUFFER_DESC cbObjectDesc;
+	cbObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbObjectDesc.ByteWidth = sizeof(constBufferPerObject);
+	cbObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbObjectDesc.MiscFlags = 0;
+	cbObjectDesc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA cbData;
-	cbData.pSysMem = &cBufWVP;
+	cbData.pSysMem = &cbPerObject;
 	cbData.SysMemPitch = 0;
 	cbData.SysMemSlicePitch = 0;
 
-	rDevice->CreateBuffer(&constantBufferDesc, &cbData, &constantBuffer);
+	rDevice->CreateBuffer(&cbObjectDesc, &cbData, &cbPerObjectBuffer);
 }
 
 void Graphics::CreateCamera()
@@ -294,7 +302,7 @@ void Graphics::CreateCamera()
 	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
 	DirectX::XMMATRIX wvp = world * view * projection;
-	DirectX::XMStoreFloat4x4(&cBufWVP.WVP, DirectX::XMMatrixTranspose(wvp));
+	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 }
 
 HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen)
@@ -302,6 +310,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	HRESULT hr;
 
 	size = 0.1f;
+	nObjects = 1;
 	nVertices = 8;
 	nIndices = 36;
 
@@ -319,10 +328,10 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	game = new GameDummy();
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
 
-	loader->Initialize();
+	loader->Initialize(rDevice, 1);
 	game->Initialize(wndHandle, hInstance, viewport);
 
-	DirectX::XMStoreFloat3(&position, game->getPlayerData().position);
+	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
 	CreateCamera();
 	InitVertices();
 	CreateBuffers();
@@ -333,8 +342,8 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 void Graphics::Update()
 {	
 	game->Update();
-	DirectX::XMStoreFloat3(&position, game->getPlayerData().position);
-	SetVertices();
+	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
+	SetVertices(loader->getObject(Player));
 	world = game->getPlayerData().direction;
 	camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, world));
 	camera->Update(0.1f);
@@ -342,13 +351,14 @@ void Graphics::Update()
 	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
 	DirectX::XMMATRIX wvp = world * view * projection;
-	DirectX::XMStoreFloat4x4(&cBufWVP.WVP, DirectX::XMMatrixTranspose(wvp));
+	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
+	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));
 
 	D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	rDeviceContext->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-	memcpy(cb.pData, &cBufWVP, sizeof(constBufferWVP));
-	rDeviceContext->Unmap(constantBuffer, 0);
+	rDeviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+	memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
+	rDeviceContext->Unmap(cbPerObjectBuffer, 0);
 
 	D3D11_MAPPED_SUBRESOURCE vb;
 	ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -372,7 +382,7 @@ void Graphics::Render()
 	rDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	rDeviceContext->VSSetShader(rVS, nullptr, 0);
-	rDeviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
+	rDeviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 	rDeviceContext->PSSetShader(rPS, nullptr, 0);
 
 	rDeviceContext->DrawIndexed(nIndices, 0, 0);
@@ -393,7 +403,7 @@ void Graphics::ReleaseCOM()
 
 	vertexBuffer->Release();
 	indexBuffer->Release();
-	constantBuffer->Release();
+	cbPerObjectBuffer->Release();
 
 	rDepthStencilView->Release();
 	rDepthStencilBuffer->Release();
