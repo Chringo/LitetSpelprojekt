@@ -21,8 +21,6 @@ private:
 		DirectX::XMFLOAT4X4 WVP;
 	} cBufWVP;
 
-	DirectX::XMMATRIX world;
-
 	Loader* loader;
 	GameDummy* game;
 	Camera* camera;
@@ -33,7 +31,6 @@ private:
 	int nVertices;
 	int nIndices;
 
-	DirectX::XMFLOAT3 position;
 	float size;
 
 	ID3D11Buffer* vertexBuffer;

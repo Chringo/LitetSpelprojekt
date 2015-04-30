@@ -1,14 +1,18 @@
 #ifndef GAMEDUMMY_H
 #define GAMEDUMMY_H
 
-#include "PlayerDummy.h"
+#include <DirectXMath.h>
+
+#include "Entity.h"
 #include "Input.h"
 
 class GameDummy
 {
 private:
-	Input* input;
-	PlayerDummy* player;
+	Collision::Player* player;
+	POINT clientSize;
+	HWND windowHandle;
+
 public:
 	GameDummy();
 	~GameDummy();
@@ -16,7 +20,9 @@ public:
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport);
 
 	void Update();
-	PlayerWorld getPlayerData();
+
+	DirectX::XMMATRIX GetPlayerMatrix();
+	DirectX::XMVECTOR GetPlayerPosition();
 
 	void ReleaseCOM();
 };

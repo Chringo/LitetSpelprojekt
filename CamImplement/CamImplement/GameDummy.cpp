@@ -1,38 +1,53 @@
 #include "GameDummy.h"
 
+using namespace DirectX;
+
 GameDummy::GameDummy()
 {
-	input = nullptr;
 	player = nullptr;
 }
 
 GameDummy::~GameDummy()
 {
-	delete input;
 	delete player;
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
 {
-	input = new Input();
-	player = new PlayerDummy();
+	RECT r;
+	windowHandle = wndHandle;
+	GetWindowRect(wndHandle, &r);
+	clientSize.x = r.right - r.left;
+	clientSize.y = r.bottom - r.top;
 
-	return input->Initialize(wndHandle, hInstance, viewport);
+	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(1.f, 1.f, 1.f, 1.f));
+
+	return S_OK;
 }
 
 void GameDummy::Update()
 {
-	input->Update();
-	player->Update(input->getMoveDirection());
-	player->setDirection(input->getMouseDirection());
+	POINT p;
+	GetCursorPos(&p);
+	ScreenToClient(windowHandle, &p);
+
+	p.x -= clientSize.x * 0.5f;
+	p.y -= clientSize.y * 0.5f;
+
+	player->Update(0.1f);
+	player->SetAttackDirection(p);
 }
 
-PlayerWorld GameDummy::getPlayerData()
+XMMATRIX GameDummy::GetPlayerMatrix()
 {
-	return player->getData();
+	return player->GetTransform();
+}
+
+XMVECTOR GameDummy::GetPlayerPosition()
+{
+	return player->GetPosition();
 }
 
 void GameDummy::ReleaseCOM()
 {
-	input->ReleaseCOM();
 }
