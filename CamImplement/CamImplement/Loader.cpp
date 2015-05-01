@@ -2,6 +2,7 @@
 
 Loader::Loader()
 {
+	nObjectsTotal = 0;
 	nObjectsCurrent = 0;
 }
 
@@ -12,40 +13,42 @@ Loader::Loader(const Loader& obj)
 
 Loader::~Loader()
 {
-	for (int i = 0; i < nObjectsCurrent; i++)
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		delete[] m_objects[i].vertices;
-		delete[] m_objects[i].texCoords;
-		delete[] m_objects[i].normals;
-		delete[] m_objects[i].faces;
+		m_objects[i]->Delete();
 	}
 	delete[] m_objects;
 	delete[] m_fileCounts;
 }
 
-void Loader::Initialize(ID3D11Device* device, int nObjects)
+void Loader::Initialize(Object* objects, int nObjects)
 {
-	if (nObjects > 0)
+	nObjectsTotal = nObjects;
+	m_fileCounts = new FileCountType[MAX_OBJECT_COUNT];
+	m_objects = new ObjectType*[MAX_OBJECT_COUNT];
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		nObjectsTotal = nObjects;
-		m_fileCounts = new FileCountType[nObjectsTotal];
-		m_objects = new ObjectType[nObjectsTotal];
-		for (int i = 0; i < nObjectsTotal; i++)
-		{
-			m_fileCounts[i].nVertices = 0;
-			m_fileCounts[i].nTextures = 0;
-			m_fileCounts[i].nNormals = 0;
-			m_fileCounts[i].nFaces = 0;
-		}
+		m_fileCounts[i].nVertices = 0;
+		m_fileCounts[i].nTextures = 0;
+		m_fileCounts[i].nNormals = 0;
+		m_fileCounts[i].nFaces = 0;
+		m_objects[i] = nullptr;
 	}
-	else { return; }
 
-	char* filename = "dummyMan.obj";
-	
-	if (ReadFileCounts(filename))
+	char* filename = nullptr;
+
+	for (int i = 0; i < nObjectsTotal; i++)
 	{
-		LoadDataStructures(filename);
-		nObjectsCurrent++;
+		if (!m_objects[objects[i]])
+		{
+			nObjectsCurrent = objects[i];
+			m_objects[objects[i]] = new ObjectType();
+			FindModelFilename(objects[i], &filename);
+			if (ReadFileCounts(filename))
+			{
+				LoadDataStructures(filename);
+			}
+		}
 	}
 
 	//filename = "dummyTexture.png";
@@ -54,7 +57,7 @@ void Loader::Initialize(ID3D11Device* device, int nObjects)
 
 ObjectType& Loader::getObject(Object obj) const
 {
-	return m_objects[obj];
+	return *m_objects[obj];
 }
 
 int Loader::getVertexCount(Object index) const
@@ -72,19 +75,24 @@ int Loader::getNormalCount(Object index) const
 	return m_fileCounts[index].nNormals;
 }
 
-void Loader::FindModelFilename(Object object, char* filename)
+void Loader::FindModelFilename(Object object, char** filename)
 {
 	char* localFilename;
 	switch (object)
 	{
 		case Player:
 		{
-			filename = "dummyMan.obj";
+			*filename = "dummyMan.obj";
+			break;
+		}
+		case Enemy:
+		{
+			*filename = "dummyCube2.obj";
 			break;
 		}
 		case Block:
 		{
-			filename = "dummyPlane.obj";
+			*filename = "dummyPlane.obj";
 			break;
 		}
 		default:
@@ -155,10 +163,10 @@ bool Loader::LoadDataStructures(char* filename)
 	char input;
 	char temp;
 
-	m_objects[nObjectsCurrent].vertices = new VertexType[m_fileCounts[nObjectsCurrent].nVertices];
-	m_objects[nObjectsCurrent].texCoords = new TextureCoordType[m_fileCounts[nObjectsCurrent].nTextures];
-	m_objects[nObjectsCurrent].normals = new NormalType[m_fileCounts[nObjectsCurrent].nNormals];
-	m_objects[nObjectsCurrent].faces = new FaceType[m_fileCounts[nObjectsCurrent].nFaces];
+	m_objects[nObjectsCurrent]->vertices = new VertexType[m_fileCounts[nObjectsCurrent].nVertices];
+	m_objects[nObjectsCurrent]->texCoords = new TextureCoordType[m_fileCounts[nObjectsCurrent].nTextures];
+	m_objects[nObjectsCurrent]->normals = new NormalType[m_fileCounts[nObjectsCurrent].nNormals];
+	m_objects[nObjectsCurrent]->faces = new FaceType[m_fileCounts[nObjectsCurrent].nFaces];
 
 	vertexIndex = 0;
 	texcoordIndex = 0;
@@ -177,30 +185,30 @@ bool Loader::LoadDataStructures(char* filename)
 
 			if (input == ' ')
 			{
-				fin >> m_objects[nObjectsCurrent].vertices[vertexIndex].x
-					>> m_objects[nObjectsCurrent].vertices[vertexIndex].y
-					>> m_objects[nObjectsCurrent].vertices[vertexIndex].z;
+				fin >> m_objects[nObjectsCurrent]->vertices[vertexIndex].x
+					>> m_objects[nObjectsCurrent]->vertices[vertexIndex].y
+					>> m_objects[nObjectsCurrent]->vertices[vertexIndex].z;
 
-				m_objects[nObjectsCurrent].vertices[vertexIndex].z *= -1.0f;
+				m_objects[nObjectsCurrent]->vertices[vertexIndex].z *= -1.0f;
 				vertexIndex++;
 			}
 
 			if (input == 't')
 			{
-				fin >> m_objects[nObjectsCurrent].texCoords[texcoordIndex].u
-					>> m_objects[nObjectsCurrent].texCoords[texcoordIndex].v;
+				fin >> m_objects[nObjectsCurrent]->texCoords[texcoordIndex].u
+					>> m_objects[nObjectsCurrent]->texCoords[texcoordIndex].v;
 
-				m_objects[nObjectsCurrent].texCoords[texcoordIndex].v = 1.0f - m_objects[nObjectsCurrent].texCoords[texcoordIndex].v;
+				m_objects[nObjectsCurrent]->texCoords[texcoordIndex].v = 1.0f - m_objects[nObjectsCurrent]->texCoords[texcoordIndex].v;
 				texcoordIndex++;
 			}
 
 			if (input == 'n')
 			{
-				fin >> m_objects[nObjectsCurrent].normals[normalIndex].x
-					>> m_objects[nObjectsCurrent].normals[normalIndex].y
-					>> m_objects[nObjectsCurrent].normals[normalIndex].z;
+				fin >> m_objects[nObjectsCurrent]->normals[normalIndex].x
+					>> m_objects[nObjectsCurrent]->normals[normalIndex].y
+					>> m_objects[nObjectsCurrent]->normals[normalIndex].z;
 
-				m_objects[nObjectsCurrent].normals[normalIndex].z *= -1.0f;
+				m_objects[nObjectsCurrent]->normals[normalIndex].z *= -1.0f;
 				normalIndex++;
 			}
 		}
@@ -210,15 +218,15 @@ bool Loader::LoadDataStructures(char* filename)
 			fin.get(input);
 			if (input == ' ')
 			{
-				fin >> m_objects[nObjectsCurrent].faces[faceIndex].vIndex3 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].tIndex3 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].nIndex3
-					>> m_objects[nObjectsCurrent].faces[faceIndex].vIndex2 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].tIndex2 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].nIndex2
-					>> m_objects[nObjectsCurrent].faces[faceIndex].vIndex1 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].tIndex1 >> temp
-					>> m_objects[nObjectsCurrent].faces[faceIndex].nIndex1;
+				fin >> m_objects[nObjectsCurrent]->faces[faceIndex].vIndex3 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].tIndex3 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].nIndex3
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].vIndex2 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].tIndex2 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].nIndex2
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].vIndex1 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].tIndex1 >> temp
+					>> m_objects[nObjectsCurrent]->faces[faceIndex].nIndex1;
 
 				faceIndex++;
 			}
@@ -242,44 +250,44 @@ bool Loader::LoadDataStructures(char* filename)
 
 	for (int i = 0; i < faceIndex; i++)
 	{
-		vIndex = m_objects[nObjectsCurrent].faces[i].vIndex1 - 1;
-		tIndex = m_objects[nObjectsCurrent].faces[i].tIndex1 - 1;
-		nIndex = m_objects[nObjectsCurrent].faces[i].nIndex1 - 1;
+		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex1 - 1;
+		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex1 - 1;
+		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex1 - 1;
 
-		fout << m_objects[nObjectsCurrent].vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].z << "\n";
+		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
 
-		vIndex = m_objects[nObjectsCurrent].faces[i].vIndex2 - 1;
-		tIndex = m_objects[nObjectsCurrent].faces[i].tIndex2 - 1;
-		nIndex = m_objects[nObjectsCurrent].faces[i].nIndex2 - 1;
+		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex2 - 1;
+		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex2 - 1;
+		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex2 - 1;
 
-		fout << m_objects[nObjectsCurrent].vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].z << "\n";
+		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
 
-		vIndex = m_objects[nObjectsCurrent].faces[i].vIndex3 - 1;
-		tIndex = m_objects[nObjectsCurrent].faces[i].tIndex3 - 1;
-		nIndex = m_objects[nObjectsCurrent].faces[i].nIndex3 - 1;
+		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex3 - 1;
+		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex3 - 1;
+		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex3 - 1;
 
-		fout << m_objects[nObjectsCurrent].vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent].vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent].texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent].normals[nIndex].z << "\n";
+		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
+			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
+			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
 	}
 
 	fout.close();

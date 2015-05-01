@@ -79,11 +79,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="GameDummy.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="PlayerDummy.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +95,7 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Loader.h" />
+    <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="PlayerDummy.h" />
   </ItemGroup>
   <ItemGroup>

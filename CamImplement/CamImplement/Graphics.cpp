@@ -9,9 +9,11 @@ Graphics::Graphics()
 	rDepthStencilView = nullptr;
 	rDepthStencilBuffer = nullptr;
 
-	loader = nullptr;
+	//loader = nullptr;
+	objManager = nullptr;
 	game = nullptr;
 	camera = nullptr;
+	dirLight = nullptr;
 
 	vertexBuffer = nullptr;
 	indexBuffer = nullptr;
@@ -33,11 +35,12 @@ Graphics::Graphics(const Graphics &obj)
 
 Graphics::~Graphics()
 {
-	delete loader;
+	delete objManager;
 	delete game;
 	delete camera;
-	delete[] vertices;
-	delete[] indices;
+	delete dirLight;
+	//delete[] vertices;
+	//delete[] indices;
 }
 
 HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
@@ -183,7 +186,7 @@ HRESULT Graphics::CreateShaders()
 
 void Graphics::InitVertices()
 {
-	ObjectType temp = loader->getObject(Player);
+	/*ObjectType temp = loader->getObject(Player);
 	nVertices = loader->getVertexCount(Player);
 	nNormals = loader->getVertexCount(Player);
 	vertices = new VertexType[nVertices];
@@ -200,7 +203,7 @@ void Graphics::InitVertices()
 		indices[j + 1] = temp.faces[i].vIndex2 - 1;
 		indices[j + 2] = temp.faces[i].vIndex3 - 1;
 		j += 3;
-	}
+	}*/
 
 	//indices[0] = 0; indices[1] = 1; indices[2] = 2; //Bottom
 	//indices[3] = 1; indices[4] = 2; indices[5] = 3; //Bottom
@@ -242,37 +245,37 @@ void Graphics::SetVertices(const ObjectType& obj)
 
 void Graphics::CreateBuffers()
 {
-	//Vertex buffer
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType)*nVertices;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
+	////Vertex buffer
+	//D3D11_BUFFER_DESC vertexBufferDesc;
+	//vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//vertexBufferDesc.ByteWidth = sizeof(VertexType)*nVertices;
+	//vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	//vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//vertexBufferDesc.MiscFlags = 0;
+	//vertexBufferDesc.StructureByteStride = 0;
 
-	D3D11_SUBRESOURCE_DATA vData;
-	vData.pSysMem = vertices;
-	vData.SysMemPitch = 0;
-	vData.SysMemSlicePitch = 0;
+	//D3D11_SUBRESOURCE_DATA vData;
+	//vData.pSysMem = vertices;
+	//vData.SysMemPitch = 0;
+	//vData.SysMemSlicePitch = 0;
 
-	rDevice->CreateBuffer(&vertexBufferDesc, &vData, &vertexBuffer);
+	//rDevice->CreateBuffer(&vertexBufferDesc, &vData, &vertexBuffer);
 
-	//Index buffer
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(UINT)*nIndices;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
+	////Index buffer
+	//D3D11_BUFFER_DESC indexBufferDesc;
+	//indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	//indexBufferDesc.ByteWidth = sizeof(UINT)*nIndices;
+	//indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	//indexBufferDesc.CPUAccessFlags = 0;
+	//indexBufferDesc.MiscFlags = 0;
+	//indexBufferDesc.StructureByteStride = 0;
 
-	D3D11_SUBRESOURCE_DATA iData;
-	iData.pSysMem = indices;
-	iData.SysMemPitch = 0;
-	iData.SysMemSlicePitch = 0;
+	//D3D11_SUBRESOURCE_DATA iData;
+	//iData.pSysMem = indices;
+	//iData.SysMemPitch = 0;
+	//iData.SysMemSlicePitch = 0;
 
-	rDevice->CreateBuffer(&indexBufferDesc, &iData, &indexBuffer);
+	//rDevice->CreateBuffer(&indexBufferDesc, &iData, &indexBuffer);
 
 	//Constant buffer
 	D3D11_BUFFER_DESC cbObjectDesc;
@@ -288,7 +291,11 @@ void Graphics::CreateBuffers()
 	cbData.SysMemPitch = 0;
 	cbData.SysMemSlicePitch = 0;
 
-	rDevice->CreateBuffer(&cbObjectDesc, &cbData, &cbPerObjectBuffer);
+	//rDevice->CreateBuffer(&cbObjectDesc, &cbData, &cbPerObjectBuffer);
+
+	cbObjectDesc.ByteWidth = sizeof(constBufferPerFrame);
+	cbData.pSysMem = &cbPerFrame;
+	rDevice->CreateBuffer(&cbObjectDesc, &cbData, &cbPerFrameBuffer);
 }
 
 void Graphics::CreateCamera()
@@ -309,7 +316,6 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 {
 	HRESULT hr;
 
-	size = 0.1f;
 	nObjects = 1;
 	nVertices = 8;
 	nIndices = 36;
@@ -324,16 +330,22 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	hr = CreateShaders();
 	if (FAILED(hr)) { return hr; }
 
-	loader = new Loader();
+	//loader = new Loader();
+	objManager = new ObjectManager();
 	game = new GameDummy();
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
+	dirLight = new DirectionalLight();
 
-	loader->Initialize(rDevice, 1);
+	//Object o[] = { Player };
+	//loader->Initialize(o, 1);
+	objManager->Initialize(rDevice);
 	game->Initialize(wndHandle, hInstance, viewport);
-
+	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
+	
 	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
+	cbPerFrame.dirLight = dirLight->getLight();
 	CreateCamera();
-	InitVertices();
+	//InitVertices();
 	CreateBuffers();
 
 	return hr;
@@ -343,28 +355,30 @@ void Graphics::Update()
 {	
 	game->Update();
 	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
-	SetVertices(loader->getObject(Player));
+	//SetVertices(loader->getObject(Player));
+	objManager->Update(playerPosition, game->getPlayerData().direction);
 	world = game->getPlayerData().direction;
-	camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, world));
+	camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, game->getPlayerData().direction));
 	camera->Update(0.1f);
 
-	DirectX::XMMATRIX view = camera->GetView();
+	/*DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
 	DirectX::XMMATRIX wvp = world * view * projection;
 	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
-	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));
+	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));*/
+	//objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
-	D3D11_MAPPED_SUBRESOURCE cb;
+	/*D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	rDeviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
 	memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
-	rDeviceContext->Unmap(cbPerObjectBuffer, 0);
+	rDeviceContext->Unmap(cbPerObjectBuffer, 0);*/
 
-	D3D11_MAPPED_SUBRESOURCE vb;
+	/*D3D11_MAPPED_SUBRESOURCE vb;
 	ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	rDeviceContext->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
 	memcpy(vb.pData, vertices, sizeof(VertexType) * nVertices);
-	rDeviceContext->Unmap(vertexBuffer, 0);
+	rDeviceContext->Unmap(vertexBuffer, 0);*/
 }
 
 void Graphics::Render()
@@ -382,10 +396,12 @@ void Graphics::Render()
 	rDeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	rDeviceContext->VSSetShader(rVS, nullptr, 0);
-	rDeviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+	//rDeviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 	rDeviceContext->PSSetShader(rPS, nullptr, 0);
+	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
 
-	rDeviceContext->DrawIndexed(nIndices, 0, 0);
+	//rDeviceContext->DrawIndexed(nIndices, 0, 0);
+	objManager->Render(rDeviceContext, camera->GetView(), camera->GetProjection());
 }
 
 void Graphics::SwapFBBuffer()

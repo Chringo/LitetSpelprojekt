@@ -1,4 +1,4 @@
-cbuffer WVP : register(b0)
+cbuffer cbPerObject : register(b0)
 {
 	float4x4 WVP;
 	float4x4 World;
@@ -22,7 +22,7 @@ VS_OUT main( VS_IN input )
 	VS_OUT output;
 
 	output.pos = mul(float4(input.pos, 1.0f), WVP);
-	output.normal = input.normal;
+	output.normal = mul(input.normal, World);
 	output.color = float3(1.0f, 1.0f, 1.0f);
 
 	return output;

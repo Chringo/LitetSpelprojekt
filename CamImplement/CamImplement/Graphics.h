@@ -4,9 +4,10 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include "Loader.h"
+#include "ObjectManager.h"
 #include "Camera.h"
 #include "GameDummy.h"
+#include "DirectionalLight.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -18,7 +19,7 @@ class Graphics
 private:
 	struct constBufferPerFrame
 	{
-
+		DirLight dirLight;
 	} cbPerFrame;
 
 	struct constBufferPerObject
@@ -29,9 +30,11 @@ private:
 
 	DirectX::XMMATRIX world;
 
-	Loader* loader;
+	//Loader* loader;
+	ObjectManager* objManager;
 	GameDummy* game;
 	Camera* camera;
+	DirectionalLight* dirLight;
 
 	VertexType* vertices;
 	UINT* indices;
@@ -43,7 +46,6 @@ private:
 	int nNormals;
 
 	DirectX::XMFLOAT3 playerPosition;
-	float size;
 
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;

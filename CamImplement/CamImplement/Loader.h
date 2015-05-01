@@ -9,9 +9,12 @@
 
 //#pragma comment (lib, "d3dx11.lib")
 
+#define MAX_OBJECT_COUNT 3
+
 enum Object
 {
 	Player,
+	Enemy,
 	Block
 };
 
@@ -53,6 +56,15 @@ struct ObjectType
 	NormalType* normals;
 	FaceType* faces;
 	ID3D11Texture2D* texture;
+
+	void Delete()
+	{
+		delete[] vertices;
+		delete[] texCoords;
+		delete[] normals;
+		delete[] faces;
+		texture->Release();
+	}
 };
 
 struct FileCountType
@@ -63,14 +75,14 @@ struct FileCountType
 class Loader
 {
 private:
-	ObjectType* m_objects;
+	ObjectType** m_objects;
 	FileCountType* m_fileCounts;
 
 	int nObjectsTotal;
 	int nObjectsCurrent;
 
 private:
-	void FindModelFilename(Object object, char* filename);
+	void FindModelFilename(Object object, char** filename);
 	bool ReadFileCounts(char* filename);
 	bool LoadDataStructures(char* filename);
 	bool LoadTextures(ID3D11Device* device, char* filename);
@@ -80,7 +92,7 @@ public:
 	Loader(const Loader& obj);
 	~Loader();
 
-	void Initialize(ID3D11Device* device, int nObjects);
+	void Initialize(Object* objects, int nObjects);
 
 	ObjectType& getObject(Object obj) const;
 	int getVertexCount(Object index) const;
