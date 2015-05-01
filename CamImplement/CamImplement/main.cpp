@@ -52,6 +52,7 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = WndProc;
 	wcex.hInstance = hInstance;
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.lpszClassName = L"BasicWindow";
 	if (!RegisterClassEx(&wcex))
 		return false;

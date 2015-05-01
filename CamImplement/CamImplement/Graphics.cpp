@@ -217,9 +217,9 @@ void Graphics::SetVertices()
 	for (int i = 0; i < nVertices; i++)
 	{
 		vertices[i] = loader->getObject(Player).vertices[i];
-		vertices[i].x += position.x;
+	/*	vertices[i].x += position.x;
 		vertices[i].y += position.y;
-		vertices[i].z += position.z;
+		vertices[i].z += position.z;*/
 	}
 
 	/*vertices[0] = VertexType(position.x - size, position.y, position.z + size);
@@ -287,13 +287,12 @@ void Graphics::CreateCamera()
 {
 	camera->SetDistance();
 	camera->SetRotation(Isometric);
-	camera->SetFocus(game->getPlayerData().position);
+	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(0.1f);
 
-	world = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
-	DirectX::XMMATRIX wvp = world * view * projection;
+	DirectX::XMMATRIX wvp = game->GetPlayerMatrix() * view * projection;
 	DirectX::XMStoreFloat4x4(&cBufWVP.WVP, DirectX::XMMatrixTranspose(wvp));
 }
 
@@ -322,7 +321,6 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	loader->Initialize();
 	game->Initialize(wndHandle, hInstance, viewport);
 
-	DirectX::XMStoreFloat3(&position, game->getPlayerData().position);
 	CreateCamera();
 	InitVertices();
 	CreateBuffers();
@@ -333,15 +331,16 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 void Graphics::Update()
 {	
 	game->Update();
-	DirectX::XMStoreFloat3(&position, game->getPlayerData().position);
+
+	// Purpose?
 	SetVertices();
-	world = game->getPlayerData().direction;
-	camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, world));
+
+	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(0.1f);
 
 	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
-	DirectX::XMMATRIX wvp = world * view * projection;
+	DirectX::XMMATRIX wvp = game->GetPlayerMatrix() * view * projection;
 	DirectX::XMStoreFloat4x4(&cBufWVP.WVP, DirectX::XMMatrixTranspose(wvp));
 
 	D3D11_MAPPED_SUBRESOURCE cb;

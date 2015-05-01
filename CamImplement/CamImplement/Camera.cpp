@@ -96,7 +96,6 @@ void Camera::SetPosition(DirectX::XMVECTOR position)
 void Camera::SetFocus(DirectX::XMVECTOR focus)
 {
 	m_Position = focus - m_Look;
-	int x;
 }
 
 void Camera::SetFocus(Direction direction)
