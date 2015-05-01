@@ -366,7 +366,7 @@ void Graphics::Update()
 	DirectX::XMMATRIX wvp = world * view * projection;
 	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));*/
-	//objManager->setViewProjection(camera->GetView(), camera->GetProjection());
+	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
 	/*D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -401,7 +401,7 @@ void Graphics::Render()
 	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
 
 	//rDeviceContext->DrawIndexed(nIndices, 0, 0);
-	objManager->Render(rDeviceContext, camera->GetView(), camera->GetProjection());
+	objManager->Render(rDeviceContext);
 }
 
 void Graphics::SwapFBBuffer()

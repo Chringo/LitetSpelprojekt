@@ -28,33 +28,41 @@ void ObjectManager::Initialize(ID3D11Device* device)
 	{
 		m_objInstances[i].obj = obj[i];
 		m_objInstances[i].position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_objInstances[i].world = DirectX::XMMatrixIdentity();
+		DirectX::XMStoreFloat4x4(&m_objInstances[i].world, DirectX::XMMatrixIdentity());
 	}
 
 	InitVertices();
 	CreateBuffers(device);
 
 	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixIdentity());
 }
 
 void ObjectManager::Update(DirectX::XMFLOAT3 pos, const DirectX::XMMATRIX &world)
 {
-	m_objInstances[Player].position = pos;
-	m_objInstances[Player].world = world;
-	SetVertices(Player, loader->getObject(Player));
+	m_objInstances[0].position = pos;
+	DirectX::XMStoreFloat4x4(&m_objInstances[0].world, world);
+	SetVertices(0, loader->getObject(Player));
 }
 
-void ObjectManager::Render(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection)
+void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 {
 	UINT stride = sizeof(VertexType);
 	UINT offset = 0;
 
+	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
+	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&m_projection);
 	for (int i = 0; i < nObjects; i++)
 	{
-		DirectX::XMMATRIX world = DirectX::XMMatrixTranspose(m_objInstances[i].world);
-		DirectX::XMStoreFloat4x4(&cbPerObject.World, world);
-		DirectX::XMMATRIX wvp = m_objInstances[i].world * view * projection;
+		DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&m_objInstances[i].world);
+		DirectX::XMMATRIX wvp = world * view * projection;
+		DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world)); 
 		DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
+
+		if (i == 1 && m_objInstances[0].position.x > 3)
+		{
+			int x = 0;
+		}
 
 		D3D11_MAPPED_SUBRESOURCE cb;
 		ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -77,8 +85,8 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext, const DirectX::XM
 
 void ObjectManager::setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection)
 {
-	m_view = view;
-	m_projection = projection;
+	DirectX::XMStoreFloat4x4(&m_view, view);
+	DirectX::XMStoreFloat4x4(&m_projection, projection);
 }
 
 void ObjectManager::InitVertices()
