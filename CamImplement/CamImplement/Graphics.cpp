@@ -358,7 +358,8 @@ void Graphics::Update()
 	//SetVertices(loader->getObject(Player));
 	objManager->Update(playerPosition, game->getPlayerData().direction);
 	world = game->getPlayerData().direction;
-	camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, game->getPlayerData().direction));
+	//camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, game->getPlayerData().direction));
+	camera->SetFocus(game->getPlayerData().position);
 	camera->Update(0.1f);
 
 	/*DirectX::XMMATRIX view = camera->GetView();

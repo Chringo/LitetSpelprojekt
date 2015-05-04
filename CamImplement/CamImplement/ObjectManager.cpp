@@ -59,11 +59,6 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 		DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world)); 
 		DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 
-		if (i == 1 && m_objInstances[0].position.x > 3)
-		{
-			int x = 0;
-		}
-
 		D3D11_MAPPED_SUBRESOURCE cb;
 		ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
