@@ -224,9 +224,9 @@ void Graphics::SetVertices(const ObjectType& obj)
 	for (int i = 0; i < nVertices; i++)
 	{
 		vertices[i] = obj.vertices[i];
-		vertices[i].x += playerPosition.x;
+		/*vertices[i].x += playerPosition.x;
 		vertices[i].y += playerPosition.y;
-		vertices[i].z += playerPosition.z;
+		vertices[i].z += playerPosition.z;*/
 	}
 	for (int i = 0; i < nNormals; i++)
 	{
@@ -302,13 +302,13 @@ void Graphics::CreateCamera()
 {
 	camera->SetDistance();
 	camera->SetRotation(Isometric);
-	camera->SetFocus(game->getPlayerData().position);
+	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(0.1f);
 
-	world = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
-	DirectX::XMMATRIX wvp = world * view * projection;
+
+	DirectX::XMMATRIX wvp = game->GetPlayerMatrix() * view * projection;
 	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 }
 
@@ -344,6 +344,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	
 	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
 	cbPerFrame.dirLight = dirLight->getLight();
+
 	CreateCamera();
 	//InitVertices();
 	CreateBuffers();
@@ -354,20 +355,17 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 void Graphics::Update()
 {	
 	game->Update();
-	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
-	//SetVertices(loader->getObject(Player));
 	objManager->Update(playerPosition, game->getPlayerData().direction);
-	world = game->getPlayerData().direction;
-	//camera->SetFocus(DirectX::XMVector3Transform(game->getPlayerData().position, game->getPlayerData().direction));
-	camera->SetFocus(game->getPlayerData().position);
+	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(0.1f);
 
-	/*DirectX::XMMATRIX view = camera->GetView();
+	DirectX::XMMATRIX view = camera->GetView();
 	DirectX::XMMATRIX projection = camera->GetProjection();
-	DirectX::XMMATRIX wvp = world * view * projection;
-	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
-	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));*/
+
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
+
+	DirectX::XMMATRIX wvp = game->GetPlayerMatrix() * view * projection;
+	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 
 	/*D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
