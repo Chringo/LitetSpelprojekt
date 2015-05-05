@@ -21,6 +21,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.y = r.bottom - r.top;
 
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(1.f, 1.f, 1.f, 1.f));
+	player->SetMovementSpeed(0.02f);
 
 	return S_OK;
 }

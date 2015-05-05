@@ -82,17 +82,17 @@ void Loader::FindModelFilename(Object object, char** filename)
 	{
 		case Player:
 		{
-			*filename = "dummyMan.obj";
+			*filename = "Meshes/dummyMan.obj";
 			break;
 		}
 		case Enemy:
 		{
-			*filename = "dummyCube2.obj";
+			*filename = "Meshes/dummyCube2.obj";
 			break;
 		}
 		case Block:
 		{
-			*filename = "dummyPlane.obj";
+			*filename = "Meshes/dummyPlane.obj";
 			break;
 		}
 		default:

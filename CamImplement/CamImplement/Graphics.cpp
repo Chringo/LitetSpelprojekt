@@ -342,7 +342,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	game->Initialize(wndHandle, hInstance, viewport);
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
 	
-	DirectX::XMStoreFloat3(&playerPosition, game->getPlayerData().position);
+	DirectX::XMStoreFloat3(&playerPosition, game->GetPlayerPosition());
 	cbPerFrame.dirLight = dirLight->getLight();
 
 	CreateCamera();
@@ -355,7 +355,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 void Graphics::Update()
 {	
 	game->Update();
-	objManager->Update(playerPosition, game->getPlayerData().direction);
+	objManager->Update(playerPosition, game->GetPlayerMatrix());
 	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(0.1f);
 
