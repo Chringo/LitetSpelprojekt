@@ -7,9 +7,9 @@ Map::Map()
 Map::Map(int power, float startValue)
 {
 	// Initiate point-map
-	this->chunkSize = /*(pow(2, power))*/ + 1;// +1 gives the map a mid-point
+	this->chunkSize = (int)(pow(2.0f, power)) + 1;// +1 gives the map a mid-point
 	seed = startValue;
-	ds = new float*[chunkSize, (chunkSize - 1) + 1];// 33x33, 17x17, etc
+	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
 	chunkSize--;
 	// Initiate map
 	tiles = new Tile*[chunkSize, chunkSize];// 32x32, 16x16, etc
@@ -20,6 +20,12 @@ Map::Map(int power, float startValue)
 }
 Map::~Map()
 {
+	for (int h = 0; h < chunkSize; h++)
+	{
+		delete tiles[h];
+		delete ds[h];
+	}
+	delete ds[chunkSize + 1];
 	delete[] tiles;
 	delete[] ds;
 }
