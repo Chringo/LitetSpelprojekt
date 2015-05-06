@@ -2,6 +2,7 @@
 #define GAMEDUMMY_H
 
 #include <DirectXMath.h>
+#include <vector.h>
 
 #include "Entity.h"
 #include "Input.h"
@@ -10,6 +11,10 @@ class GameDummy
 {
 private:
 	Collision::Player* player;
+	
+	int enemyArrSize;
+	Collision::Enemy* enemyArr;
+
 	POINT clientSize;
 	HWND windowHandle;
 
@@ -23,6 +28,9 @@ public:
 
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
+
+	DirectX::XMMATRIX* GetEnemyMatrices();
+	DirectX::XMVECTOR* GetEnemyPositions();
 
 	void ReleaseCOM();
 };

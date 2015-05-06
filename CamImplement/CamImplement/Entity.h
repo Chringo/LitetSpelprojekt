@@ -22,9 +22,6 @@ namespace Collision
 		virtual HRESULT Update(float deltaTime) = 0;
 
 		void SetMovementSpeed(float speed);
-		void SetPosition(float x, float y, float z);
-		void SetRotation(float x, float y, float z);
-		void SetScale(float uniformScale);
 
 		DirectX::XMMATRIX GetTransform();
 		DirectX::XMVECTOR GetPosition();
@@ -36,7 +33,7 @@ namespace Collision
 	protected:
 		DirectX::XMVECTOR m_Position;
 		DirectX::XMVECTOR m_Rotation;
-		DirectX::XMVECTOR m_Scaling;
+		const DirectX::XMVECTOR m_Scaling = DirectX::XMVectorSet(1.f, 1.f, 1.f, 1.f);
 
 		float m_Speed = 4.f;
 		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
@@ -66,8 +63,7 @@ namespace Collision
 	{
 	public:
 		Player(DirectX::XMVECTOR m_Position,
-			DirectX::XMVECTOR m_Rotation,
-			DirectX::XMVECTOR m_Scaling);
+			DirectX::XMVECTOR m_Rotation);
 
 		virtual ~Player();
 
@@ -97,15 +93,15 @@ namespace Collision
 	class Enemy : public Entity
 	{
 	public:
-		Enemy(DirectX::XMVECTOR m_Position,
-			DirectX::XMVECTOR m_Rotation,
-			DirectX::XMVECTOR m_Scaling);
+		Enemy();
+		Enemy(int x, int z);
 
 		virtual ~Enemy();
 
 		HRESULT Update(float deltaTime);	// AI-stuff.
 
 	private:
+		int x, z;
 
 	};
 
