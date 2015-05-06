@@ -105,7 +105,7 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	device->CreateBuffer(&indexBufferDesc, &iData, &m_objPlayer->indexBuffer);
 
 	//Enemy buffers
-	for (int i = 0; i < nEnemies; i++)
+	for (int i = 0; i < m_nEnemies; i++)
 	{
 		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objEnemies[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objEnemies[i].nIndices;
@@ -116,7 +116,7 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 
 	//Obstacle buffers
-	for (int i = 0; i < nObstacles; i++)
+	for (int i = 0; i < m_nObstacles; i++)
 	{
 		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objObstacles[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objObstacles[i].nIndices;
@@ -127,7 +127,7 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 
 	//Tile buffers
-	for (int i = 0; i < nTiles; i++)
+	for (int i = 0; i < m_nTiles; i++)
 	{
 		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objTiles[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objTiles[i].nIndices;
@@ -171,20 +171,20 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	}
 }
 
-void ObjectManager::Initialize(ID3D11Device* device)
+void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
 	m_loader = new Loader();
 	Object obj[] = { Player, Enemy };
 	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
 
-	nEnemies = 1;
-	nObstacles = 0;
-	nTiles = 0;
+	m_nEnemies = nEnemies;
+	m_nObstacles = nObstacles;
+	m_nTiles = nTiles;
 
 	InitInstances(Player, &m_objPlayer, 1);
-	InitInstances(Enemy, &m_objEnemies, nEnemies);
-	InitInstances(Obstacle, &m_objObstacles, nObstacles);
-	InitInstances(Tile, &m_objTiles, nTiles);
+	InitInstances(Enemy, &m_objEnemies, m_nEnemies);
+	InitInstances(Obstacle, &m_objObstacles, m_nObstacles);
+	InitInstances(Tile, &m_objTiles, m_nTiles);
 
 	CreateBuffers(device);
 
@@ -200,9 +200,9 @@ void ObjectManager::SetPlayerWorld(const DirectX::XMMATRIX &world)
 void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 {
 	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
-	if (size > nEnemies)
+	if (size > m_nEnemies)
 	{
-		size = nEnemies;
+		size = m_nEnemies;
 	}
 
 	for (int i = 0; i < size; i++)
@@ -213,7 +213,45 @@ void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 
 void ObjectManager::SetEnemiesWorld(int index, const DirectX::XMMATRIX &world)
 {
-	DirectX::XMStoreFloat4x4(&m_objPlayer->world, world);
+	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, world);
+}
+
+void ObjectManager::SetObstaclesWorld(const DirectX::XMMATRIX* arr)
+{
+	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
+	if (size > m_nObstacles)
+	{
+		size = m_nObstacles;
+	}
+
+	for (int i = 0; i < size; i++)
+	{
+		SetObstaclesWorld(i, arr[i]);
+	}
+}
+
+void ObjectManager::SetObstaclesWorld(int index, const DirectX::XMMATRIX &world)
+{
+	DirectX::XMStoreFloat4x4(&m_objObstacles[index].world, world);
+}
+
+void ObjectManager::SetTilesWorld(const DirectX::XMMATRIX* arr)
+{
+	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
+	if (size > m_nTiles)
+	{
+		size = m_nTiles;
+	}
+
+	for (int i = 0; i < size; i++)
+	{
+		SetTilesWorld(i, arr[i]);
+	}
+}
+
+void ObjectManager::SetTilesWorld(int index, const DirectX::XMMATRIX &world)
+{
+	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, world);
 }
 
 void ObjectManager::Update()
@@ -224,9 +262,9 @@ void ObjectManager::Update()
 void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 {
 	RenderInstances(deviceContext, m_objPlayer, 1);
-	RenderInstances(deviceContext, m_objEnemies, nEnemies);
-	RenderInstances(deviceContext, m_objObstacles, nObstacles);
-	RenderInstances(deviceContext, m_objTiles, nTiles);
+	RenderInstances(deviceContext, m_objEnemies, m_nEnemies);
+	RenderInstances(deviceContext, m_objObstacles, m_nObstacles);
+	RenderInstances(deviceContext, m_objTiles, m_nTiles);
 }
 
 void ObjectManager::setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection)
@@ -240,19 +278,19 @@ void ObjectManager::ReleaseCOM()
 	m_objPlayer->Delete();
 	delete m_objPlayer;
 
-	for (int i = 0; i < nEnemies; i++)
+	for (int i = 0; i < m_nEnemies; i++)
 	{
 		m_objEnemies[i].Delete();
 	}
 	delete[] m_objEnemies;
 
-	for (int i = 0; i < nObstacles; i++)
+	for (int i = 0; i < m_nObstacles; i++)
 	{
 		m_objObstacles[i].Delete();
 	}
 	delete[] m_objObstacles;
 
-	for (int i = 0; i < nTiles; i++)
+	for (int i = 0; i < m_nTiles; i++)
 	{
 		m_objTiles[i].Delete();
 	}
