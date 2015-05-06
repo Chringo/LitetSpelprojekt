@@ -2,8 +2,12 @@
 
 ObjectManager::ObjectManager()
 {
-	loader = nullptr;
-	m_objInstances = nullptr;
+	m_loader = nullptr;
+	m_objPlayer = nullptr;
+	m_objEnemies = nullptr;
+	m_objObstacles = nullptr;
+	m_objTiles = nullptr;
+	cbPerObjectBuffer = nullptr;
 }
 
 ObjectManager::ObjectManager(const ObjectManager& obj)
@@ -16,47 +20,136 @@ ObjectManager::~ObjectManager()
 
 }
 
-void ObjectManager::Initialize(ID3D11Device* device)
+void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 {
-	loader = new Loader();
-	Object obj[] = { Player, Enemy };
-	nObjects = sizeof(obj) / sizeof(Object);
-	loader->Initialize(obj, nObjects);
+	if (size <= 0) { return; }
 
-	m_objInstances = new ObjectInstance[nObjects];
-	for (int i = 0; i < nObjects; i++)
+	*arr = new ObjectInstance[size];
+
+	ObjectType temp = m_loader->getObject(obj);
+	for (int i = 0; i < size; i++)
 	{
-		m_objInstances[i].obj = obj[i];
-		m_objInstances[i].position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		DirectX::XMStoreFloat4x4(&m_objInstances[i].world, DirectX::XMMatrixIdentity());
+		(*arr)[i].nVertices = m_loader->getVertexCount(obj);
+		(*arr)[i].nNormals = m_loader->getVertexCount(obj);
+		(*arr)[i].nIndices = m_loader->getIndexCount(obj);
+
+		(*arr)[i].vertices = new VertexType[(*arr)[i].nVertices];
+		(*arr)[i].normals = new NormalType[(*arr)[i].nNormals];
+		(*arr)[i].indices = new UINT[(*arr)[i].nIndices];
+
+		for (int j = 0; j < (*arr)[i].nVertices; j++)
+		{
+			(*arr)[i].vertices[j] = temp.vertices[j];
+		}
+		for (int j = 0; j < (*arr)[i].nNormals; j++)
+		{
+			(*arr)[i].normals[j] = temp.normals[j];
+		}
+
+		int k = 0;
+		for (int j = 0; j < (*arr)[i].nIndices / 3; j++)
+		{
+			(*arr)[i].indices[k] = temp.faces[j].vIndex1 - 1;
+			(*arr)[i].indices[k + 1] = temp.faces[j].vIndex2 - 1;
+			(*arr)[i].indices[k + 2] = temp.faces[j].vIndex3 - 1;
+			k += 3;
+		}
+
+		DirectX::XMStoreFloat4x4(&(*arr)[i].world, DirectX::XMMatrixIdentity());
+	}
+}
+
+void ObjectManager::CreateBuffers(ID3D11Device* device)
+{
+	//Constant buffer
+	D3D11_BUFFER_DESC cbObjectDesc;
+	cbObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbObjectDesc.ByteWidth = sizeof(constBufferPerObject);
+	cbObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbObjectDesc.MiscFlags = 0;
+	cbObjectDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&cbObjectDesc, NULL, &cbPerObjectBuffer);
+
+	//Vertex buffer
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objPlayer->nVertices;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vData;
+	vData.pSysMem = m_objPlayer->vertices;
+	vData.SysMemPitch = 0;
+	vData.SysMemSlicePitch = 0;
+
+	//Index buffer
+	D3D11_BUFFER_DESC indexBufferDesc;
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(UINT) * m_objPlayer->nIndices;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA iData;
+	iData.pSysMem = m_objPlayer->indices;
+	iData.SysMemPitch = 0;
+	iData.SysMemSlicePitch = 0;
+
+	//Player buffers
+	device->CreateBuffer(&vertexBufferDesc, &vData, &m_objPlayer->vertexBuffer);
+	device->CreateBuffer(&indexBufferDesc, &iData, &m_objPlayer->indexBuffer);
+
+	//Enemy buffers
+	for (int i = 0; i < nEnemies; i++)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objEnemies[i].nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objEnemies[i].nIndices;
+		vData.pSysMem = m_objEnemies[i].vertices;
+		iData.pSysMem = m_objEnemies[i].indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objEnemies[i].vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objEnemies[i].indexBuffer);
 	}
 
-	InitVertices();
-	CreateBuffers(device);
+	//Obstacle buffers
+	for (int i = 0; i < nObstacles; i++)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objObstacles[i].nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objObstacles[i].nIndices;
+		vData.pSysMem = m_objObstacles[i].vertices;
+		iData.pSysMem = m_objObstacles[i].indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objObstacles[i].vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objObstacles[i].indexBuffer);
+	}
 
-	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixIdentity());
-	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixIdentity());
+	//Tile buffers
+	for (int i = 0; i < nTiles; i++)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objTiles[i].nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objTiles[i].nIndices;
+		vData.pSysMem = m_objTiles[i].vertices;
+		iData.pSysMem = m_objTiles[i].indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objTiles[i].vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objTiles[i].indexBuffer);
+	}
 }
 
-void ObjectManager::Update(DirectX::XMFLOAT3 pos, const DirectX::XMMATRIX &world)
-{
-	//m_objInstances[0].position = pos;
-	DirectX::XMStoreFloat4x4(&m_objInstances[0].world, world);
-	//SetVertices(0, loader->getObject(Player));
-}
-
-void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
+void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size)
 {
 	UINT stride = sizeof(VertexType);
 	UINT offset = 0;
-
 	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
 	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&m_projection);
-	for (int i = 0; i < nObjects; i++)
+
+	for (int i = 0; i < size; i++)
 	{
-		DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&m_objInstances[i].world);
+		DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&arr[i].world);
 		DirectX::XMMATRIX wvp = world * view * projection;
-		DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world)); 
+		DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixTranspose(world));
 		DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixTranspose(wvp));
 
 		D3D11_MAPPED_SUBRESOURCE cb;
@@ -67,15 +160,73 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 
 		D3D11_MAPPED_SUBRESOURCE vb;
 		ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		deviceContext->Map(m_objInstances[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
-		memcpy(vb.pData, m_objInstances[i].vertices, sizeof(VertexType) * m_objInstances[i].nVertices);
-		deviceContext->Unmap(m_objInstances[i].vertexBuffer, 0);
+		deviceContext->Map(arr[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+		memcpy(vb.pData, arr[i].vertices, sizeof(VertexType) * arr[i].nVertices);
+		deviceContext->Unmap(arr[i].vertexBuffer, 0);
 
-		deviceContext->IASetIndexBuffer(m_objInstances[i].indexBuffer, DXGI_FORMAT_R32_UINT, offset);
-		deviceContext->IASetVertexBuffers(0, 1, &m_objInstances[i].vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(arr[i].indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+		deviceContext->IASetVertexBuffers(0, 1, &arr[i].vertexBuffer, &stride, &offset);
 		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-		deviceContext->DrawIndexed(m_objInstances[i].nIndices, 0, 0);
+		deviceContext->DrawIndexed(arr[i].nIndices, 0, 0);
 	}
+}
+
+void ObjectManager::Initialize(ID3D11Device* device)
+{
+	m_loader = new Loader();
+	Object obj[] = { Player, Enemy };
+	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
+
+	nEnemies = 1;
+	nObstacles = 0;
+	nTiles = 0;
+
+	InitInstances(Player, &m_objPlayer, 1);
+	InitInstances(Enemy, &m_objEnemies, nEnemies);
+	InitInstances(Obstacle, &m_objObstacles, nObstacles);
+	InitInstances(Tile, &m_objTiles, nTiles);
+
+	CreateBuffers(device);
+
+	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixIdentity());
+}
+
+void ObjectManager::SetPlayerWorld(const DirectX::XMMATRIX &world)
+{
+	DirectX::XMStoreFloat4x4(&m_objPlayer->world, world);
+}
+
+void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
+{
+	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
+	if (size > nEnemies)
+	{
+		size = nEnemies;
+	}
+
+	for (int i = 0; i < size; i++)
+	{
+		SetEnemiesWorld(i, arr[i]);
+	}
+}
+
+void ObjectManager::SetEnemiesWorld(int index, const DirectX::XMMATRIX &world)
+{
+	DirectX::XMStoreFloat4x4(&m_objPlayer->world, world);
+}
+
+void ObjectManager::Update()
+{
+	
+}
+
+void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
+{
+	RenderInstances(deviceContext, m_objPlayer, 1);
+	RenderInstances(deviceContext, m_objEnemies, nEnemies);
+	RenderInstances(deviceContext, m_objObstacles, nObstacles);
+	RenderInstances(deviceContext, m_objTiles, nTiles);
 }
 
 void ObjectManager::setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection)
@@ -84,92 +235,28 @@ void ObjectManager::setViewProjection(const DirectX::XMMATRIX &view, const Direc
 	DirectX::XMStoreFloat4x4(&m_projection, projection);
 }
 
-void ObjectManager::InitVertices()
+void ObjectManager::ReleaseCOM()
 {
-	ObjectType temp;
-	for (int i = 0; i < nObjects; i++)
+	m_objPlayer->Delete();
+	delete m_objPlayer;
+
+	for (int i = 0; i < nEnemies; i++)
 	{
-		temp = loader->getObject(m_objInstances[i].obj);
-
-		m_objInstances[i].nVertices = loader->getVertexCount(m_objInstances[i].obj);
-		m_objInstances[i].nNormals = loader->getVertexCount(m_objInstances[i].obj);
-		m_objInstances[i].vertices = new VertexType[m_objInstances[i].nVertices];
-		m_objInstances[i].normals = new NormalType[m_objInstances[i].nNormals];
-		SetVertices(i, temp);
-
-		m_objInstances[i].nIndices = loader->getIndexCount(m_objInstances[i].obj);
-		m_objInstances[i].indices = new UINT[m_objInstances[i].nIndices];
-
-		int k = 0;
-		for (int j = 0; j < m_objInstances[i].nIndices / 3; j++)
-		{
-			m_objInstances[i].indices[k] = temp.faces[j].vIndex1 - 1;
-			m_objInstances[i].indices[k + 1] = temp.faces[j].vIndex2 - 1;
-			m_objInstances[i].indices[k + 2] = temp.faces[j].vIndex3 - 1;
-			k += 3;
-		}
+		m_objEnemies[i].Delete();
 	}
-}
+	delete[] m_objEnemies;
 
-void ObjectManager::SetVertices(int index, const ObjectType& obj)
-{
-	for (int i = 0; i < m_objInstances[index].nVertices; i++)
+	for (int i = 0; i < nObstacles; i++)
 	{
-		m_objInstances[index].vertices[i] = obj.vertices[i];
-		m_objInstances[index].vertices[i].x += m_objInstances[index].position.x;
-		m_objInstances[index].vertices[i].y += m_objInstances[index].position.y;
-		m_objInstances[index].vertices[i].z += m_objInstances[index].position.z;
+		m_objObstacles[i].Delete();
 	}
-	for (int i = 0; i < m_objInstances[index].nNormals; i++)
+	delete[] m_objObstacles;
+
+	for (int i = 0; i < nTiles; i++)
 	{
-		m_objInstances[index].normals[i] = obj.normals[i];
+		m_objTiles[i].Delete();
 	}
-}
+	delete[] m_objTiles;
 
-void ObjectManager::CreateBuffers(ID3D11Device* device)
-{
-	for (int i = 0; i < nObjects; i++)
-	{
-		//Vertex buffer
-		D3D11_BUFFER_DESC vertexBufferDesc;
-		vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		vertexBufferDesc.ByteWidth = sizeof(VertexType)*m_objInstances[i].nVertices;
-		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		vertexBufferDesc.MiscFlags = 0;
-		vertexBufferDesc.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA vData;
-		vData.pSysMem = m_objInstances[i].vertices;
-		vData.SysMemPitch = 0;
-		vData.SysMemSlicePitch = 0;
-
-		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objInstances[i].vertexBuffer);
-
-		//Index buffer
-		D3D11_BUFFER_DESC indexBufferDesc;
-		indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		indexBufferDesc.ByteWidth = sizeof(UINT)*m_objInstances[i].nIndices;
-		indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		indexBufferDesc.CPUAccessFlags = 0;
-		indexBufferDesc.MiscFlags = 0;
-		indexBufferDesc.StructureByteStride = 0;
-
-		D3D11_SUBRESOURCE_DATA iData;
-		iData.pSysMem = m_objInstances[i].indices;
-		iData.SysMemPitch = 0;
-		iData.SysMemSlicePitch = 0;
-
-		device->CreateBuffer(&indexBufferDesc, &iData, &m_objInstances[i].indexBuffer);
-	}
-
-	D3D11_BUFFER_DESC cbObjectDesc;
-	cbObjectDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbObjectDesc.ByteWidth = sizeof(constBufferPerObject);
-	cbObjectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbObjectDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbObjectDesc.MiscFlags = 0;
-	cbObjectDesc.StructureByteStride = 0;
-
-	device->CreateBuffer(&cbObjectDesc, NULL, &cbPerObjectBuffer);
+	cbPerObjectBuffer->Release();
 }

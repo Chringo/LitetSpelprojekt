@@ -15,7 +15,8 @@ enum Object
 {
 	Player,
 	Enemy,
-	Block
+	Obstacle,
+	Tile
 };
 
 struct VertexType

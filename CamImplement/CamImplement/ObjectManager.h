@@ -11,23 +11,23 @@ struct ObjectInstance
 {
 	ID3D11Buffer*		vertexBuffer;
 	ID3D11Buffer*		indexBuffer;
+	ID3D11Texture2D*	texture;
 
-	Object				obj;
-	DirectX::XMFLOAT3	position;
 	DirectX::XMFLOAT4X4 world;
 
-	VertexType*	vertices;
-	UINT*		indices;
-	NormalType*	normals;
+	VertexType*			vertices;
+	UINT*				indices;
+	NormalType*			normals;
 
-	int			nVertices;
-	int			nIndices;
-	int			nNormals;
+	int					nVertices;
+	int					nIndices;
+	int					nNormals;
 
 	void Delete()
 	{
-		vertexBuffer->Release();
-		indexBuffer->Release();
+		if (vertexBuffer) { vertexBuffer->Release(); }
+		if (indexBuffer) { indexBuffer->Release(); }
+		if (texture) { texture->Release(); }
 		delete[] vertices;
 		delete[] indices;
 		delete[] normals;
@@ -41,28 +41,27 @@ private:
 	{
 		DirectX::XMFLOAT4X4 WVP;
 		DirectX::XMFLOAT4X4 World;
-	} cbPerObject;
+	}					cbPerObject;
 
 	DirectX::XMFLOAT4X4 m_view;
 	DirectX::XMFLOAT4X4 m_projection;
 
-	Loader* loader;
+	Loader*				m_loader;
 
-	ObjectInstance* m_objInstances;
-	ObjectInstance* m_objPlayer;
-	ObjectInstance* m_objEnemies;
-	ObjectInstance* m_objObstacles;
-	int nObjects;
-	int nEnemies;
-	int nObstacles;
+	ObjectInstance*		m_objPlayer;
+	ObjectInstance*		m_objEnemies;
+	ObjectInstance*		m_objObstacles;
+	ObjectInstance*		m_objTiles;
+	int					nEnemies;
+	int					nObstacles;
+	int					nTiles;
 
-	ID3D11Buffer* cbPerObjectBuffer;
-	ID3D11Texture2D* texture;
+	ID3D11Buffer*		cbPerObjectBuffer;
 
 private:
-	void InitVertices();
-	void SetVertices(int index, const ObjectType& obj);
+	void InitInstances(Object obj, ObjectInstance** arr, int size);
 	void CreateBuffers(ID3D11Device* device);
+	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
 
 public:
 	ObjectManager();
@@ -70,11 +69,16 @@ public:
 	~ObjectManager();
 
 	void Initialize(ID3D11Device* device);
+	void SetPlayerWorld(const DirectX::XMMATRIX &world);
+	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
+	void SetEnemiesWorld(int index, const DirectX::XMMATRIX &world);
 
-	void Update(DirectX::XMFLOAT3 pos, const DirectX::XMMATRIX &world);
+	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);
 
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
+
+	void ReleaseCOM();
 };
 
 #endif
