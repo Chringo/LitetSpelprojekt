@@ -2,15 +2,16 @@
 #define MAP_H
 
 #include <d3d11.h>
-#include <math.h>
+//#include <math.h>
+//#include <random>
 #include "Tile.h"
 
 class Map
 {
 public:
 	Map();
-	Map(int power, float startValue);
-	Map(int power, float startValue, int seed);
+	Map(int exponent, float startValue);
+	Map(int exponent, float startValue, int seed);
 	~Map();
 
 	void setSeed(float seed);
@@ -19,23 +20,27 @@ public:
 	int getChunkSize() const;
 	void setOffset(float offset);
 	float getOffset() const;
+	void setRandom(int value);
+	float getRandom();
+	
+	int pow(int base, int exponent);
 	
 private:
 	Tile** tiles;
-	float seed;
 	int chunkSize;
-	//TODO Random
-	void loadTiles();
+	float seed;
+	float random;
+	void LoadTiles();
 
 	// Diamond-Square
 	float** ds;
-	float off;
+	float offset;
 	void DiamondSquare(float range, float decrease);
 
 	// Evaluation
 	int water;
 	int hill;
-	void evaluateTile(Tile tile);
-	bool evaluateMap();
+	void EvaluateTile(Tile tile);
+	bool EvaluateMap();
 };
 #endif

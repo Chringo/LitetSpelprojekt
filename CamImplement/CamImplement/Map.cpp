@@ -4,17 +4,16 @@ Map::Map()
 {
 
 }
-Map::Map(int power, float startValue)
+Map::Map(int exponent, float startValue)
 {
 	// Initiate point-map
-	this->chunkSize = (int)(pow(2.0f, power)) + 1;// +1 gives the map a mid-point
+	this->chunkSize = pow(2, exponent) + 1;// +1 gives the map a mid-point
 	seed = startValue;
 	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
 	chunkSize--;
 	// Initiate map
 	tiles = new Tile*[chunkSize, chunkSize];// 32x32, 16x16, etc
 
-	int a = rand() % 100;
 	// Create noise - algorithm usage
 	DiamondSquare(30.0f, 0.76789f);
 }
@@ -48,14 +47,33 @@ int Map::getChunkSize() const
 }
 void Map::setOffset(float offset)
 {
-	this->off = offset;
+	this->offset = offset;
 }
 float Map::getOffset() const
 {
-	return this->off;
+	return this->offset;
+}
+void Map::setRandom(int value)
+{
+	srand(value);
+}
+float Map::getRandom()
+{
+	random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);// Random value between 0.0f -> 1.0f
+	return random;
 }
 
-void Map::loadTiles()
+int Map::pow(int base, int exponent)
+{
+	int b = base;
+	for (int i = 0; i < exponent; i++)
+	{
+		b *= b;
+	}
+	return b;
+}
+
+void Map::LoadTiles()
 {
 	float avg;
 	for (int h = 0; h < chunkSize; h++)
@@ -70,7 +88,7 @@ void Map::loadTiles()
 
 			tiles[h][w] = Tile(avg);
 
-			evaluateTile(tiles[h][w]);
+			EvaluateTile(tiles[h][w]);
 		}
 	}
 }
@@ -79,14 +97,14 @@ void Map::DiamondSquare(float range, float decrease)
 {
 	// Starting value for corners
 	float startOffset = 1.2f;
-	ds[0][0] = seed /*+ (Seed * Rand * startOffset)*/;// Top left
-	ds[0][chunkSize] = seed /*+ (Seed * Rand * startOffset)*/;// Top right
-	ds[chunkSize][0] = seed /*+ (Seed * Rand * startOffset)*/;// Bot left
-	ds[chunkSize][chunkSize] = seed /*+ (Seed * Rand * startOffset)*/;// Bot right
+	ds[0][0] = seed + (seed * getRandom() * startOffset);// Top left
+	ds[0][chunkSize] = seed + (seed * getRandom() * startOffset);// Top right
+	ds[chunkSize][0] = seed + (seed * getRandom() * startOffset);// Bot left
+	ds[chunkSize][chunkSize] = seed + (seed * getRandom() * startOffset);// Bot right
 
-	off = range;// the range (-off -> +off) for the average offset
+	offset = range;// the range (-off -> +off) for the average offset
 	float avg;
-	for (int i = chunkSize; i >= 2; i /= 2, off *= decrease)// decrease the variation of the offset
+	for (int i = chunkSize; i >= 2; i /= 2, offset *= decrease)// decrease the variation of the offset
 	{
 		int halfI = i / 2;
 		// generate new square values
@@ -102,7 +120,7 @@ void Map::DiamondSquare(float range, float decrease)
 				avg /= 4.0;
 
 				// center is average plus random offset
-				ds[h + halfI][w + halfI] = avg /*+ (Rand * 2 * off)*/ - off;
+				ds[h + halfI][w + halfI] = avg + (getRandom() * 2 * offset) - offset;
 			}
 		}//__SQUARE_END__//
 
@@ -118,7 +136,7 @@ void Map::DiamondSquare(float range, float decrease)
 				avg /= 4.0;
 
 				// new value = average plus random offset
-				avg = avg /*+ (Rand * 2 * off)*/ - off;
+				avg = avg + (getRandom() * 2 * offset) - offset;
 				// update value
 				ds[h][w] = avg;
 
@@ -136,7 +154,7 @@ void Map::DiamondSquare(float range, float decrease)
 	}//__HEIGHT_MAP_END__//
 }
 //TODO
-void Map::evaluateTile(Tile tile)
+void Map::EvaluateTile(Tile tile)
 {
 	if (tile.getHeight() < 60)
 	{
@@ -149,7 +167,7 @@ void Map::evaluateTile(Tile tile)
 	//	hill++;
 	//}
 }
-bool Map::evaluateMap()
+bool Map::EvaluateMap()
 {
 	bool redo = false;
 	int mapSize = chunkSize * chunkSize;
