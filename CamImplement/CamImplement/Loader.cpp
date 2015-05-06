@@ -90,7 +90,12 @@ void Loader::FindModelFilename(Object object, char** filename)
 			*filename = "Meshes/dummyCube2.obj";
 			break;
 		}
-		case Block:
+		case Obstacle:
+		{
+			*filename = "Meshes/dummyPlane.obj";
+			break;
+		}
+		case Tile:
 		{
 			*filename = "Meshes/dummyPlane.obj";
 			break;
