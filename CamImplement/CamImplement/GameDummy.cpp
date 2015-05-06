@@ -10,6 +10,7 @@ GameDummy::GameDummy()
 GameDummy::~GameDummy()
 {
 	delete player;
+	delete enemyArr;
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -20,8 +21,15 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
 
-	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(1.f, 1.f, 1.f, 1.f));
+	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(0.02f);
+
+	enemyArrSize = 5;
+	enemyArr = new Collision::Enemy[enemyArrSize];
+	for (size_t i = 0; i < enemyArrSize; i++)
+	{
+		enemyArr[i] = Collision::Enemy(0, i);
+	}
 
 	return S_OK;
 }
@@ -48,6 +56,39 @@ XMVECTOR GameDummy::GetPlayerPosition()
 {
 	return player->GetPosition();
 }
+
+
+
+/// 
+/// Enemies
+///
+int GameDummy::GetEnemyArrSize()
+{
+	return enemyArrSize;
+}
+DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
+{
+	XMMATRIX* arr = new XMMATRIX[enemyArrSize];
+	for (size_t i = 0; i < enemyArrSize; i++)
+	{
+		arr[i] = enemyArr[i].GetTransform();
+	}
+	return arr;
+}
+DirectX::XMVECTOR* GameDummy::GetEnemyPositions()
+{
+	XMVECTOR* arr = new XMVECTOR[enemyArrSize];
+	for (size_t i = 0; i < enemyArrSize; i++)
+	{
+		arr[i] = enemyArr[i].GetPosition();
+	}
+	return arr;
+}
+/// 
+/// Enemies
+///
+
+
 
 void GameDummy::ReleaseCOM()
 {

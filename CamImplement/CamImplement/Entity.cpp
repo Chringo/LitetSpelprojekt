@@ -21,21 +21,6 @@ void Entity::SetMovementSpeed(float speed)
 	m_Speed = speed;
 }
 
-void Entity::SetPosition(float x, float y, float z)
-{
-	m_Position = XMVectorSet(x, y, z, 1.f);
-}
-
-void Entity::SetRotation(float x, float y, float z)
-{
-	m_Rotation = XMVectorSet(x, y, z, 1.f);
-}
-
-void Entity::SetScale(float uniformScale)
-{
-	m_Scaling = XMVectorSet(uniformScale, uniformScale, uniformScale, 1.f);
-}
-
 DirectX::XMMATRIX Entity::GetTransform()
 {
 	return XMMatrixScalingFromVector(m_Scaling)
@@ -81,11 +66,10 @@ void Entity::Push(DirectX::XMVECTOR force)
 
 // Player
 
-Player::Player(XMVECTOR position, XMVECTOR rotation, XMVECTOR scaling)
+Player::Player(XMVECTOR position, XMVECTOR rotation)
 {
 	Entity::m_Position = position;
 	Entity::m_Rotation = rotation;
-	Entity::m_Scaling = scaling;
 
 	m_Controls[Attack1] = VK_LBUTTON;
 	m_Controls[Attack2] = VK_RBUTTON;
@@ -179,11 +163,22 @@ Action Player::GetCurrentAction()
 
 // Enemy
 
-Enemy::Enemy(XMVECTOR position, XMVECTOR rotation, XMVECTOR scaling)
+Enemy::Enemy(int x, int z)
 {
-	Entity::m_Position = position;
-	Entity::m_Rotation = rotation;
-	Entity::m_Scaling = scaling;
+	this->x = x;
+	this->z = z;
+
+	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
+	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+}
+
+Enemy::Enemy()
+{
+	x = 0;
+	z = 0;
+
+	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
+	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 }
 
 Enemy::~Enemy()
