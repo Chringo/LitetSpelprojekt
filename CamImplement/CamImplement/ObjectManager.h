@@ -23,6 +23,15 @@ struct ObjectInstance
 	int			nVertices;
 	int			nIndices;
 	int			nNormals;
+
+	void Delete()
+	{
+		vertexBuffer->Release();
+		indexBuffer->Release();
+		delete[] vertices;
+		delete[] indices;
+		delete[] normals;
+	}
 };
 
 class ObjectManager
@@ -40,9 +49,15 @@ private:
 	Loader* loader;
 
 	ObjectInstance* m_objInstances;
+	ObjectInstance* m_objPlayer;
+	ObjectInstance* m_objEnemies;
+	ObjectInstance* m_objObstacles;
 	int nObjects;
+	int nEnemies;
+	int nObstacles;
 
 	ID3D11Buffer* cbPerObjectBuffer;
+	ID3D11Texture2D* texture;
 
 private:
 	void InitVertices();

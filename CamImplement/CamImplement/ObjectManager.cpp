@@ -40,9 +40,9 @@ void ObjectManager::Initialize(ID3D11Device* device)
 
 void ObjectManager::Update(DirectX::XMFLOAT3 pos, const DirectX::XMMATRIX &world)
 {
-	m_objInstances[0].position = pos;
+	//m_objInstances[0].position = pos;
 	DirectX::XMStoreFloat4x4(&m_objInstances[0].world, world);
-	SetVertices(0, loader->getObject(Player));
+	//SetVertices(0, loader->getObject(Player));
 }
 
 void ObjectManager::Render(ID3D11DeviceContext* deviceContext)

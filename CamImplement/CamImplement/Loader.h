@@ -29,7 +29,6 @@ struct VertexType
 	}
 
 	float x, y, z;
-	float nx, ny, nz;
 };
 
 struct TextureCoordType
@@ -55,7 +54,6 @@ struct ObjectType
 	TextureCoordType* texCoords;
 	NormalType* normals;
 	FaceType* faces;
-	ID3D11Texture2D* texture;
 
 	void Delete()
 	{
@@ -63,7 +61,6 @@ struct ObjectType
 		delete[] texCoords;
 		delete[] normals;
 		delete[] faces;
-		texture->Release();
 	}
 };
 
