@@ -17,5 +17,8 @@ private:
 	bool obstacle;
 
 	float height;
+
+	//TODO worldposition
+	//TODO type of tile
 };
 #endif
