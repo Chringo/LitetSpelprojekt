@@ -2,19 +2,7 @@
 
 Map::Map()
 {
-	// Initiate point-map
-	this->chunkSize = pow(2, 3) + 1;// +1 gives the map a mid-point
-	seed = 60.0f;
-	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
-	chunkSize--;
-	// Initiate map
-	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
 
-	// Create noise - algorithm usage
-	DiamondSquare(30.0f, 0.76789f);
-
-	// Create Tile-based map
-	CreateTiles();
 }
 Map::Map(int exponent, float startValue)
 {
@@ -24,13 +12,10 @@ Map::Map(int exponent, float startValue)
 	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
 	chunkSize--;
 	// Initiate map
-	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
+	tiles = new Tile*[chunkSize, chunkSize];// 32x32, 16x16, etc
 
 	// Create noise - algorithm usage
 	DiamondSquare(30.0f, 0.76789f);
-
-	// Create Tile-based map
-	CreateTiles();
 }
 Map::~Map()
 {
@@ -88,14 +73,9 @@ int Map::pow(int base, int exponent)
 	return b;
 }
 
-void Map::CreateTiles()
+void Map::LoadTiles()
 {
 	float avg;
-
-	// Set world position
-	float posX = 0.0f;
-	float posZ = 0.0f;
-	DirectX::XMFLOAT3 worldpos = { posX, 0, posZ };
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
@@ -106,29 +86,11 @@ void Map::CreateTiles()
 				ds[h + 1][w + 1];
 			avg /= 4;
 
-			tiles[h][w] = TileClass(avg, worldpos);
+			tiles[h][w] = Tile(avg);
 
 			EvaluateTile(tiles[h][w]);
-
-			//posX += TILESIZE;
-			//posZ += TILESIZE;
-			//worldpos = { posX, 0, posZ };
-			worldpos.x += TILESIZE;
-			worldpos.z += TILESIZE;
 		}
 	}
-}
-DirectX::XMMATRIX* Map::getTileMatrices() const
-{
-	DirectX::XMMATRIX* arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
-	for (int h = 0; h < chunkSize; h++)
-	{
-		for (int w = 0; w < chunkSize; w++)
-		{
-			*arrOfTiles = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&tiles[h][w].getWorldPos()));
-		}
-	}
-	return arrOfTiles;
 }
 //TODO
 void Map::DiamondSquare(float range, float decrease)
@@ -192,15 +154,18 @@ void Map::DiamondSquare(float range, float decrease)
 	}//__HEIGHT_MAP_END__//
 }
 //TODO
-void Map::EvaluateTile(TileClass tile)
+void Map::EvaluateTile(Tile tile)
 {
 	if (tile.getHeight() < 60)
 	{
 		tile.setObstacle(true);
 		water++;
 	}
-	// Define tile type
-
+	//else if (tile.getHeight() > 180)
+	//{
+	//	tile.setObstacle(true);
+	//	hill++;
+	//}
 }
 bool Map::EvaluateMap()
 {

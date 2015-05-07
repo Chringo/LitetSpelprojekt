@@ -5,7 +5,6 @@ using namespace DirectX;
 GameDummy::GameDummy()
 {
 	player = nullptr;
-	map = nullptr;
 }
 
 GameDummy::~GameDummy()
@@ -16,7 +15,6 @@ GameDummy::~GameDummy()
 		delete enemyArr[i];
 	}
 	delete enemyArr;
-	delete map;
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -26,8 +24,6 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	GetWindowRect(wndHandle, &r);
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
-
-	map = new Map();
 
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(0.02f);
@@ -96,11 +92,7 @@ DirectX::XMVECTOR* GameDummy::GetEnemyPositions()
 /// Enemies
 ///
 
-DirectX::XMMATRIX* GameDummy::GetTileMatrices()
-{
-	DirectX::XMMATRIX* arrOfTiles = map->getTileMatrices();
-	return arrOfTiles;
-}
+
 
 void GameDummy::ReleaseCOM()
 {
