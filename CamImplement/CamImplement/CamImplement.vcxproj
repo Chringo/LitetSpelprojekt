@@ -89,7 +89,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
-    <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="TileClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -101,7 +101,7 @@
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="ObjectManager.h" />
-    <ClInclude Include="Tile.h" />
+    <ClInclude Include="TileClass.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PS.hlsl">
