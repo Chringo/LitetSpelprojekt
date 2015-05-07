@@ -10,6 +10,10 @@ GameDummy::GameDummy()
 GameDummy::~GameDummy()
 {
 	delete player;
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+	{
+		delete enemyArr[i];
+	}
 	delete enemyArr;
 }
 
