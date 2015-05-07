@@ -56,6 +56,9 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 		}
 
 		DirectX::XMStoreFloat4x4(&(*arr)[i].world, DirectX::XMMatrixIdentity());
+		(*arr)[i].vertexBuffer = nullptr;
+		(*arr)[i].indexBuffer = nullptr;
+		(*arr)[i].texture = nullptr;
 	}
 }
 
