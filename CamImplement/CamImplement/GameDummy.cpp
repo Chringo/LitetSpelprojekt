@@ -25,10 +25,10 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	player->SetMovementSpeed(0.02f);
 
 	enemyArrSize = 5;
-	enemyArr = new Collision::Enemy[enemyArrSize];
-	for (size_t i = 0; i < enemyArrSize; i++)
+	enemyArr = new Collision::Enemy*[enemyArrSize];
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i] = Collision::Enemy(0, i);
+		enemyArr[i] = new Collision::Enemy(0, i);
 	}
 
 	return S_OK;
@@ -69,18 +69,18 @@ int GameDummy::GetEnemyArrSize()
 DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 {
 	XMMATRIX* arr = new XMMATRIX[enemyArrSize];
-	for (size_t i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		arr[i] = enemyArr[i].GetTransform();
+		arr[i] = enemyArr[i]->GetTransform();
 	}
 	return arr;
 }
 DirectX::XMVECTOR* GameDummy::GetEnemyPositions()
 {
 	XMVECTOR* arr = new XMVECTOR[enemyArrSize];
-	for (size_t i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		arr[i] = enemyArr[i].GetPosition();
+		arr[i] = enemyArr[i]->GetPosition();
 	}
 	return arr;
 }

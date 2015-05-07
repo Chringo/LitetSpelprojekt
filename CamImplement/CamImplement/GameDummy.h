@@ -2,7 +2,7 @@
 #define GAMEDUMMY_H
 
 #include <DirectXMath.h>
-#include <vector.h>
+//#include <vector.h>
 
 #include "Entity.h"
 #include "Input.h"
@@ -13,7 +13,7 @@ private:
 	Collision::Player* player;
 	
 	int enemyArrSize;
-	Collision::Enemy* enemyArr;
+	Collision::Enemy** enemyArr;
 
 	POINT clientSize;
 	HWND windowHandle;
@@ -29,6 +29,7 @@ public:
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
 
+	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
 	DirectX::XMVECTOR* GetEnemyPositions();
 
