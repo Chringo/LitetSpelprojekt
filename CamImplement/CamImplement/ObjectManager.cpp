@@ -177,7 +177,7 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy };
+	Object obj[] = { Player, Enemy, Tile };
 	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
 
 	m_nEnemies = nEnemies;

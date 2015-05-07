@@ -3,12 +3,20 @@
 Map::Map()
 {
 	// Initiate point-map
-	this->chunkSize = pow(2, 3) + 1;// +1 gives the map a mid-point
+	this->chunkSize = pow(2, 2) + 1;// +1 gives the map a mid-point
 	seed = 60.0f;
-	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
+	ds = new float*[chunkSize];// 33x33, 17x17, etc
+	for (int i = 0; i < chunkSize; i++)
+	{
+		ds[i] = new float[chunkSize];
+	}
 	chunkSize--;
 	// Initiate map
-	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
+	tiles = new TileClass*[chunkSize];// 32x32, 16x16, etc
+	for (int i = 0; i < chunkSize; i++)
+	{
+		tiles[i] = new TileClass[chunkSize];
+	}
 
 	// Create noise - algorithm usage
 	DiamondSquare(30.0f, 0.76789f);
@@ -81,9 +89,9 @@ float Map::getRandom()
 int Map::pow(int base, int exponent)
 {
 	int b = base;
-	for (int i = 0; i < exponent; i++)
+	for (int i = 1; i < exponent; i++)
 	{
-		b *= b;
+		b *= base;
 	}
 	return b;
 }

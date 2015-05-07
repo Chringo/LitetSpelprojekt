@@ -9,7 +9,7 @@
 
 //#pragma comment (lib, "d3dx11.lib")
 
-#define MAX_OBJECT_COUNT 3
+#define MAX_OBJECT_COUNT 4
 
 enum Object
 {

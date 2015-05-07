@@ -97,7 +97,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 		}
 		case Tile:
 		{
-			*filename = "Meshes/dummyPlane.obj";
+			*filename = "Meshes/dummyCube2.obj";
 			break;
 		}
 		default:
