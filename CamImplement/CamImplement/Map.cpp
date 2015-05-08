@@ -2,8 +2,11 @@
 
 Map::Map()
 {
+	arrOfTiles = nullptr;
+	// Get seed for noise
+	setRandom(1);
 	// Initiate point-map
-	this->chunkSize = pow(2, 2) + 1;// +1 gives the map a mid-point
+	this->chunkSize = pow(2, 1) + 1;// +1 gives the map a mid-point
 	seed = 60.0f;
 	ds = new float*[chunkSize];// 33x33, 17x17, etc
 	for (int i = 0; i < chunkSize; i++)
@@ -42,14 +45,15 @@ Map::Map(int exponent, float startValue)
 }
 Map::~Map()
 {
-	for (int h = 0; h < chunkSize; h++)
+	for (int h = chunkSize - 1; h > 0; h--)
 	{
-		delete tiles[h];
-		delete ds[h];
+		delete[] tiles[h];
+		delete[] ds[h];// If fatal crash happened, check this one.
 	}
-	delete ds[chunkSize + 1];
+	delete ds[0];
 	delete[] tiles;
 	delete[] ds;
+	delete[] arrOfTiles;
 }
 
 void Map::setSeed(float seed)
@@ -126,9 +130,14 @@ void Map::CreateTiles()
 		}
 	}
 }
+int Map::getNrOfTiles() const
+{
+	return (chunkSize * chunkSize);
+}
 DirectX::XMMATRIX* Map::getTileMatrices() const
 {
-	DirectX::XMMATRIX* arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	(DirectX::XMMATRIX*)arrOfTiles = arr;
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)

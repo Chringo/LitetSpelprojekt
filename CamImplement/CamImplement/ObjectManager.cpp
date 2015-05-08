@@ -240,19 +240,13 @@ void ObjectManager::SetObstaclesWorld(int index, const DirectX::XMMATRIX &world)
 
 void ObjectManager::SetTilesWorld(const DirectX::XMMATRIX* arr)
 {
-	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
-	if (size > m_nTiles)
+	for (int i = 0; i < m_nTiles; i++)
 	{
-		size = m_nTiles;
-	}
-
-	for (int i = 0; i < size; i++)
-	{
-		SetTilesWorld(i, arr[i]);
+		SetTileWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetTilesWorld(int index, const DirectX::XMMATRIX &world)
+void ObjectManager::SetTileWorld(int index, const DirectX::XMMATRIX &world)
 {
 	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, world);
 }

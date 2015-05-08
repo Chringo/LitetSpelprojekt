@@ -16,7 +16,8 @@ GameDummy::~GameDummy()
 		delete enemyArr[i];
 	}
 	delete enemyArr;
-	delete map;
+	delete[] map;
+	delete[] tileMatrixArr;//TODO Make sure to deallocate object properly
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -98,8 +99,12 @@ DirectX::XMVECTOR* GameDummy::GetEnemyPositions()
 
 DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 {
-	DirectX::XMMATRIX* arrOfTiles = map->getTileMatrices();
-	return arrOfTiles;
+	tileMatrixArr = map->getTileMatrices();
+	return tileMatrixArr;
+}
+int GameDummy::GetNrOfTiles() const
+{
+	return map->getNrOfTiles();
 }
 
 void GameDummy::ReleaseCOM()

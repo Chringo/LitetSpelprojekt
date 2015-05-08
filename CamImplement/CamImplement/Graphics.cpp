@@ -221,7 +221,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	dirLight = new DirectionalLight();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, 1, 0, 4);
+	objManager->Initialize(rDevice, 0, 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
 	

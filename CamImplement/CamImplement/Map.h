@@ -16,9 +16,11 @@ private:
 	float seed;
 	float random;
 	void CreateTiles();
+
+	DirectX::XMMATRIX* arrOfTiles;
 	
 	// Diamond-Square
-	float** ds;
+	float** ds;// Structure redesigned needed
 	float offset;
 	void DiamondSquare(float range, float decrease);
 
@@ -32,7 +34,7 @@ public:
 	Map();
 	Map(int exponent, float startValue);//TODO Map starting point others than origo
 	Map(int exponent, float startValue, int seed);
-	~Map();
+	virtual ~Map();
 
 	void setSeed(float seed);
 	float getSeed() const;
@@ -45,6 +47,7 @@ public:
 
 	void setTileMatrices();
 	DirectX::XMMATRIX* getTileMatrices() const;
+	int getNrOfTiles() const;
 	
 	int pow(int base, int exponent);
 };

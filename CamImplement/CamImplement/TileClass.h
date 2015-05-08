@@ -29,7 +29,7 @@ public:
 	TileClass();
 	TileClass(float startValue);
 	TileClass(float startValue, DirectX::XMFLOAT3 worldpos);
-	~TileClass();
+	virtual ~TileClass();
 
 	void setObstacle(bool obstacle);
 	bool getObstacle() const;

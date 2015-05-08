@@ -11,6 +11,7 @@ class GameDummy
 {
 private:
 	Map* map;
+	DirectX::XMMATRIX* tileMatrixArr;
 
 	Collision::Player* player;
 	
@@ -36,6 +37,7 @@ public:
 	DirectX::XMVECTOR* GetEnemyPositions();
 
 	DirectX::XMMATRIX* GetTileMatrices();
+	int GetNrOfTiles() const;
 
 	void ReleaseCOM();
 };

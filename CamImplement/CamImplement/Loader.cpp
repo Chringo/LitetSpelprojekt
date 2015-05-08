@@ -107,7 +107,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 
 bool Loader::ReadFileCounts(char* filename)
 {
-	if (nObjectsCurrent == nObjectsTotal) { return false; }
+	//if (nObjectsCurrent == nObjectsTotal) { return false; }
 
 	std::ifstream fin;
 	char input;
@@ -159,7 +159,7 @@ bool Loader::ReadFileCounts(char* filename)
 
 bool Loader::LoadDataStructures(char* filename)
 {
-	if (nObjectsCurrent == nObjectsTotal) { return false; }
+	//if (nObjectsCurrent == nObjectsTotal) { return false; }
 
 	std::ifstream fin;
 	std::ofstream fout;
