@@ -141,6 +141,12 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 }
 
+bool ObjectManager::LoadTextures(ID3D11Device* device)
+{
+
+	return false;
+}
+
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size)
 {
 	UINT stride = sizeof(VertexType);

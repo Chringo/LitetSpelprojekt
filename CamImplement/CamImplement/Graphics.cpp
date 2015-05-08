@@ -240,6 +240,7 @@ void Graphics::Update()
 	camera->Update(0.1f);
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
+	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
 	objManager->Update();
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 }
