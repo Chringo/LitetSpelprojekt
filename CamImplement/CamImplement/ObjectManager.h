@@ -64,6 +64,7 @@ private:
 	void CreateBuffers(ID3D11Device* device);
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
+	void SetEnemyWorld(int index, const DirectX::XMMATRIX &world);
 
 public:
 	ObjectManager();
@@ -74,7 +75,6 @@ public:
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
-	void SetEnemiesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
 	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);

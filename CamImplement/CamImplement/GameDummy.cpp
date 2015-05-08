@@ -32,7 +32,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i);
+		enemyArr[i] = new Collision::Enemy(0, i+3);
 	}
 
 	return S_OK;

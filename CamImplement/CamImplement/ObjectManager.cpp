@@ -208,19 +208,13 @@ void ObjectManager::SetPlayerWorld(const DirectX::XMMATRIX &world)
 
 void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 {
-	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
-	if (size > m_nEnemies)
+	for (int i = 0; i < m_nEnemies; i++)
 	{
-		size = m_nEnemies;
-	}
-
-	for (int i = 0; i < size; i++)
-	{
-		SetEnemiesWorld(i, arr[i]);
+		SetEnemyWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetEnemiesWorld(int index, const DirectX::XMMATRIX &world)
+void ObjectManager::SetEnemyWorld(int index, const DirectX::XMMATRIX &world)
 {
 	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, world);
 }
