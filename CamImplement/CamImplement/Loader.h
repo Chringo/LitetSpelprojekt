@@ -5,9 +5,6 @@
 #include <fstream>
 #include <string>
 #include <d3d11.h>
-//#include <d3dx11.h>
-
-//#pragma comment (lib, "d3dx11.lib")
 
 #define MAX_OBJECT_COUNT 4
 
@@ -83,7 +80,6 @@ private:
 	void FindModelFilename(Object object, char** filename);
 	bool ReadFileCounts(char* filename);
 	bool LoadDataStructures(char* filename);
-	bool LoadTextures(ID3D11Device* device, char* filename);
 
 public:
 	Loader();

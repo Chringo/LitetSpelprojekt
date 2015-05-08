@@ -11,7 +11,7 @@ struct ObjectInstance
 {
 	ID3D11Buffer*		vertexBuffer;
 	ID3D11Buffer*		indexBuffer;
-	ID3D11Texture2D*	texture;
+	ID3D11ShaderResourceView* texture;
 
 	DirectX::XMFLOAT4X4 world;
 
@@ -57,10 +57,12 @@ private:
 	int					m_nTiles;
 
 	ID3D11Buffer*		cbPerObjectBuffer;
+	ID3D11SamplerState* samplerState;
 
 private:
 	void InitInstances(Object obj, ObjectInstance** arr, int size);
 	void CreateBuffers(ID3D11Device* device);
+	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
 
 public:

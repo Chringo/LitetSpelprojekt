@@ -17,6 +17,7 @@ private:
 	
 	int enemyArrSize;
 	Collision::Enemy** enemyArr;
+	DirectX::XMMATRIX* enemyMatrixArr;
 
 	POINT clientSize;
 	HWND windowHandle;
@@ -41,4 +42,5 @@ public:
 
 	void ReleaseCOM();
 };
+
 #endif

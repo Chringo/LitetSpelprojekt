@@ -141,6 +141,12 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 }
 
+bool ObjectManager::LoadTextures(ID3D11Device* device)
+{
+
+	return false;
+}
+
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size)
 {
 	UINT stride = sizeof(VertexType);
@@ -202,13 +208,7 @@ void ObjectManager::SetPlayerWorld(const DirectX::XMMATRIX &world)
 
 void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 {
-	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
-	if (size > m_nEnemies)
-	{
-		size = m_nEnemies;
-	}
-
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < m_nEnemies; i++)
 	{
 		SetEnemiesWorld(i, arr[i]);
 	}
@@ -216,7 +216,9 @@ void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 
 void ObjectManager::SetEnemiesWorld(int index, const DirectX::XMMATRIX &world)
 {
-	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, world);
+	//Passing world directly into StoreFloat causes random access violation
+	DirectX::XMMATRIX w = world;
+	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, w);
 }
 
 void ObjectManager::SetObstaclesWorld(const DirectX::XMMATRIX* arr)

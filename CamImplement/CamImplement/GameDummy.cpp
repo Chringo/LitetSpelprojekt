@@ -17,7 +17,7 @@ GameDummy::~GameDummy()
 	}
 	delete enemyArr;
 	delete[] map;
-	delete[] tileMatrixArr;//TODO Make sure to deallocate object properly
+	delete[] tileMatrixArr;//TODO Make sure to deallocate tileMatrixArr properly
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -34,10 +34,12 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	player->SetMovementSpeed(0.02f);
 
 	enemyArrSize = 5;
+	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i);
+		enemyArr[i] = new Collision::Enemy(0, i+3);
+		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
 	return S_OK;
@@ -77,12 +79,12 @@ int GameDummy::GetEnemyArrSize()
 }
 DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 {
-	XMMATRIX* arr = new XMMATRIX[enemyArrSize];
+	//XMMATRIX* arr = new XMMATRIX[enemyArrSize];
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		arr[i] = enemyArr[i]->GetTransform();
+		enemyMatrixArr[i] = enemyArr[i]->GetTransform();
 	}
-	return arr;
+	return enemyMatrixArr;
 }
 DirectX::XMVECTOR* GameDummy::GetEnemyPositions()
 {
