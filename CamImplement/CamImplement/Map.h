@@ -46,7 +46,7 @@ public:
 	float getRandom();
 
 	void setTileMatrices();
-	DirectX::XMMATRIX* getTileMatrices() const;
+	DirectX::XMMATRIX* getTileMatrices();
 	int getNrOfTiles() const;
 	
 	int pow(int base, int exponent);

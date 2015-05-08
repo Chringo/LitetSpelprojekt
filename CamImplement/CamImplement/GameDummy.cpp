@@ -17,7 +17,7 @@ GameDummy::~GameDummy()
 	}
 	delete enemyArr;
 	delete[] map;
-	delete[] tileMatrixArr;//TODO Make sure to deallocate tileMatrixArr properly
+	//delete[] tileMatrixArr;//TODO Make sure to deallocate tileMatrixArr properly
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)

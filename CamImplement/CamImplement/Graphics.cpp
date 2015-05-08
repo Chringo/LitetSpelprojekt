@@ -221,9 +221,8 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	dirLight = new DirectionalLight();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	//objManager->Initialize(rDevice, 0, 0, game->GetNrOfTiles());
-	//objManager->SetTilesWorld(game->GetTileMatrices());
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, 0);
+	objManager->Initialize(rDevice, 0, 0, game->GetNrOfTiles());
+	//objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, 0);
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
 	
 	cbPerFrame.dirLight = dirLight->getLight();
@@ -243,6 +242,7 @@ void Graphics::Update()
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
+	objManager->SetTilesWorld(game->GetTileMatrices());
 	objManager->Update();
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 }

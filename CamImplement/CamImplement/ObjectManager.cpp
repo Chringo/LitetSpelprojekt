@@ -250,7 +250,9 @@ void ObjectManager::SetTilesWorld(const DirectX::XMMATRIX* arr)
 
 void ObjectManager::SetTileWorld(int index, const DirectX::XMMATRIX &world)
 {
-	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, world);
+	//Passing world directly into StoreFloat causes random access violation
+	DirectX::XMMATRIX w = world;
+	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, w);
 }
 
 void ObjectManager::Update()

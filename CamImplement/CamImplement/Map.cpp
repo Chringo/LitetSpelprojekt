@@ -130,14 +130,14 @@ void Map::CreateTiles()
 		}
 	}
 }
-int Map::getNrOfTiles() const
+int Map::getNrOfTiles() 
 {
 	return (chunkSize * chunkSize);
 }
-DirectX::XMMATRIX* Map::getTileMatrices() const
+DirectX::XMMATRIX* Map::getTileMatrices()
 {
-	DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
-	(DirectX::XMMATRIX*)arrOfTiles = arr;
+	//DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
