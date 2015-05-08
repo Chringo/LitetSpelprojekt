@@ -220,8 +220,9 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
 	dirLight = new DirectionalLight();
 
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, 0);
 	game->Initialize(wndHandle, hInstance, viewport);
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, 0);
+	
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
 	
 	cbPerFrame.dirLight = dirLight->getLight();
