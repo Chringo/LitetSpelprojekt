@@ -13,6 +13,19 @@
 
 namespace Collision
 {
+	enum Action
+	{
+		Attack1,
+		Attack2,
+		Block,
+		Dodge,
+		MoveUp,
+		MoveDown,
+		MoveRight,
+		MoveLeft,
+		Idle
+	};
+
 	class Entity
 	{
 	public:
@@ -35,8 +48,11 @@ namespace Collision
 		DirectX::XMVECTOR m_Rotation;
 		const DirectX::XMVECTOR m_Scaling = DirectX::XMVectorSet(1.f, 1.f, 1.f, 1.f);
 
-		float m_Speed = 4.f;
+		float m_Speed = 0.f;
+		Action m_CurrentAction = Idle;
 		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
+
+		void PerformAction(Action action);
 
 	private:
 		float m_Mass = 1.f;
@@ -45,19 +61,6 @@ namespace Collision
 	};
 
 	// [Move to individual files.]
-
-	enum Action
-	{
-		Attack1,
-		Attack2,
-		Block,
-		Dodge,
-		MoveUp,
-		MoveDown,
-		MoveRight,
-		MoveLeft,
-		Idle
-	};
 
 	class Player : public Entity
 	{
@@ -71,17 +74,12 @@ namespace Collision
 
 		void SetAttackDirection(POINT clientCursorNDC);
 
-		void PerformAction(Action action,
-			float deltaTime);
-
-		void SetInputKey(Action action,
-			int key);
+		void SetInputKey(Action action, int key);
 
 		Action GetCurrentAction();
 
 	private:
 		int m_Controls[8];
-		Action m_CurrentAction = Idle;
 
 		// [todo. combat system calculations ]
 		unsigned int m_HitPoints = 0;
@@ -98,11 +96,13 @@ namespace Collision
 
 		virtual ~Enemy();
 
-		HRESULT Update(float deltaTime);	// AI-stuff.
+		void setAction(Action action);
+		Action popAction();
+
+		HRESULT Update(float deltaTime);
 
 	private:
 		int x, z;
-
 	};
 
 } /// namespace Collision

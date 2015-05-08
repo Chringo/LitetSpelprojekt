@@ -32,7 +32,6 @@ public:
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
-	DirectX::XMVECTOR* GetEnemyPositions();
 
 	void ReleaseCOM();
 };

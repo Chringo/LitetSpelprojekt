@@ -10,11 +10,9 @@ using namespace Collision;
 
 // Entity
 
-Entity::Entity()
-{}
+Entity::Entity(){}
 
-Entity::~Entity()
-{}
+Entity::~Entity(){}
 
 void Entity::SetMovementSpeed(float speed)
 {
@@ -64,6 +62,41 @@ void Entity::Push(DirectX::XMVECTOR force)
 	m_Move = force;
 }
 
+void Entity::PerformAction(Action action)
+{
+	// Only handle exlusive actions. Movement works independently.
+	m_CurrentAction = action < 4 ? action : Idle;
+
+	// Higher number action overwrite lower.
+	switch (action)
+	{
+	case Attack1:
+		// Move sword.
+		break;
+	case Attack2:
+		// Move sword.
+		break;
+	case Block:
+		// Move shield.
+		break;
+	case Dodge:
+		// Tumble away.
+		break;
+	case MoveUp:
+		m_Move.m128_f32[2] += 1.0f;
+		break;
+	case MoveDown:
+		m_Move.m128_f32[2] -= 1.0f;
+		break;
+	case MoveRight:
+		m_Move.m128_f32[0] += 1.0f;
+		break;
+	case MoveLeft:
+		m_Move.m128_f32[0] -= 1.0f;
+		break;
+	}
+}
+
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
@@ -81,10 +114,7 @@ Player::Player(XMVECTOR position, XMVECTOR rotation)
 	m_Controls[MoveLeft] = 'A';
 }
 
-Player::~Player()
-{
-
-}
+Player::~Player(){}
 
 HRESULT Player::Update(float deltaTime)
 {
@@ -93,7 +123,7 @@ HRESULT Player::Update(float deltaTime)
 	// Key input.
 	for (UINT i = 0; i < 8; i++)
 		if (KEYDOWN(m_Controls[i]))
-			PerformAction((Action)i, deltaTime);
+			PerformAction((Action)i);
 
 	// Rotate to match camera.
 	m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
@@ -121,41 +151,6 @@ void Player::SetInputKey(Action action, int key)
 	m_Controls[(int)action] = key;
 }
 
-void Player::PerformAction(Action action, float deltaTime)
-{
-	// Only handle exlusive actions. Movement works independently.
-	m_CurrentAction = action < 4 ? action : Idle;
-
-	// Higher number action overwrite lower.
-	switch (action)
-	{
-		case Attack1:
-			// Move sword.
-			break;
-		case Attack2:
-			// Move sword.
-			break;
-		case Block:
-			// Move shield.
-			break;
-		case Dodge:
-			// Tumble away.
-			break;
-		case MoveUp:
-			m_Move.m128_f32[2] += 1.f;
-			break;
-		case MoveDown:
-			m_Move.m128_f32[2] -= 1.f;
-			break;
-		case MoveRight:
-			m_Move.m128_f32[0] += 1.f;
-			break;
-		case MoveLeft:
-			m_Move.m128_f32[0] -= 1.f;
-			break;
-	}
-}
-
 Action Player::GetCurrentAction()
 {
 	return m_CurrentAction;
@@ -172,26 +167,33 @@ Enemy::Enemy(int x, int z)
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 }
 
-Enemy::Enemy()
-{
-	x = 0;
-	z = 0;
-
-	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
-	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-}
-
-Enemy::~Enemy()
-{
-
-}
+Enemy::~Enemy(){}
 
 HRESULT Enemy::Update(float deltaTime)
 {
+	m_Move = XMVectorZero();
+	
+	PerformAction(popAction());
+
+	//// Rotate to match camera.
+	m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
+
+	//// Set proper movement speed => 'm_Speed' UnitLengths per second.
+	m_Move = XMVector3Normalize(m_Move) * deltaTime * m_Speed;
+
 	m_Position += m_Move;
 
-	// Friction.
-	m_Move *= 0.8f;
-
 	return S_OK;
+}
+
+
+void Enemy::setAction(Action action)
+{
+	m_CurrentAction = action;
+}
+Action Enemy::popAction()
+{
+	Action action = m_CurrentAction;
+	m_CurrentAction = Idle;
+	return action;
 }
