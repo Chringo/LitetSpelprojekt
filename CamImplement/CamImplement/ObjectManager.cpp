@@ -210,13 +210,15 @@ void ObjectManager::SetEnemiesWorld(const DirectX::XMMATRIX* arr)
 {
 	for (int i = 0; i < m_nEnemies; i++)
 	{
-		SetEnemyWorld(i, arr[i]);
+		SetEnemiesWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetEnemyWorld(int index, const DirectX::XMMATRIX &world)
+void ObjectManager::SetEnemiesWorld(int index, const DirectX::XMMATRIX &world)
 {
-	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, world);
+	//Passing world directly into StoreFloat causes random access violation
+	DirectX::XMMATRIX w = world;
+	DirectX::XMStoreFloat4x4(&m_objEnemies[index].world, w);
 }
 
 void ObjectManager::SetObstaclesWorld(const DirectX::XMMATRIX* arr)
