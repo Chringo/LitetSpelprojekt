@@ -77,7 +77,7 @@ int Loader::getNormalCount(Object index) const
 
 void Loader::FindModelFilename(Object object, char** filename)
 {
-	char* localFilename;
+	//char* localFilename;
 	switch (object)
 	{
 		case Player:

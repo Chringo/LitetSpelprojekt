@@ -139,8 +139,8 @@ HRESULT Player::Update(float deltaTime)
 
 void Player::SetAttackDirection(POINT clientCursorNDC)
 {
-	float a = clientCursorNDC.x;
-	float b = clientCursorNDC.y;
+	float a = (float)clientCursorNDC.x;
+	float b = (float)clientCursorNDC.y;
 
 	m_Rotation.m128_f32[1] = -atan2(a, b);
 }
@@ -163,7 +163,7 @@ Enemy::Enemy(int x, int z)
 	this->x = x;
 	this->z = z;
 
-	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
+	Entity::m_Position = XMVectorSet((float)x, 0.f, (float)z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 }
 
