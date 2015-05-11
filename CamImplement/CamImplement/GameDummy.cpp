@@ -58,10 +58,11 @@ void GameDummy::Update()
 	GetCursorPos(&p);
 	ScreenToClient(windowHandle, &p);
 
-	p.x -= clientSize.x * (LONG)0.5f;
-	p.y -= clientSize.y * (LONG)0.5f;
+	//Adjust to center on player
+	p.x -= (LONG)(clientSize.x * 0.5f - 5);
+	p.y -= (LONG)(clientSize.y * 0.5f - 15);
 
-	player->Update(0.1f);
+	player->Update(0.3f);
 	player->SetAttackDirection(p);
 
 	// Temporary example that should be removed later
@@ -69,7 +70,7 @@ void GameDummy::Update()
 	
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i]->Update(0.1);
+		enemyArr[i]->Update(0.3f);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{

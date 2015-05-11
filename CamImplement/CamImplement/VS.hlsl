@@ -7,14 +7,15 @@ cbuffer cbPerObject : register(b0)
 struct VS_IN
 {
 	float3 pos : POSITION;
+	float2 tex : TEXCOORD;
 	float3 normal : NORMAL;
 };
 
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
+	float2 tex : TEXCOORD;
 	float3 normal : NORMAL;
-	float3 color : COLOR;
 };
 
 VS_OUT main( VS_IN input )
@@ -23,7 +24,7 @@ VS_OUT main( VS_IN input )
 
 	output.pos = mul(float4(input.pos, 1.0f), WVP);
 	output.normal = mul(input.normal, World);
-	output.color = float3(1.0f, 1.0f, 1.0f);
+	output.tex = input.tex;
 
 	return output;
 }

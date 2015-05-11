@@ -7,6 +7,18 @@
 
 #pragma comment (lib, "d3d11.lib")
 
+struct InputType
+{
+	InputType() {}
+	InputType(float x, float y, float z,
+		float u, float v,
+		float nx, float ny, float nz) : pos(x, y, z), tex(u, v), nor(nx, ny, nz) {}
+
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT2 tex;
+	DirectX::XMFLOAT3 nor;
+};
+
 struct ObjectInstance
 {
 	ID3D11Buffer*		vertexBuffer;
@@ -15,9 +27,10 @@ struct ObjectInstance
 
 	DirectX::XMFLOAT4X4 world;
 
-	VertexType*			vertices;
+	InputType*			input;
+	//VertexType*			vertices;
 	UINT*				indices;
-	NormalType*			normals;
+	//NormalType*			normals;
 
 	int					nVertices;
 	int					nIndices;
@@ -28,9 +41,9 @@ struct ObjectInstance
 		if (vertexBuffer) { vertexBuffer->Release(); }
 		if (indexBuffer) { indexBuffer->Release(); }
 		if (texture) { texture->Release(); }
-		delete[] vertices;
+		//delete[] vertices;
 		delete[] indices;
-		delete[] normals;
+		//delete[] normals;
 	}
 };
 
