@@ -6,7 +6,7 @@ Map::Map()
 	// Get seed for noise
 	setRandom(1);
 	// Initiate point-map
-	this->chunkSize = pow(2, 1) + 1;// +1 gives the map a mid-point
+	this->chunkSize = pow(2, 0) + 1;// +1 gives the map a mid-point
 	seed = 60.0f;
 	ds = new float*[chunkSize];// 33x33, 17x17, etc
 	for (int i = 0; i < chunkSize; i++)
@@ -92,10 +92,17 @@ float Map::getRandom()
 
 int Map::pow(int base, int exponent)
 {
-	int b = base;
-	for (int i = 1; i < exponent; i++)
+	int b = 1;
+	if (exponent > 1)
 	{
-		b *= base;
+		for (int i = 1; i < exponent; i++)
+		{
+			b *= base;
+		}
+	}
+	else
+	{
+		b = 1;
 	}
 	return b;
 }
