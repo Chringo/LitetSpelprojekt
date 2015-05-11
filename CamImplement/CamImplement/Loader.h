@@ -6,7 +6,7 @@
 #include <string>
 #include <d3d11.h>
 
-#define MAX_OBJECT_COUNT 3
+#define MAX_OBJECT_COUNT 4
 
 enum Object
 {

@@ -183,7 +183,7 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy };
+	Object obj[] = { Player, Enemy, Tile };
 	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
 
 	m_nEnemies = nEnemies;
@@ -242,21 +242,17 @@ void ObjectManager::SetObstaclesWorld(int index, const DirectX::XMMATRIX &world)
 
 void ObjectManager::SetTilesWorld(const DirectX::XMMATRIX* arr)
 {
-	int size = sizeof(arr) / sizeof(DirectX::XMMATRIX);
-	if (size > m_nTiles)
+	for (int i = 0; i < m_nTiles; i++)
 	{
-		size = m_nTiles;
-	}
-
-	for (int i = 0; i < size; i++)
-	{
-		SetTilesWorld(i, arr[i]);
+		SetTileWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetTilesWorld(int index, const DirectX::XMMATRIX &world)
+void ObjectManager::SetTileWorld(int index, const DirectX::XMMATRIX &world)
 {
-	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, world);
+	//Passing world directly into StoreFloat causes random access violation
+	DirectX::XMMATRIX w = world;
+	DirectX::XMStoreFloat4x4(&m_objTiles[index].world, w);
 }
 
 void ObjectManager::Update()

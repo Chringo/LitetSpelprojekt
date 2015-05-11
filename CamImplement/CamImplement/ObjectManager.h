@@ -78,7 +78,7 @@ public:
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
 	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
-	void SetTilesWorld(int index, const DirectX::XMMATRIX &world);
+	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);

@@ -2,7 +2,30 @@
 
 Map::Map()
 {
+	arrOfTiles = nullptr;
+	// Get seed for noise
+	setRandom(1);
+	// Initiate point-map
+	this->chunkSize = pow(2, 2) + 1;// +1 gives the map a mid-point
+	seed = 60.0f;
+	ds = new float*[chunkSize];// 33x33, 17x17, etc
+	for (int i = 0; i < chunkSize; i++)
+	{
+		ds[i] = new float[chunkSize];
+	}
+	chunkSize--;
+	// Initiate map
+	tiles = new TileClass*[chunkSize];// 32x32, 16x16, etc
+	for (int i = 0; i < chunkSize; i++)
+	{
+		tiles[i] = new TileClass[chunkSize];
+	}
 
+	// Create noise - algorithm usage
+	DiamondSquare(30.0f, 0.76789f);
+
+	// Create Tile-based map
+	CreateTiles();
 }
 Map::Map(int exponent, float startValue)
 {
@@ -12,21 +35,25 @@ Map::Map(int exponent, float startValue)
 	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
 	chunkSize--;
 	// Initiate map
-	tiles = new Tile*[chunkSize, chunkSize];// 32x32, 16x16, etc
+	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
 
 	// Create noise - algorithm usage
 	DiamondSquare(30.0f, 0.76789f);
+
+	// Create Tile-based map
+	CreateTiles();
 }
 Map::~Map()
 {
-	for (int h = 0; h < chunkSize; h++)
+	for (int h = chunkSize - 1; h > 0; h--)
 	{
-		delete tiles[h];
-		delete ds[h];
+		delete[] tiles[h];
+		delete[] ds[h];// If fatal crash happened, check this one.
 	}
-	delete ds[chunkSize + 1];
+	delete ds[0];
 	delete[] tiles;
 	delete[] ds;
+	delete[] arrOfTiles;
 }
 
 void Map::setSeed(float seed)
@@ -66,16 +93,20 @@ float Map::getRandom()
 int Map::pow(int base, int exponent)
 {
 	int b = base;
-	for (int i = 0; i < exponent; i++)
+	for (int i = 1; i < exponent; i++)
 	{
-		b *= b;
+		b *= base;
 	}
 	return b;
 }
 
-void Map::LoadTiles()
+void Map::CreateTiles()
 {
-	float avg;
+	float avg = 0.0f;
+	float posX = 0.0f;
+	float posZ = 0.0f;
+	DirectX::XMFLOAT3 worldpos = { posX, -1.0f, posZ };
+
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
@@ -86,11 +117,33 @@ void Map::LoadTiles()
 				ds[h + 1][w + 1];
 			avg /= 4;
 
-			tiles[h][w] = Tile(avg);
+			// Set world position
+			worldpos.x = (h * TILESIZE);
+			worldpos.z = (w * TILESIZE);
+			tiles[h][w] = TileClass(avg, worldpos);
 
 			EvaluateTile(tiles[h][w]);
 		}
 	}
+}
+int Map::getNrOfTiles() const
+{
+	return (chunkSize * chunkSize);
+}
+DirectX::XMMATRIX* Map::getTileMatrices()
+{
+	//DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	int count = 0;
+	arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	for (int h = 0; h < chunkSize; h++)
+	{
+		for (int w = 0; w < chunkSize; w++)
+		{
+			arrOfTiles[count] = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&tiles[h][w].getWorldPos()));
+			count++;
+		}
+	}
+	return arrOfTiles;
 }
 //TODO
 void Map::DiamondSquare(float range, float decrease)
@@ -154,18 +207,15 @@ void Map::DiamondSquare(float range, float decrease)
 	}//__HEIGHT_MAP_END__//
 }
 //TODO
-void Map::EvaluateTile(Tile tile)
+void Map::EvaluateTile(TileClass tile)
 {
 	if (tile.getHeight() < 60)
 	{
 		tile.setObstacle(true);
 		water++;
 	}
-	//else if (tile.getHeight() > 180)
-	//{
-	//	tile.setObstacle(true);
-	//	hill++;
-	//}
+	// Define tile type
+
 }
 bool Map::EvaluateMap()
 {

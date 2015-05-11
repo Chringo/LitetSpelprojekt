@@ -7,6 +7,7 @@ GameDummy::GameDummy()
 	player = nullptr;
 	enemyArr = nullptr;
 	enemyMatrixArr = nullptr;
+	map = nullptr;
 }
 
 GameDummy::~GameDummy()
@@ -16,7 +17,8 @@ GameDummy::~GameDummy()
 	{
 		delete enemyArr[i];
 	}
-	delete [] enemyArr;
+	delete[] enemyArr;
+	delete[] map;
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -27,6 +29,13 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
 
+	map = new Map();
+	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
+	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
+	{
+		tileMatrixArr[i] = XMMatrixIdentity();
+	}
+
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(0.02f);
 
@@ -36,7 +45,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		enemyArr[i] = new Collision::Enemy(0, i * 3);
-		enemyArr[i]->SetMovementSpeed(0.02);
+		enemyArr[i]->SetMovementSpeed(0.02f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
@@ -49,8 +58,8 @@ void GameDummy::Update()
 	GetCursorPos(&p);
 	ScreenToClient(windowHandle, &p);
 
-	p.x -= clientSize.x * 0.5f;
-	p.y -= clientSize.y * 0.5f;
+	p.x -= clientSize.x * (LONG)0.5f;
+	p.y -= clientSize.y * (LONG)0.5f;
 
 	player->Update(0.1f);
 	player->SetAttackDirection(p);
@@ -60,7 +69,7 @@ void GameDummy::Update()
 	
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i]->Update(0.1);
+		enemyArr[i]->Update(0.1f);
 	}
 }
 
@@ -95,6 +104,14 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 /// Enemies
 ///
 
-
+DirectX::XMMATRIX* GameDummy::GetTileMatrices()
+{
+	tileMatrixArr = map->getTileMatrices();
+	return tileMatrixArr;
+}
+int GameDummy::GetNrOfTiles() const
+{
+	return map->getNrOfTiles();
+}
 
 void GameDummy::ReleaseCOM(){}

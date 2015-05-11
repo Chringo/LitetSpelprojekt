@@ -2,14 +2,17 @@
 #define GAMEDUMMY_H
 
 #include <DirectXMath.h>
-//#include <vector.h>
 
+#include "Map.h"
 #include "Entity.h"
 #include "Input.h"
 
 class GameDummy
 {
 private:
+	Map* map;
+	DirectX::XMMATRIX* tileMatrixArr;
+
 	Collision::Player* player;
 	
 	int enemyArrSize;
@@ -32,6 +35,9 @@ public:
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
+
+	DirectX::XMMATRIX* GetTileMatrices();
+	int GetNrOfTiles() const;
 
 	void ReleaseCOM();
 };
