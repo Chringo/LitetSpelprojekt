@@ -35,6 +35,7 @@
 *.idb
 *.ilk
 *.sdf
+*.cso
 CamImplement/CamImplement/Debug
 CamImplement/CamImplement.v12.suo
 CamImplement/Debug
