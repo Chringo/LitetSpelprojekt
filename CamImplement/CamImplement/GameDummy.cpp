@@ -17,7 +17,6 @@ GameDummy::~GameDummy()
 	}
 	delete enemyArr;
 	delete[] map;
-	//delete[] tileMatrixArr;//TODO Make sure to deallocate tileMatrixArr properly
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -29,6 +28,11 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.y = r.bottom - r.top;
 
 	map = new Map();
+	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
+	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
+	{
+		tileMatrixArr[i] = XMMatrixIdentity();
+	}
 
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(0.02f);

@@ -6,7 +6,7 @@ Map::Map()
 	// Get seed for noise
 	setRandom(1);
 	// Initiate point-map
-	this->chunkSize = pow(2, 1) + 1;// +1 gives the map a mid-point
+	this->chunkSize = pow(2, 2) + 1;// +1 gives the map a mid-point
 	seed = 60.0f;
 	ds = new float*[chunkSize];// 33x33, 17x17, etc
 	for (int i = 0; i < chunkSize; i++)
@@ -102,12 +102,11 @@ int Map::pow(int base, int exponent)
 
 void Map::CreateTiles()
 {
-	float avg;
-
-	// Set world position
+	float avg = 0.0f;
 	float posX = 0.0f;
 	float posZ = 0.0f;
-	DirectX::XMFLOAT3 worldpos = { posX, 0, posZ };
+	DirectX::XMFLOAT3 worldpos = { posX, -1.0f, posZ };
+
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
@@ -118,31 +117,30 @@ void Map::CreateTiles()
 				ds[h + 1][w + 1];
 			avg /= 4;
 
+			// Set world position
+			worldpos.x = (h * TILESIZE);
+			worldpos.z = (w * TILESIZE);
 			tiles[h][w] = TileClass(avg, worldpos);
 
 			EvaluateTile(tiles[h][w]);
-
-			//posX += TILESIZE;
-			//posZ += TILESIZE;
-			//worldpos = { posX, 0, posZ };
-			worldpos.x += TILESIZE;
-			worldpos.z += TILESIZE;
 		}
 	}
 }
-int Map::getNrOfTiles() 
+int Map::getNrOfTiles() const
 {
 	return (chunkSize * chunkSize);
 }
 DirectX::XMMATRIX* Map::getTileMatrices()
 {
 	//DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	int count = 0;
 	arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
 		{
-			*arrOfTiles = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&tiles[h][w].getWorldPos()));
+			arrOfTiles[count] = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&tiles[h][w].getWorldPos()));
+			count++;
 		}
 	}
 	return arrOfTiles;

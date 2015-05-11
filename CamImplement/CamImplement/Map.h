@@ -1,11 +1,9 @@
 #ifndef MAP_H
 #define MAP_H
-#define TILESIZE 2.0f
+#define TILESIZE 4.0f
 
 #include <d3d11.h>
 #include <DirectXMath.h>
-//#include <math.h>
-//#include <random>
 #include "TileClass.h"
 
 class Map
@@ -16,19 +14,23 @@ private:
 	float seed;
 	float random;
 	void CreateTiles();
-
-	DirectX::XMMATRIX* arrOfTiles;
 	
 	// Diamond-Square
-	float** ds;// Structure redesigned needed
+	float** ds;
 	float offset;
 	void DiamondSquare(float range, float decrease);
 
 	// Evaluation
 	int water;
-	int hill;
-	void EvaluateTile(TileClass tile);
-	bool EvaluateMap();
+	int hill;// might not needed
+	void EvaluateTile(TileClass tile);//TODO expand the variations
+	bool EvaluateMap();//TODO more accurate eval
+
+	// Calcs
+	int pow(int base, int exponent);
+
+	// Graphics data
+	DirectX::XMMATRIX* arrOfTiles;
 
 public:
 	Map();
@@ -45,10 +47,9 @@ public:
 	void setRandom(int value);
 	float getRandom();
 
+	// Graphics data
 	void setTileMatrices();
 	DirectX::XMMATRIX* getTileMatrices();
 	int getNrOfTiles() const;
-	
-	int pow(int base, int exponent);
 };
 #endif
