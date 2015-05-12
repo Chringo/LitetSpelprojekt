@@ -123,6 +123,8 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
+	int size = sizeof(*m_objPlayer->input);
+
 	D3D11_SUBRESOURCE_DATA vData;
 	vData.pSysMem = m_objPlayer->input;
 	vData.SysMemPitch = 0;
@@ -206,11 +208,11 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
 		deviceContext->Unmap(cbPerObjectBuffer, 0);
 
-		D3D11_MAPPED_SUBRESOURCE vb;
-		ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		deviceContext->Map(arr[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
-		memcpy(vb.pData, arr[i].input, sizeof(InputType) * arr[i].nVertices);
-		deviceContext->Unmap(arr[i].vertexBuffer, 0);
+		//D3D11_MAPPED_SUBRESOURCE vb;
+		//ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		//deviceContext->Map(arr[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+		//memcpy(vb.pData, arr[i].input, 32 * arr[i].nVertices);
+		//deviceContext->Unmap(arr[i].vertexBuffer, 0);
 
 		deviceContext->IASetIndexBuffer(arr[i].indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 		deviceContext->IASetVertexBuffers(0, 1, &arr[i].vertexBuffer, &stride, &offset);

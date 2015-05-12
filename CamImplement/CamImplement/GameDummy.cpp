@@ -44,7 +44,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i * 3 + 3);
+		enemyArr[i] = new Collision::Enemy(0, i * 5 + 3);
 		enemyArr[i]->SetMovementSpeed(0.02);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
