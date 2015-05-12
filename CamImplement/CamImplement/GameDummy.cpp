@@ -60,11 +60,8 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	//path.insertLast(XMFLOAT3(5.0f, 0, -5.0f));
 	//path.insertLast(XMFLOAT3(5.0f, 0, 5.0f));
 	
-	
-	
-
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	player->SetMovementSpeed(0.02f);
+	player->SetMovementSpeed(4.f);
 
 	enemyArrSize = 5;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
@@ -72,27 +69,31 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		enemyArr[i] = new Collision::Enemy(0, i * 5 + 3);
-		enemyArr[i]->SetMovementSpeed(0.02f);
+		enemyArr[i]->SetMovementSpeed(2.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
 	return S_OK;
 }
 
-void GameDummy::Update()
+void GameDummy::Update(float deltaTime)
 {
-	POINT p;
-	GetCursorPos(&p);
-	ScreenToClient(windowHandle, &p);
+	// Output fps.
+	std::wstringstream wss;
+	wss << "Fps: " << 1 / deltaTime;
+	SetWindowText(windowHandle, wss.str().c_str());
 
-	//Adjust to center on player
-	p.x -= (LONG)(clientSize.x * 0.5f - 5);
-	p.y -= (LONG)(clientSize.y * 0.5f - 15);
+	// Get cursor position.
+	POINT cursor;
+	GetCursorPos(&cursor);
+	ScreenToClient(windowHandle, &cursor);
 
-	player->Update(0.1f);
-	player->SetAttackDirection(p);
+	// Adjust to client center.
+	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
+	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
 
-
+	player->Update(deltaTime);
+	player->SetAttackDirection(cursor);
 
 	// Temporary example that should be removed later
 	bool there = true;
@@ -128,7 +129,7 @@ void GameDummy::Update()
 
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i]->Update(0.1f);
+		enemyArr[i]->Update(deltaTime);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{

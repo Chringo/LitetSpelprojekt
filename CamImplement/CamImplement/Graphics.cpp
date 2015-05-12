@@ -234,12 +234,12 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	return hr;
 }
 
-void Graphics::Update()
+void Graphics::Update(float deltaTime)
 {	
-	game->Update();
+	game->Update(deltaTime);
 
 	camera->SetFocus(game->GetPlayerPosition());
-	camera->Update(0.1f);
+	camera->Update(deltaTime);
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());

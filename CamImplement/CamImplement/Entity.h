@@ -48,7 +48,7 @@ namespace Collision
 		DirectX::XMVECTOR m_Rotation;
 		const DirectX::XMVECTOR m_Scaling = DirectX::XMVectorSet(1.f, 1.f, 1.f, 1.f);
 
-		float m_Speed = 0.f;
+		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
 		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
 

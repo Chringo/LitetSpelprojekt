@@ -22,8 +22,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 		ShowWindow(wndHandle, nCmdShow);
 
+		// Time keeping.
+		INT64 tickPerSecond = 0;
+		INT64 previousTime = 0;
+		INT64 currentTime = 0;
+
+		QueryPerformanceFrequency((LARGE_INTEGER*)&tickPerSecond);
+		QueryPerformanceCounter((LARGE_INTEGER*)&previousTime);
+		FLOAT secondsPerTick = 1.0f / (FLOAT)tickPerSecond;
+
 		while (WM_QUIT != msg.message)
 		{
+			// Update time.
+			QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
+			FLOAT deltaTime = (currentTime - previousTime) * secondsPerTick;
+
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
@@ -31,11 +44,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			}
 			else
 			{
-				d3d_Graphics.Update();
+				d3d_Graphics.Update(deltaTime);
 				d3d_Graphics.Render();
 
 				d3d_Graphics.SwapFBBuffer();
 			}
+
+			// Frame over.
+			previousTime = currentTime;
 		}
 
 		d3d_Graphics.ReleaseCOM();

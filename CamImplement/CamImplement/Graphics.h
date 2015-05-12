@@ -56,7 +56,7 @@ public:
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
 
-	void Update();
+	void Update(float deltaTime);
 	void Render();
 
 	void SwapFBBuffer();

@@ -2,6 +2,7 @@
 #define GAMEDUMMY_H
 
 #include <DirectXMath.h>
+#include <sstream>
 
 #include "Map.h"
 #include "Entity.h"
@@ -35,7 +36,7 @@ public:
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport);
 
-	void Update();
+	void Update(float deltaTime);
 
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
