@@ -29,6 +29,8 @@ private:
 
 	POINT clientSize;
 	HWND windowHandle;
+	float elapsedTime = 0.f;
+	int frames = 0;
 
 public:
 	GameDummy();

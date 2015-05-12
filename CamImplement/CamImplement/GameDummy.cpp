@@ -79,21 +79,24 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 void GameDummy::Update(float deltaTime)
 {
 	// Output fps.
+	elapsedTime += deltaTime;
+	frames++;
+
 	std::wstringstream wss;
-	wss << "Fps: " << 1 / deltaTime;
+	wss << "Fps: " << (INT)((float)frames / elapsedTime);
 	SetWindowText(windowHandle, wss.str().c_str());
 
 	// Get cursor position.
-	POINT cursor;
-	GetCursorPos(&cursor);
-	ScreenToClient(windowHandle, &cursor);
+	//POINT cursor;
+	//GetCursorPos(&cursor);
+	//ScreenToClient(windowHandle, &cursor);
 
-	// Adjust to client center.
-	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
-	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
+	//// Adjust to client center.
+	//cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
+	//cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
 
 	player->Update(deltaTime);
-	player->SetAttackDirection(cursor);
+	//player->SetAttackDirection(cursor);
 
 	// Temporary example that should be removed later
 	bool there = true;
