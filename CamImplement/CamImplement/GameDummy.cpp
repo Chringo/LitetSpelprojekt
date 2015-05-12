@@ -44,8 +44,8 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i * 3 + 3);
-		enemyArr[i]->SetMovementSpeed(0.02);
+		enemyArr[i] = new Collision::Enemy(0.f, (float)i * 3.f + 3.f);
+		enemyArr[i]->SetMovementSpeed(0.2f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
@@ -54,28 +54,29 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 void GameDummy::Update()
 {
-	POINT p;
-	GetCursorPos(&p);
-	ScreenToClient(windowHandle, &p);
+	POINT cursor;
+	GetCursorPos(&cursor);
+	ScreenToClient(windowHandle, &cursor);
 
 	//Adjust to center on player
-	p.x -= (LONG)(clientSize.x * 0.5f - 5);
-	p.y -= (LONG)(clientSize.y * 0.5f - 15);
+	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
+	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
 	player->Update(0.3f);
-	player->SetAttackDirection(p);
+	player->SetAttackDirection(cursor);
 
 	// Temporary example that should be removed later
-	enemyArr[2]->setAction(Collision::MoveRight);
-	
+	enemyArr[2]->PerformAction(Collision::Action::MoveRight);
+
+	// Update enemies.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		enemyArr[i]->Update(0.3f);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{
-			player->Intersect(enemyArr[j]);
-			enemyArr[i]->Intersect(enemyArr[j]);
+			if (i != j)
+				enemyArr[i]->Intersect(enemyArr[j]);
 		}
 	}
 }
