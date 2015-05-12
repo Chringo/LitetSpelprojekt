@@ -2,13 +2,25 @@
 
 TileClass::TileClass()
 {
-	this->height = 200;
+	this->height = 0;
 	this->obstacle = false;
+
+	this->worldpos.x = 0.0f;
+	this->worldpos.y = -1.0f;
+	this->worldpos.z = 0.0f;
+
+	this->type = Dummy;
 }
 TileClass::TileClass(float startValue)
 {
 	this->height = startValue;
 	this->obstacle = false;
+
+	this->worldpos.x = 0.0f;
+	this->worldpos.y = -1.0f;
+	this->worldpos.z = 0.0f;
+
+	this->type = Dummy;
 }
 TileClass::TileClass(float startValue, DirectX::XMFLOAT3 _worldpos)
 {
@@ -16,6 +28,8 @@ TileClass::TileClass(float startValue, DirectX::XMFLOAT3 _worldpos)
 	this->obstacle = false;
 
 	this->worldpos = _worldpos;
+
+	this->type = Dummy;
 }
 TileClass::~TileClass()
 {
@@ -50,4 +64,13 @@ void TileClass::setWorldPos(DirectX::XMFLOAT3 _worldpos)
 DirectX::XMFLOAT3  TileClass::getWorldPos() const
 {
 	return this->worldpos;
+}
+
+void TileClass::setType(int type)
+{
+	this->type = (Type)type;
+}
+int TileClass::getType() const
+{
+	return (int)(this->type);
 }

@@ -93,8 +93,9 @@ float Map::getRandom()
 int Map::pow(int base, int exponent)
 {
 	int b = 1;
-	if (exponent > 1)
+	if (exponent > 0)
 	{
+		b = 2;
 		for (int i = 1; i < exponent; i++)
 		{
 			b *= base;
@@ -139,9 +140,9 @@ int Map::getNrOfTiles() const
 }
 DirectX::XMMATRIX* Map::getTileMatrices()
 {
-	//DirectX::XMMATRIX* arr = new DirectX::XMMATRIX[chunkSize * chunkSize];
 	int count = 0;
-	arrOfTiles = new DirectX::XMMATRIX[chunkSize * chunkSize];
+	//TODO http://stackoverflow.com/questions/20104815/warning-c4316-object-allocated-on-the-heap-may-not-be-aligned-16
+	arrOfTiles = new DirectX::XMMATRIX[getNrOfTiles()];
 	for (int h = 0; h < chunkSize; h++)
 	{
 		for (int w = 0; w < chunkSize; w++)
@@ -152,7 +153,7 @@ DirectX::XMMATRIX* Map::getTileMatrices()
 	}
 	return arrOfTiles;
 }
-//TODO
+//TODO Make sure average is okey once visual graphics is at hand
 void Map::DiamondSquare(float range, float decrease)
 {
 	// Starting value for corners
@@ -213,15 +214,17 @@ void Map::DiamondSquare(float range, float decrease)
 		}//__DIAMOND_END__//
 	}//__HEIGHT_MAP_END__//
 }
-//TODO
+//TODO Set tile type
 void Map::EvaluateTile(TileClass tile)
 {
 	if (tile.getHeight() < 60)
 	{
 		tile.setObstacle(true);
+		tile.setType(1);
 		water++;
 	}
 	// Define tile type
+	tile.setType(0);
 
 }
 bool Map::EvaluateMap()

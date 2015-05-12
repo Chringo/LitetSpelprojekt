@@ -22,7 +22,7 @@ private:
 
 	// Evaluation
 	int water;
-	int hill;// might not needed
+	int hill;// might not be needed
 	void EvaluateTile(TileClass tile);//TODO expand the variations
 	bool EvaluateMap();//TODO more accurate eval
 
