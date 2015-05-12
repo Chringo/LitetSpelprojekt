@@ -164,7 +164,6 @@ bool Loader::LoadDataStructures(char* filename)
 	std::ifstream fin;
 	std::ofstream fout;
 	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
-	int vIndex, tIndex, nIndex;
 	char input;
 	char temp;
 
