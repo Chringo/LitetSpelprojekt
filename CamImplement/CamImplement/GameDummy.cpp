@@ -71,8 +71,8 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i * 3 + 3);
-		enemyArr[i]->SetMovementSpeed(0.02f);
+		enemyArr[i] = new Collision::Enemy(0, i * 5 + 3);
+		enemyArr[i]->SetMovementSpeed(0.02);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
@@ -85,8 +85,9 @@ void GameDummy::Update()
 	GetCursorPos(&p);
 	ScreenToClient(windowHandle, &p);
 
-	p.x -= clientSize.x * (LONG)0.5f;
-	p.y -= clientSize.y * (LONG)0.5f;
+	//Adjust to center on player
+	p.x -= (LONG)(clientSize.x * 0.5f - 5);
+	p.y -= (LONG)(clientSize.y * 0.5f - 15);
 
 	player->Update(0.1f);
 	player->SetAttackDirection(p);

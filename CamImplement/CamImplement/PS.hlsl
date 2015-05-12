@@ -15,8 +15,8 @@ cbuffer cbPerFrame : register(b0)
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
+	float2 tex : TEXCOORD;
 	float3 normal : NORMAL;
-	float3 color : COLOR;
 };
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -25,7 +25,7 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	float3 finalColor;
 
-	finalColor = dirLight.ambient + input.color;
+	finalColor = dirLight.ambient + float3(input.tex, 1.0f);
 	finalColor += saturate(dot(dirLight.dir, input.normal) * dirLight.diffuse);
 
 	return float4(finalColor, 1.0f);
