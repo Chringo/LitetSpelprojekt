@@ -14,7 +14,8 @@ private:
 
 	enum Type
 	{
-		Dummy
+		Dummy,
+		Water
 		/*
 		Grass1,
 		Grass2,
@@ -24,6 +25,7 @@ private:
 		Leaves
 		*/
 	};
+	Type type;
 
 public:
 	TileClass();
@@ -39,5 +41,8 @@ public:
 
 	void setWorldPos(DirectX::XMFLOAT3 worldpos);
 	DirectX::XMFLOAT3 getWorldPos() const;
+
+	void setType(int type);
+	int getType() const;
 };
 #endif
