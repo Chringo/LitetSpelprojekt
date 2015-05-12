@@ -92,12 +92,14 @@
     <ClCompile Include="TileClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayQueue.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameDummy.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="ObjectManager.h" />

@@ -247,55 +247,5 @@ bool Loader::LoadDataStructures(char* filename)
 
 	fin.close();
 
-	fout.open("path.txt");
-	if (fout.fail()) { return false; }
-
-	fout << "Vertex Count: " << m_fileCounts[nObjectsCurrent].nFaces * 3 << "\n\n";
-	fout << "Data: \n\n";
-
-	for (int i = 0; i < faceIndex; i++)
-	{
-		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex1 - 1;
-		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex1 - 1;
-		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex1 - 1;
-
-		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
-
-		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex2 - 1;
-		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex2 - 1;
-		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex2 - 1;
-
-		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
-
-		vIndex = m_objects[nObjectsCurrent]->faces[i].vIndex3 - 1;
-		tIndex = m_objects[nObjectsCurrent]->faces[i].tIndex3 - 1;
-		nIndex = m_objects[nObjectsCurrent]->faces[i].nIndex3 - 1;
-
-		fout << m_objects[nObjectsCurrent]->vertices[vIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->vertices[vIndex].z << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].u << ' '
-			<< m_objects[nObjectsCurrent]->texCoords[tIndex].v << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].x << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].y << ' '
-			<< m_objects[nObjectsCurrent]->normals[nIndex].z << "\n";
-	}
-
-	fout.close();
-
 	return true;
 }
