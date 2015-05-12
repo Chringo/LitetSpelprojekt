@@ -87,16 +87,16 @@ void GameDummy::Update(float deltaTime)
 	SetWindowText(windowHandle, wss.str().c_str());
 
 	// Get cursor position.
-	//POINT cursor;
-	//GetCursorPos(&cursor);
-	//ScreenToClient(windowHandle, &cursor);
+	POINT cursor;
+	GetCursorPos(&cursor);
+	ScreenToClient(windowHandle, &cursor);
 
-	//// Adjust to client center.
-	//cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
-	//cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
+	// Adjust to client center.
+	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
+	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
 
 	player->Update(deltaTime);
-	//player->SetAttackDirection(cursor);
+	player->SetAttackDirection(cursor);
 
 	// Temporary example that should be removed later
 	bool there = true;

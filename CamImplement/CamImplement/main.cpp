@@ -42,13 +42,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			else
-			{
+			//else
+			//{
 				d3d_Graphics.Update(deltaTime);
 				d3d_Graphics.Render();
 
 				d3d_Graphics.SwapFBBuffer();
-			}
+			//}
 
 			// Frame over.
 			previousTime = currentTime;
@@ -75,7 +75,7 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 	RECT rc = { 0, 0, width, height };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-
+	
 	HWND handle = CreateWindow(
 		L"BasicWindow",
 		L"BTH BasicWindow",
