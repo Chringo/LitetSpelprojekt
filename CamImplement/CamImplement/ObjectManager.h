@@ -28,9 +28,7 @@ struct ObjectInstance
 	DirectX::XMFLOAT4X4 world;
 
 	InputType*			input;
-	//VertexType*			vertices;
 	UINT*				indices;
-	//NormalType*			normals;
 
 	int					nVertices;
 	int					nIndices;
@@ -41,9 +39,7 @@ struct ObjectInstance
 		if (vertexBuffer) { vertexBuffer->Release(); }
 		if (indexBuffer) { indexBuffer->Release(); }
 		if (texture) { texture->Release(); }
-		//delete[] vertices;
 		delete[] indices;
-		//delete[] normals;
 	}
 };
 

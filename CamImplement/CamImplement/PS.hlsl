@@ -25,8 +25,8 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	float3 finalColor;
 
-	finalColor = dirLight.ambient;
+	finalColor = dirLight.ambient + float3(input.tex, 1.0f);
 	finalColor += saturate(dot(dirLight.dir, input.normal) * dirLight.diffuse);
 
-	return float4(input.tex, 1.0f, 1.0f);
+	return float4(finalColor, 1.0f);
 }
