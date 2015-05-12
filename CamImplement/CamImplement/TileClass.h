@@ -3,14 +3,16 @@
 
 #include <DirectXMath.h>
 
+struct BaseTile
+{
+	bool obstacle;
+	DirectX::XMFLOAT3 worldpos;
+};
 class TileClass
 {
 private:
-	bool obstacle;
-
+	BaseTile base;
 	float height;
-
-	DirectX::XMFLOAT3 worldpos;
 
 	enum Type
 	{
@@ -32,6 +34,8 @@ public:
 	TileClass(float startValue);
 	TileClass(float startValue, DirectX::XMFLOAT3 worldpos);
 	virtual ~TileClass();
+
+	BaseTile getBase() const;
 
 	void setObstacle(bool obstacle);
 	bool getObstacle() const;

@@ -10,6 +10,7 @@ class Map
 {	
 private:
 	TileClass** tiles;
+	BaseTile** baseTiles;
 	int chunkSize;
 	float seed;
 	float random;
@@ -46,6 +47,8 @@ public:
 	float getOffset() const;
 	void setRandom(int value);
 	float getRandom();
+
+	BaseTile** getBaseTiles();
 
 	// Graphics data
 	void setTileMatrices();

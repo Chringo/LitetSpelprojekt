@@ -16,9 +16,11 @@ Map::Map()
 	chunkSize--;
 	// Initiate map
 	tiles = new TileClass*[chunkSize];// 32x32, 16x16, etc
+	baseTiles = new BaseTile*[chunkSize];
 	for (int i = 0; i < chunkSize; i++)
 	{
 		tiles[i] = new TileClass[chunkSize];
+		baseTiles[i] = new BaseTile[chunkSize];
 	}
 
 	// Create noise - algorithm usage
@@ -36,6 +38,12 @@ Map::Map(int exponent, float startValue)
 	chunkSize--;
 	// Initiate map
 	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
+	baseTiles = new BaseTile*[chunkSize];
+	for (int i = 0; i < chunkSize; i++)
+	{
+		tiles[i] = new TileClass[chunkSize];
+		baseTiles[i] = new BaseTile[chunkSize];
+	}
 
 	// Create noise - algorithm usage
 	DiamondSquare(30.0f, 0.76789f);
@@ -49,10 +57,12 @@ Map::~Map()
 	{
 		delete[] tiles[h];
 		delete[] ds[h];// If fatal crash happened, check this one.
+		delete[] baseTiles[h];
 	}
 	delete ds[0];
 	delete[] tiles;
 	delete[] ds;
+	delete[] baseTiles;
 	delete[] arrOfTiles;
 }
 
@@ -239,4 +249,18 @@ bool Map::EvaluateMap()
 		water = 0;
 	}
 	return redo;
+}
+
+BaseTile** Map::getBaseTiles()
+{
+	baseTiles = new BaseTile*[chunkSize];
+	for (int h = 0; h < chunkSize; h++)
+	{
+		baseTiles[h] = new BaseTile[chunkSize];
+		for (int w = 0; w < chunkSize; w++)
+		{
+			baseTiles[h][w] = tiles[h][w].getBase();
+		}
+	}
+	return baseTiles;
 }
