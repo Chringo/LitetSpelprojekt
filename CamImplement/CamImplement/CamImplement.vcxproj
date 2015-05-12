@@ -84,7 +84,6 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameDummy.cpp" />
     <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -98,7 +97,6 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameDummy.h" />
     <ClInclude Include="Graphics.h" />
-    <ClInclude Include="Input.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Map.h" />

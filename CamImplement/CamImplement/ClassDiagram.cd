@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Camera" Collapsed="true">
-    <Position X="7.25" Y="8" Width="1.5" />
+    <Position X="7.5" Y="1" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AISKAQAQACCAAAABQCACAQAAAABAAgiFAAAhABAAAQE=</HashCode>
       <FileName>Camera.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DirectionalLight">
-    <Position X="0.5" Y="5.75" Width="1.5" />
+  <Class Name="DirectionalLight" Collapsed="true">
+    <Position X="5" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAIAAQAAAAAAAQAAAAAQAAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DirectionalLight.h</FileName>
@@ -17,20 +17,29 @@
       <Field Name="light" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="GameDummy" Collapsed="true">
-    <Position X="4.25" Y="0.5" Width="1.5" />
+  <Class Name="GameDummy">
+    <Position X="5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQQAAECAAAAAQAAgAAAABAAAAAAACABAAAAAAAAAAg=</HashCode>
+      <HashCode>AAQQEAECAAEAgQAAgAAGABhAAIAAACABACAgABAAAAg=</HashCode>
       <FileName>GameDummy.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="player" />
+      <Field Name="map" />
+      <Field Name="enemyArr" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Graphics">
-    <Position X="4.25" Y="1.75" Width="1.5" />
+    <Position X="7.5" Y="2" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="Graphics::constBufferPerFrame" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Graphics.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>ACQRUAQEAhABAZAARAASEBEAWJAQAMJMgBAAACABgAc=</HashCode>
+      <HashCode>ACQBAAAEAgABAYAARAASEBEASAAAAMJMgBAAAAABAAU=</HashCode>
       <FileName>Graphics.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -38,21 +47,12 @@
       <Field Name="game" />
       <Field Name="camera" />
       <Field Name="dirLight" />
-      <Field Name="normals" />
-      <Field Name="vertices" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="Input" Collapsed="true">
-    <Position X="15.5" Y="4.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>IAUAAAgBAAIEAQAAAQAAABAAEAABAAAAAAAAAAAIEAg=</HashCode>
-      <FileName>Input.h</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="Loader">
-    <Position X="9" Y="1.75" Width="2.25" />
+    <Position X="13.25" Y="2" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAkAAAgABEEAQAAACAgAAAAAAAgAAAhAAAAAAASACA=</HashCode>
+      <HashCode>AAAgAAAgABEEAQAAACAgAAAAAAAgAAAhAAAAAAASACA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -61,7 +61,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="ObjectManager">
-    <Position X="6.25" Y="1.75" Width="2" />
+    <Position X="10.25" Y="1" Width="2" />
     <NestedTypes>
       <Struct Name="ObjectManager::constBufferPerObject" Collapsed="true">
         <TypeIdentifier>
@@ -70,132 +70,152 @@
       </Struct>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>ACQAAAAAAAAIAQABAiACAAAAUIAAAAAAIBAAADAAAAI=</HashCode>
+      <HashCode>ACUEAAgYABIIAQAAAmACABAAIAAAAAAIIRgCgBAABgI=</HashCode>
       <FileName>ObjectManager.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="loader" />
-      <Field Name="m_objInstances" />
+      <Field Name="m_loader" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Collision::Entity" Collapsed="true">
-    <Position X="2.25" Y="3" Width="1.5" />
+    <Position X="2.5" Y="6" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAQAIAAAADAIAAAgAAhEAAAEACAAAggAAAAAAgEACAA=</HashCode>
+      <HashCode>EAQAIAAAADIIAAAgAAhEAAAEACAAAgAAAAAAQAEACAA=</HashCode>
       <FileName>Entity.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Collision::Player" Collapsed="true">
-    <Position X="2.25" Y="1.75" Width="1.5" />
+    <Position X="2.5" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAIAAAhABAAAAAAAIAEEAAAAAAAAQQAAABA=</HashCode>
+      <HashCode>AAQAAAAAAAAAAAhABAAAAAAAIAEEAAAAAAAAAQAAABA=</HashCode>
       <FileName>Entity.h</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="m_CurrentAction" />
-    </ShowAsAssociation>
   </Class>
   <Class Name="Collision::Enemy" Collapsed="true">
-    <Position X="2.25" Y="4" Width="1.5" />
+    <Position X="2.5" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AgQAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AgQAAgAAAAAAAAAAIAAABAAAAAAAAAAAAABAAQAAAAA=</HashCode>
       <FileName>Entity.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Struct Name="IsometricCamera" Collapsed="true">
-    <Position X="7.25" Y="9.5" Width="1.5" />
+  <Class Name="ArrayQueue&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAA=</HashCode>
-      <FileName>Camera.h</FileName>
+      <HashCode>AAAAAAUAABAAAAAAAIIAAAAEkAAAAEAAAAAAAAAAQAA=</HashCode>
+      <FileName>ArrayQueue.h</FileName>
     </TypeIdentifier>
-  </Struct>
+  </Class>
+  <Class Name="LinkedList&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAABAAAgAACIEIBAAAAAQAAAAAAACgAAAAAQA=</HashCode>
+      <FileName>LinkedList.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Map" Collapsed="true">
+    <Position X="2.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACABERACBSAQQggAAAIIIAAAgAIgCAAIAQKABAAAAA=</HashCode>
+      <FileName>Map.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="tiles" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="TileClass" Collapsed="true">
+    <Position X="2.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAIAAAAAIAQAAIAAAAAAAABAQAAEAAAAAAIAAEA=</HashCode>
+      <FileName>TileClass.h</FileName>
+    </TypeIdentifier>
+  </Class>
   <Struct Name="DirLight" Collapsed="true">
-    <Position X="0.5" Y="5" Width="1.5" />
+    <Position X="2.5" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAAAAAACACAAAAAAAAAAAAIAAAAAAACAAAAAAAAAAAA=</HashCode>
       <FileName>DirectionalLight.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="VertexType" Collapsed="true">
-    <Position X="7.25" Y="7" Width="1.5" />
+    <Position X="16.5" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAIAQAAAAAAAAAAAQABgAQAAABA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABgAQAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="TextureCoordType" Collapsed="true">
-    <Position X="11.5" Y="4.5" Width="1.5" />
+    <Position X="19" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABIAAAAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="NormalType" Collapsed="true">
-    <Position X="7.25" Y="6.25" Width="1.5" />
+    <Position X="19" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAQAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="FaceType" Collapsed="true">
-    <Position X="13.25" Y="4.5" Width="1.5" />
+    <Position X="16.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAOAAAPAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="ObjectType">
-    <Position X="10" Y="6.5" Width="1.5" />
+    <Position X="16.5" Y="3.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gAAAAAAAAAAAABAAAAAAAAAAAAEQAgAAAAIAAAAAAAA=</HashCode>
+      <HashCode>gAAAAAAAAAAAABAAAAAAAAAAAAEQAAAAAAIAAAAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="faces" />
-      <Field Name="normals" />
-      <Field Name="texCoords" />
       <Field Name="vertices" />
+      <Field Name="texCoords" />
+      <Field Name="normals" />
+      <Field Name="faces" />
     </ShowAsAssociation>
   </Struct>
   <Struct Name="FileCountType" Collapsed="true">
-    <Position X="12.25" Y="1.75" Width="1.5" />
+    <Position X="13.25" Y="1" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAQAABAAAACAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="ObjectInstance" Collapsed="true">
-    <Position X="6.5" Y="0.5" Width="1.5" />
+    <Position X="0.5" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAQUAQAABAAIRAAAAAAIAAAABAQAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAQUAQAABAAARAAAAAAAAAAABEQAgAAAAAAAAAAAAA=</HashCode>
       <FileName>ObjectManager.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Enum Name="ProjectionType" Collapsed="true">
-    <Position X="15.5" Y="3" Width="1.5" />
+    <Position X="0.5" Y="6" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
       <FileName>Camera.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Direction" Collapsed="true">
-    <Position X="15.5" Y="1.5" Width="1.5" />
+    <Position X="0.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAACACAAAAAAAI=</HashCode>
       <FileName>Camera.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="RotationPreset" Collapsed="true">
-    <Position X="15.5" Y="2.25" Width="1.5" />
+    <Position X="0.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAA=</HashCode>
       <FileName>Camera.h</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Object" Collapsed="true">
-    <Position X="15.5" Y="3.75" Width="1.5" />
+    <Position X="0.5" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAEAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <HashCode>AgAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAQA=</HashCode>
       <FileName>Loader.h</FileName>
     </TypeIdentifier>
   </Enum>

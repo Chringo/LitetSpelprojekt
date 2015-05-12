@@ -26,16 +26,6 @@ enum ProjectionType
 	Perspective
 };
 
-enum Direction
-{
-	Right,
-	Left,
-	Up,
-	Down,
-	Forward,
-	Backward
-};
-
 enum RotationPreset
 {
 	Isometric
@@ -43,6 +33,30 @@ enum RotationPreset
 
 class Camera
 {
+	private:
+		DirectX::XMMATRIX m_View = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX m_Projection = DirectX::XMMatrixIdentity();
+
+		FLOAT m_Distance = 10;
+		DirectX::XMVECTOR m_Up = DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f);
+		DirectX::XMVECTOR m_Look = DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.f);
+		DirectX::XMVECTOR m_Position = DirectX::XMVectorZero();
+
+		DirectX::BoundingFrustum m_Frustum;
+
+		FLOAT m_Width;
+		FLOAT m_Height;
+
+		enum Direction
+		{
+			Right,
+			Left,
+			Up,
+			Down,
+			Forward,
+			Backward
+		};
+
 	public:
 		Camera();
 		Camera(ProjectionType type,
@@ -92,45 +106,8 @@ class Camera
 		DirectX::XMVECTOR UnprojectScreenPoint(POINT cursorPosition);
 		DirectX::XMVECTOR UnprojectScreenPoint(POINT cursorPosition, const DirectX::XMMATRIX &world);
 		DirectX::XMVECTOR UnprojectScreenPoint(POINT cursorPosition, const D3D11_VIEWPORT &viewport, const DirectX::XMMATRIX &world);
-
-	private:
-		DirectX::XMMATRIX m_View = DirectX::XMMatrixIdentity();
-		DirectX::XMMATRIX m_Projection = DirectX::XMMatrixIdentity();
-
-		FLOAT m_Distance = 10;
-		DirectX::XMVECTOR m_Up = DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f);
-		DirectX::XMVECTOR m_Look = DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.f);
-		DirectX::XMVECTOR m_Position = DirectX::XMVectorZero();
-
-		DirectX::BoundingFrustum m_Frustum;
-
-		FLOAT m_Width;
-		FLOAT m_Height;
 };
 
-struct IsometricCamera : Camera
-{
-	IsometricCamera()
-		: Camera(Perspective, DirectX::XM_PIDIV2, 800.f, 600.f, 1.f, 100.f)
-	{
-		Camera::SetRotation(ISOMETRIC);
-	}
-	IsometricCamera(ProjectionType type,
-		float fieldOfView,
-		float width,
-		float height,
-		float screenNear,
-		float screenFar)
-		: Camera(type, fieldOfView, width, height, screenNear, screenFar)
-	{
-		Camera::SetRotation(ISOMETRIC);
-	}
 
-	void Update(float deltaTime, DirectX::XMVECTOR focus)
-	{
-		Camera::SetFocus(focus);
-		Camera::Update(deltaTime);
-	}
-};
 
 #endif /// CAMERA__H
