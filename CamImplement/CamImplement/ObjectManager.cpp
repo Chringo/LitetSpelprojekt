@@ -26,6 +26,10 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 
 	*arr = new ObjectInstance[size];
 
+	float x, y, z;
+	float u, v;
+	float nx, ny, nz;
+
 	ObjectType temp = m_loader->getObject(obj);
 	for (int i = 0; i < size; i++)
 	{
@@ -33,17 +37,52 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 		(*arr)[i].nNormals = m_loader->getVertexCount(obj);
 		(*arr)[i].nIndices = m_loader->getIndexCount(obj);
 
-		(*arr)[i].vertices = new VertexType[(*arr)[i].nVertices];
-		(*arr)[i].normals = new NormalType[(*arr)[i].nNormals];
+		(*arr)[i].input = new InputType[(*arr)[i].nVertices];
+		//(*arr)[i].normals = new NormalType[(*arr)[i].nNormals];
 		(*arr)[i].indices = new UINT[(*arr)[i].nIndices];
+
+		//-- Used for testing, to be removed -------------------------
+		switch (obj)
+		{
+			case Player:
+			{
+				u = 1.0f;
+				v = 1.0f;
+				break;
+			}
+			case Enemy:
+			{
+				u = 1.0f;
+				v = 0.0f;
+				break;
+			}
+			case Tile:
+			{
+				u = 0.0f;
+				v = 1.0f;
+				break;
+			}
+			default:
+			{
+				u = 0.0f;
+				v = 0.0f;
+				break;
+			}
+		}
+		//------------------------------------------------------------
 
 		for (int j = 0; j < (*arr)[i].nVertices; j++)
 		{
-			(*arr)[i].vertices[j] = temp.vertices[j];
-		}
-		for (int j = 0; j < (*arr)[i].nNormals; j++)
-		{
-			(*arr)[i].normals[j] = temp.normals[j];
+			x = temp.vertices[j].x;
+			y = temp.vertices[j].y;
+			z = temp.vertices[j].z;
+			//u = temp.texCoords[j].u;
+			//v = temp.texCoords[j].v;
+			nx = temp.normals[j].x;
+			ny = temp.normals[j].y;
+			nz = temp.normals[j].z;
+
+			(*arr)[i].input[j] = InputType(x, y, z, u, v, nx, ny, nz);
 		}
 
 		int k = 0;
@@ -78,14 +117,16 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	//Vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objPlayer->nVertices;
+	vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objPlayer->nVertices;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
+	int size = sizeof(*m_objPlayer->input);
+
 	D3D11_SUBRESOURCE_DATA vData;
-	vData.pSysMem = m_objPlayer->vertices;
+	vData.pSysMem = m_objPlayer->input;
 	vData.SysMemPitch = 0;
 	vData.SysMemSlicePitch = 0;
 
@@ -110,9 +151,9 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	//Enemy buffers
 	for (int i = 0; i < m_nEnemies; i++)
 	{
-		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objEnemies[i].nVertices;
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objEnemies[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objEnemies[i].nIndices;
-		vData.pSysMem = m_objEnemies[i].vertices;
+		vData.pSysMem = m_objEnemies[i].input;
 		iData.pSysMem = m_objEnemies[i].indices;
 		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objEnemies[i].vertexBuffer);
 		device->CreateBuffer(&indexBufferDesc, &iData, &m_objEnemies[i].indexBuffer);
@@ -121,9 +162,9 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	//Obstacle buffers
 	for (int i = 0; i < m_nObstacles; i++)
 	{
-		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objObstacles[i].nVertices;
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objObstacles[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objObstacles[i].nIndices;
-		vData.pSysMem = m_objObstacles[i].vertices;
+		vData.pSysMem = m_objObstacles[i].input;
 		iData.pSysMem = m_objObstacles[i].indices;
 		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objObstacles[i].vertexBuffer);
 		device->CreateBuffer(&indexBufferDesc, &iData, &m_objObstacles[i].indexBuffer);
@@ -132,9 +173,9 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	//Tile buffers
 	for (int i = 0; i < m_nTiles; i++)
 	{
-		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_objTiles[i].nVertices;
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objTiles[i].nVertices;
 		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objTiles[i].nIndices;
-		vData.pSysMem = m_objTiles[i].vertices;
+		vData.pSysMem = m_objTiles[i].input;
 		iData.pSysMem = m_objTiles[i].indices;
 		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objTiles[i].vertexBuffer);
 		device->CreateBuffer(&indexBufferDesc, &iData, &m_objTiles[i].indexBuffer);
@@ -149,7 +190,7 @@ bool ObjectManager::LoadTextures(ID3D11Device* device)
 
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size)
 {
-	UINT stride = sizeof(VertexType);
+	UINT stride = sizeof(InputType);
 	UINT offset = 0;
 	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
 	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&m_projection);
@@ -167,11 +208,11 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
 		deviceContext->Unmap(cbPerObjectBuffer, 0);
 
-		D3D11_MAPPED_SUBRESOURCE vb;
-		ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		deviceContext->Map(arr[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
-		memcpy(vb.pData, arr[i].vertices, sizeof(VertexType) * arr[i].nVertices);
-		deviceContext->Unmap(arr[i].vertexBuffer, 0);
+		//D3D11_MAPPED_SUBRESOURCE vb;
+		//ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		//deviceContext->Map(arr[i].vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+		//memcpy(vb.pData, arr[i].input, 32 * arr[i].nVertices);
+		//deviceContext->Unmap(arr[i].vertexBuffer, 0);
 
 		deviceContext->IASetIndexBuffer(arr[i].indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 		deviceContext->IASetVertexBuffers(0, 1, &arr[i].vertexBuffer, &stride, &offset);
