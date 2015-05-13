@@ -98,7 +98,10 @@ public:
 	ID3D11ShaderResourceView* getTexture(int index) const;
 	int getVertexCount(Object index) const;
 	int getIndexCount(Object index) const;
+	int getTextureCoordCount(Object index) const;
 	int getNormalCount(Object index) const;
+
+	void ReleaseCOM();
 };
 
 #endif

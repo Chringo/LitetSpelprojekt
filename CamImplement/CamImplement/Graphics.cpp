@@ -224,7 +224,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	game->Initialize(wndHandle, hInstance, viewport);
 	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
-	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE, DIRLIGHT_DEFAULT_COLOR);
+	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	
 	cbPerFrame.dirLight = dirLight->getLight();
 

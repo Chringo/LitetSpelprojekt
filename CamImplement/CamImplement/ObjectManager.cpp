@@ -20,6 +20,8 @@ ObjectManager::~ObjectManager()
 
 }
 
+// *** FIX THIS ***
+//Normals and texture coordinates are not loaded in the proper place
 void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 {
 	if (size <= 0) { return; }
@@ -30,30 +32,16 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 	float u, v;
 	float nx, ny, nz;
 
+	int pos_i, tex_i, nor_i;
+
 	ObjectType temp = m_loader->getObject(obj);
 	for (int i = 0; i < size; i++)
 	{
 		(*arr)[i].nVertices = m_loader->getVertexCount(obj);
-		(*arr)[i].nNormals = m_loader->getVertexCount(obj);
 		(*arr)[i].nIndices = m_loader->getIndexCount(obj);
 
 		(*arr)[i].input = new InputType[(*arr)[i].nVertices];
-		//(*arr)[i].normals = new NormalType[(*arr)[i].nNormals];
 		(*arr)[i].indices = new UINT[(*arr)[i].nIndices];
-
-		for (int j = 0; j < (*arr)[i].nVertices; j++)
-		{
-			x = temp.vertices[j].x;
-			y = temp.vertices[j].y;
-			z = temp.vertices[j].z;
-			u = temp.texCoords[j].u;
-			v = temp.texCoords[j].v;
-			nx = temp.normals[j].x;
-			ny = temp.normals[j].y;
-			nz = temp.normals[j].z;
-
-			(*arr)[i].input[j] = InputType(x, y, z, u, v, nx, ny, nz);
-		}
 
 		int k = 0;
 		for (int j = 0; j < (*arr)[i].nIndices / 3; j++)
@@ -62,6 +50,46 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 			(*arr)[i].indices[k + 1] = temp.faces[j].vIndex2 - 1;
 			(*arr)[i].indices[k + 2] = temp.faces[j].vIndex3 - 1;
 			k += 3;
+		}
+
+		for (int j = 0; j < (*arr)[i].nVertices; j++)
+		{	
+			pos_i = j;
+			tex_i = -1;
+			nor_i = -1;
+
+			//Fix this
+			for (k = 0; (tex_i == -1 || nor_i == -1) && k < (*arr)[i].nIndices / 3; k++)
+			{
+				if (pos_i == temp.faces[k].vIndex1 - 1)
+				{
+					tex_i = temp.faces[k].tIndex1 - 1;
+					nor_i = temp.faces[k].nIndex1 - 1;
+				}
+				else if (pos_i == temp.faces[k].vIndex2 - 1)
+				{
+					tex_i = temp.faces[k].tIndex2 - 1;
+					nor_i = temp.faces[k].nIndex1 - 1;
+				}
+				else if (pos_i == temp.faces[k].vIndex3 - 1)
+				{
+					tex_i = temp.faces[k].tIndex3 - 1;
+					nor_i = temp.faces[k].nIndex1 - 1;
+				}
+			}
+
+			x = temp.vertices[pos_i].x;
+			y = temp.vertices[pos_i].y;
+			z = temp.vertices[pos_i].z;
+
+			u = temp.texCoords[tex_i].u;
+			v = temp.texCoords[tex_i].v;
+			
+			nx = temp.normals[nor_i].x;
+			ny = temp.normals[nor_i].y;
+			nz = temp.normals[nor_i].z;
+
+			(*arr)[i].input[j] = InputType(x, y, z, u, v, nx, ny, nz);
 		}
 
 		(*arr)[i].textureIndex = obj;
@@ -221,6 +249,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Tile, &m_objTiles, m_nTiles);
 
 	CreateBuffers(device);
+	CreateSamplers(device);
 
 	DirectX::XMStoreFloat4x4(&cbPerObject.World, DirectX::XMMatrixIdentity());
 	DirectX::XMStoreFloat4x4(&cbPerObject.WVP, DirectX::XMMatrixIdentity());
@@ -303,6 +332,8 @@ void ObjectManager::setViewProjection(const DirectX::XMMATRIX &view, const Direc
 
 void ObjectManager::ReleaseCOM()
 {
+	m_loader->ReleaseCOM();
+
 	m_objPlayer->Delete();
 	delete m_objPlayer;
 
@@ -325,4 +356,5 @@ void ObjectManager::ReleaseCOM()
 	delete[] m_objTiles;
 
 	cbPerObjectBuffer->Release();
+	samplerState->Release();
 }

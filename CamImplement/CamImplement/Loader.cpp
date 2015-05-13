@@ -13,17 +13,13 @@ Loader::Loader(const Loader& obj)
 
 Loader::~Loader()
 {
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
-	{
-		m_objects[i]->Delete();
-	}
 	delete[] m_objects;
 	delete[] m_fileCounts;
+	delete[] m_textures;
 }
 
 void Loader::FindModelFilename(Object object, char** filename)
 {
-	//char* localFilename;
 	switch (object)
 	{
 	case Player:
@@ -53,8 +49,6 @@ void Loader::FindModelFilename(Object object, char** filename)
 
 bool Loader::ReadFileCounts(char* filename)
 {
-	//if (nObjectsCurrent == nObjectsTotal) { return false; }
-
 	std::ifstream fin;
 	char input;
 
@@ -105,8 +99,6 @@ bool Loader::ReadFileCounts(char* filename)
 
 bool Loader::LoadDataStructures(char* filename)
 {
-	//if (nObjectsCurrent == nObjectsTotal) { return false; }
-
 	std::ifstream fin;
 	std::ofstream fout;
 	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
@@ -312,7 +304,25 @@ int Loader::getIndexCount(Object index) const
 	return m_fileCounts[index].nFaces * 3;
 }
 
+int Loader::getTextureCoordCount(Object index) const
+{
+	return m_fileCounts[index].nTextures;
+}
+
 int Loader::getNormalCount(Object index) const
 {
 	return m_fileCounts[index].nNormals;
+}
+
+void Loader::ReleaseCOM()
+{
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	{
+		if (m_objects[i]) { m_objects[i]->Delete(); }
+	}
+
+	for (int i = 0; i < TEXTURE_COUNT; i++)
+	{
+		if (m_textures[i]) { m_textures[i]->Release(); }
+	}
 }
