@@ -21,87 +21,33 @@ Loader::~Loader()
 	delete[] m_fileCounts;
 }
 
-void Loader::Initialize(Object* objects, int nObjects)
-{
-	nObjectsTotal = nObjects;
-	m_fileCounts = new FileCountType[MAX_OBJECT_COUNT];
-	m_objects = new ObjectType*[MAX_OBJECT_COUNT];
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
-	{
-		m_fileCounts[i].nVertices = 0;
-		m_fileCounts[i].nTextures = 0;
-		m_fileCounts[i].nNormals = 0;
-		m_fileCounts[i].nFaces = 0;
-		m_objects[i] = nullptr;
-	}
-
-	char* filename = nullptr;
-
-	for (int i = 0; i < nObjectsTotal; i++)
-	{
-		if (!m_objects[objects[i]])
-		{
-			nObjectsCurrent = objects[i];
-			m_objects[objects[i]] = new ObjectType();
-			FindModelFilename(objects[i], &filename);
-			if (ReadFileCounts(filename))
-			{
-				LoadDataStructures(filename);
-			}
-		}
-	}
-
-	//filename = "dummyTexture.png";
-	//LoadTextures(device, filename);
-}
-
-ObjectType& Loader::getObject(Object obj) const
-{
-	return *m_objects[obj];
-}
-
-int Loader::getVertexCount(Object index) const
-{
-	return m_fileCounts[index].nVertices;
-}
-
-int Loader::getIndexCount(Object index) const
-{
-	return m_fileCounts[index].nFaces * 3;
-}
-
-int Loader::getNormalCount(Object index) const
-{
-	return m_fileCounts[index].nNormals;
-}
-
 void Loader::FindModelFilename(Object object, char** filename)
 {
 	//char* localFilename;
 	switch (object)
 	{
-		case Player:
-		{
-			*filename = "Meshes/dummyMan.obj";
-			break;
-		}
-		case Enemy:
-		{
-			*filename = "Meshes/tree01.obj";
-			break;
-		}
-		case Obstacle:
-		{
-			*filename = "Meshes/tree03.obj";
-			break;
-		}
-		case Tile:
-		{
-			*filename = "Meshes/groundTile01.obj";
-			break;
-		}
-		default:
-			break;
+	case Player:
+	{
+		*filename = "Meshes/dummyMan.obj";
+		break;
+	}
+	case Enemy:
+	{
+		*filename = "Meshes/tree01.obj";
+		break;
+	}
+	case Obstacle:
+	{
+		*filename = "Meshes/tree03.obj";
+		break;
+	}
+	case Tile:
+	{
+		*filename = "Meshes/groundTile01.obj";
+		break;
+	}
+	default:
+		break;
 	}
 }
 
@@ -298,4 +244,75 @@ bool Loader::LoadDataStructures(char* filename)
 	fout.close();
 
 	return true;
+}
+
+void Loader::LoadTextures(ID3D11Device* device)
+{
+	CoInitialize(NULL);
+
+	WCHAR* filename[TEXTURE_COUNT] = { L"dummyTexture.png", L"dummyTexture.png", L"dummyTexture.png", L"dummyTexture.png" };
+	m_textures = new ID3D11ShaderResourceView*[TEXTURE_COUNT];
+
+	for (int i = 0; i < TEXTURE_COUNT; i++)
+	{
+		DirectX::CreateWICTextureFromFile(device, filename[i], nullptr, &m_textures[i]);
+	}
+}
+
+void Loader::Initialize(ID3D11Device* device, Object* objects, int nObjects)
+{
+	nObjectsTotal = nObjects;
+	m_fileCounts = new FileCountType[MAX_OBJECT_COUNT];
+	m_objects = new ObjectType*[MAX_OBJECT_COUNT];
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	{
+		m_fileCounts[i].nVertices = 0;
+		m_fileCounts[i].nTextures = 0;
+		m_fileCounts[i].nNormals = 0;
+		m_fileCounts[i].nFaces = 0;
+		m_objects[i] = nullptr;
+	}
+
+	char* filename = nullptr;
+
+	for (int i = 0; i < nObjectsTotal; i++)
+	{
+		if (!m_objects[objects[i]])
+		{
+			nObjectsCurrent = objects[i];
+			m_objects[objects[i]] = new ObjectType();
+			FindModelFilename(objects[i], &filename);
+			if (ReadFileCounts(filename))
+			{
+				LoadDataStructures(filename);
+			}
+		}
+	}
+
+	LoadTextures(device);
+}
+
+ObjectType& Loader::getObject(Object obj) const
+{
+	return *m_objects[obj];
+}
+
+ID3D11ShaderResourceView* Loader::getTexture(int index) const
+{
+	return m_textures[index];
+}
+
+int Loader::getVertexCount(Object index) const
+{
+	return m_fileCounts[index].nVertices;
+}
+
+int Loader::getIndexCount(Object index) const
+{
+	return m_fileCounts[index].nFaces * 3;
+}
+
+int Loader::getNormalCount(Object index) const
+{
+	return m_fileCounts[index].nNormals;
 }

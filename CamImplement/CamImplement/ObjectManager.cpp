@@ -41,43 +41,13 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 		//(*arr)[i].normals = new NormalType[(*arr)[i].nNormals];
 		(*arr)[i].indices = new UINT[(*arr)[i].nIndices];
 
-		//-- Used for testing, to be removed -------------------------
-		switch (obj)
-		{
-			case Player:
-			{
-				u = 1.0f;
-				v = 1.0f;
-				break;
-			}
-			case Enemy:
-			{
-				u = 1.0f;
-				v = 0.0f;
-				break;
-			}
-			case Tile:
-			{
-				u = 0.0f;
-				v = 1.0f;
-				break;
-			}
-			default:
-			{
-				u = 0.0f;
-				v = 0.0f;
-				break;
-			}
-		}
-		//------------------------------------------------------------
-
 		for (int j = 0; j < (*arr)[i].nVertices; j++)
 		{
 			x = temp.vertices[j].x;
 			y = temp.vertices[j].y;
 			z = temp.vertices[j].z;
-			//u = temp.texCoords[j].u;
-			//v = temp.texCoords[j].v;
+			u = temp.texCoords[j].u;
+			v = temp.texCoords[j].v;
 			nx = temp.normals[j].x;
 			ny = temp.normals[j].y;
 			nz = temp.normals[j].z;
@@ -94,10 +64,10 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 			k += 3;
 		}
 
+		(*arr)[i].textureIndex = obj;
 		DirectX::XMStoreFloat4x4(&(*arr)[i].world, DirectX::XMMatrixIdentity());
 		(*arr)[i].vertexBuffer = nullptr;
 		(*arr)[i].indexBuffer = nullptr;
-		(*arr)[i].texture = nullptr;
 	}
 }
 
@@ -182,10 +152,19 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 }
 
-bool ObjectManager::LoadTextures(ID3D11Device* device)
+void ObjectManager::CreateSamplers(ID3D11Device* device)
 {
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	return false;
+	device->CreateSamplerState(&sampDesc, &samplerState);
 }
 
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size)
@@ -194,6 +173,7 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	UINT offset = 0;
 	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
 	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&m_projection);
+	ID3D11ShaderResourceView* srv;
 
 	for (int i = 0; i < size; i++)
 	{
@@ -217,6 +197,10 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		deviceContext->IASetIndexBuffer(arr[i].indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 		deviceContext->IASetVertexBuffers(0, 1, &arr[i].vertexBuffer, &stride, &offset);
 		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
+		srv = m_loader->getTexture(arr[i].textureIndex);
+		deviceContext->PSSetShaderResources(0, 1, &srv);
+
 		deviceContext->DrawIndexed(arr[i].nIndices, 0, 0);
 	}
 }
@@ -225,7 +209,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 {
 	m_loader = new Loader();
 	Object obj[] = { Player, Enemy, Tile };
-	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
+	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	m_nEnemies = nEnemies;
 	m_nObstacles = nObstacles;
@@ -303,6 +287,8 @@ void ObjectManager::Update()
 
 void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 {
+	deviceContext->PSSetSamplers(0, 1, &samplerState);
+
 	RenderInstances(deviceContext, m_objPlayer, 1);
 	RenderInstances(deviceContext, m_objEnemies, m_nEnemies);
 	RenderInstances(deviceContext, m_objObstacles, m_nObstacles);
