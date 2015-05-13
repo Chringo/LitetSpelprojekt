@@ -101,6 +101,7 @@
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="ObjectManager.h" />
+    <ClInclude Include="PathfindingLib.h" />
     <ClInclude Include="TileClass.h" />
   </ItemGroup>
   <ItemGroup>
