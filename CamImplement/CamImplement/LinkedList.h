@@ -16,7 +16,7 @@ public:
 		void insertAt(int pos, const T& value);
 		void insertFirst(const T& value);
 		T elementAt(int pos) const;
-		T removeFirst();
+		T removeFirst() ;
 		T removeLast();
 		T removeAt(int pos);
 		int size() const;
@@ -46,7 +46,6 @@ LinkedList<T>::Node::Node(const T& value, Node* next)
 template<typename T>
 LinkedList<T>::Node::~Node(){}
 
-
 // Constructors and destructor
 template<typename T>
 LinkedList<T>::LinkedList()
@@ -56,7 +55,6 @@ LinkedList<T>::LinkedList()
 template<typename T>
 LinkedList<T>::LinkedList(const LinkedList<T>& orig)
 {
-	nrOfNodes = orig.nrOfNodes;
 	if (orig.first == nullptr)
 	{
 		first = nullptr;
@@ -164,7 +162,6 @@ template<typename T>
 void LinkedList<T>::insertFirst(const T& value)
 {
 	first = new Node(value, first);
-	nrOfNodes++;
 }
 
 
@@ -172,6 +169,7 @@ void LinkedList<T>::insertFirst(const T& value)
 template<typename T>
 T LinkedList<T>::elementAt(int pos) const
 {
+	int asdf = size();
 	if(pos < 0 ||pos >= size())
 	{
 		throw std::string ("Out of bonds!");
@@ -272,15 +270,9 @@ T LinkedList<T>::removeAt(int pos)
 template<typename T>
 int LinkedList<T>::size() const
 {
-	if (first == nullptr)
-	{
-		return 0;
-	}
-	
-
 	int count = 0;
 	Node* iterator = first;
-	while (iterator->next != nullptr)
+	while (iterator != nullptr)
 	{
 		iterator = iterator->next;
 		count++;

@@ -158,13 +158,18 @@ Action Player::GetCurrentAction()
 
 // Enemy
 
-Enemy::Enemy(int x, int z)
+Enemy::Enemy(float x, float z)
 {
-	this->x = x;
-	this->z = z;
-
-	Entity::m_Position = XMVectorSet((float)x, 0.f, (float)z, 1.f);
+	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	orders = LQueue<Action>();
+}
+
+Enemy::Enemy(XMFLOAT3 position)
+{
+	Entity::m_Position = XMVectorSet(position.x, 0.f, position.z, 1.f);
+	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	orders = LQueue<Action>();
 }
 
 Enemy::~Enemy(){}
@@ -172,8 +177,11 @@ Enemy::~Enemy(){}
 HRESULT Enemy::Update(float deltaTime)
 {
 	m_Move = XMVectorZero();
-	
-	PerformAction(popAction());
+
+	while (orders.Size() != 0)
+	{
+		PerformAction(dequeueAction());
+	}
 
 	//// Rotate to match camera.
 	m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
@@ -187,13 +195,20 @@ HRESULT Enemy::Update(float deltaTime)
 }
 
 
-void Enemy::setAction(Action action)
+void Enemy::enqueueAction(Action action)
 {
-	m_CurrentAction = action;
+	orders.Enqueue(action);
 }
-Action Enemy::popAction()
+Action Enemy::dequeueAction()
 {
-	Action action = m_CurrentAction;
-	m_CurrentAction = Idle;
+	Action action;
+	if (orders.Size() == 0)
+	{
+		action = Idle;
+	}
+	else
+	{
+		action = orders.Dequeue();
+	}
 	return action;
 }

@@ -19,12 +19,6 @@ GameDummy::~GameDummy()
 	}
 	delete[] enemyArr;
 	delete[] map;
-
-	for (int i = 0; i < tempMapSize; i++)
-	{
-		delete tempMap[i];
-	}
-	delete[] tempMap;
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -42,34 +36,26 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	tempMap = new XMFLOAT3*[tempMapSize];
 	path = LinkedList<XMFLOAT3>();
 
-	for (int x = 0; x < tempMapSize; x++)
+	for (int x = 1; x < map->getChunkSize(); x++)
 	{
-		tempMap[x] = new XMFLOAT3[tempMapSize];
-		for (int z = 0; z < tempMapSize; z++)
+		for (int z = 0; z < map->getChunkSize(); z++)
 		{
-			tempMap[x][z] = XMFLOAT3((float)x, 0, (float)z);
-			//path.insertLast(tempMap[x][z]);
-		}
+			path.insertLast(map->getBaseTiles()[x][z].worldpos);
+		}	
 	}
 
-	path.insertLast(XMFLOAT3(-5.0f, 0, 5.0f));
-	path.insertLast(XMFLOAT3(-5.0f, 0, -5.0f));
-	//path.insertLast(XMFLOAT3(5.0f, 0, -5.0f));
-	//path.insertLast(XMFLOAT3(5.0f, 0, 5.0f));
-	
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
 
-	enemyArrSize = 5;
+	enemyArrSize = 3;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(0, i * 5 + 3);
-		enemyArr[i]->SetMovementSpeed(2.f);
+		enemyArr[i] = new Collision::Enemy(map->getBaseTiles()[0][i+3].worldpos);
+		enemyArr[i]->SetMovementSpeed(4.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
@@ -102,23 +88,23 @@ void GameDummy::Update(float deltaTime)
 	bool there = true;
 	if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
 	{
-		enemyArr[2]->setAction(Collision::MoveRight);
+		enemyArr[2]->enqueueAction(Collision::MoveRight);
 		there = false;
 	}
 	else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
 	{
-		enemyArr[2]->setAction(Collision::MoveLeft);
+		enemyArr[2]->enqueueAction(Collision::MoveLeft);
 		there = false;
 	}
 
 	if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
 	{
-		enemyArr[2]->setAction(Collision::MoveUp);
+		enemyArr[2]->enqueueAction(Collision::MoveUp);
 		there = false;
 	}
 	else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
 	{
-		enemyArr[2]->setAction(Collision::MoveDown);
+		enemyArr[2]->enqueueAction(Collision::MoveDown);
 		there = false;
 	}
 

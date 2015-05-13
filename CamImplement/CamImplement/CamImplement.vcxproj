@@ -99,6 +99,7 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Loader.h" />
+    <ClInclude Include="LQueue.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="TileClass.h" />

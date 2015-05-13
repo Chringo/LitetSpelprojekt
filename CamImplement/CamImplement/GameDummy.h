@@ -16,8 +16,6 @@ private:
 	DirectX::XMMATRIX* tileMatrixArr;
 
 	// Testing bed for pathfinding - TO BE REMOVED LATER
-	const int tempMapSize = 10;
-	DirectX::XMFLOAT3** tempMap;
 	LinkedList<DirectX::XMFLOAT3> path;
 	// 
 

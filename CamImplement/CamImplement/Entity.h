@@ -9,6 +9,8 @@
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
 
+#include "LQueue.h"
+
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x8000)
 
 namespace Collision
@@ -91,19 +93,19 @@ namespace Collision
 	class Enemy : public Entity
 	{
 	public:
-		Enemy();
-		Enemy(int x, int z);
+		Enemy(float x, float z);
+		Enemy(DirectX::XMFLOAT3 position);
 
 		virtual ~Enemy();
 
-		void setAction(Action action);
-		Action popAction();
+		void enqueueAction(Action action);
+		Action dequeueAction();
 
 		HRESULT Update(float deltaTime);
-
 	private:
-		int x, z;
+		LQueue<Action> orders;
 	};
+	
 
 } /// namespace Collision
 
