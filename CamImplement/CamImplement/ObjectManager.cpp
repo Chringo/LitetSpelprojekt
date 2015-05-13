@@ -20,14 +20,6 @@ ObjectManager::ObjectManager(const ObjectManager& obj)
 
 ObjectManager::~ObjectManager()
 {
-	if (m_objPlayer)
-		delete m_objPlayer;
-	if (m_objEnemies)
-		delete m_objEnemies;
-	if (m_objTiles)
-		delete m_objTiles;
-	if (m_objObstacles)
-		delete m_objObstacles;
 }
 
 void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
@@ -348,26 +340,26 @@ void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &proj
 
 void ObjectManager::ReleaseCOM()
 {
-	m_objPlayer->Delete();
-	delete m_objPlayer;
-
-	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
+	if (m_objPlayer)
 	{
-		m_objEnemies[i].Delete();
+		m_objPlayer->Delete();
+		delete m_objPlayer;
 	}
-	delete[] m_objEnemies;
-
-	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
+	if (m_objEnemies)
 	{
-		m_objObstacles[i].Delete();
+		m_objEnemies->Delete();
+		delete m_objEnemies;
 	}
-	delete[] m_objObstacles;
-
-	for (UINT i = 0; i < m_objTiles->world.size(); i++)
+	if (m_objTiles)
 	{
-		m_objTiles[i].Delete();
+		m_objTiles->Delete();
+		delete m_objTiles;
 	}
-	delete[] m_objTiles;
+	if (m_objObstacles)
+	{
+		m_objObstacles->Delete();
+		delete m_objObstacles;
+	}
 
 	cbPerObjectBuffer->Release();
 }
