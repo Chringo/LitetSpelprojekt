@@ -39,10 +39,10 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 	float u, v;
 	float nx, ny, nz;
 
-	// [todo. Error check getObject]
-	ObjectType temp = m_loader->getObject(obj);
-	// [if (!temp)
-	// return;
+	ObjectType *temp = m_loader->getObject(obj);
+	
+	if (!temp)
+		return;
 
 	object = new ObjectInstance();
 
@@ -86,14 +86,14 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 
 	for (int j = 0; j < object->nVertices; j++)
 	{
-		x = temp.vertices[j].x;
-		y = temp.vertices[j].y;
-		z = temp.vertices[j].z;
-		//u = temp.texCoords[j].u;
-		//v = temp.texCoords[j].v;
-		nx = temp.normals[j].x;
-		ny = temp.normals[j].y;
-		nz = temp.normals[j].z;
+		x = temp->vertices[j].x;
+		y = temp->vertices[j].y;
+		z = temp->vertices[j].z;
+		//u = temp->texCoords[j].u;
+		//v = temp->texCoords[j].v;
+		nx = temp->normals[j].x;
+		ny = temp->normals[j].y;
+		nz = temp->normals[j].z;
 
 		object->input[j] = InputType(x, y, z, u, v, nx, ny, nz);
 	}
@@ -101,9 +101,9 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 	int k = 0;
 	for (int j = 0; j < object->nIndices / 3; j++)
 	{
-		object->indices[k] = temp.faces[j].vIndex1 - 1;
-		object->indices[k + 1] = temp.faces[j].vIndex2 - 1;
-		object->indices[k + 2] = temp.faces[j].vIndex3 - 1;
+		object->indices[k] = temp->faces[j].vIndex1 - 1;
+		object->indices[k + 1] = temp->faces[j].vIndex2 - 1;
+		object->indices[k + 2] = temp->faces[j].vIndex3 - 1;
 		k += 3;
 	}
 
@@ -249,7 +249,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	// Create meshes & buffers.
 	InitInstances(Player, m_objPlayer);
 	InitInstances(Enemy, m_objEnemies);
-	// InitInstances(Obstacle, m_objObstacles);
+	InitInstances(Obstacle, m_objObstacles);
 	InitInstances(Tile, m_objTiles);
 
 	CreateBuffers(device);

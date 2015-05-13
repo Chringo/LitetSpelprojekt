@@ -88,7 +88,7 @@ public:
 
 	void Initialize(Object* objects, int nObjects);
 
-	ObjectType& getObject(Object obj) const;
+	ObjectType* getObject(Object obj) const;
 	int getVertexCount(Object index) const;
 	int getIndexCount(Object index) const;
 	int getNormalCount(Object index) const;
