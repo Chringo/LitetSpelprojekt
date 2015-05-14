@@ -3,6 +3,8 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <vector>
+
 #include "Loader.h"
 
 #pragma comment (lib, "d3d11.lib")
@@ -25,7 +27,7 @@ struct ObjectInstance
 	ID3D11Buffer*		indexBuffer;
 	ID3D11ShaderResourceView* texture;
 
-	DirectX::XMFLOAT4X4 world;
+	std::vector<DirectX::XMFLOAT4X4> world;
 
 	InputType*			input;
 	UINT*				indices;
@@ -61,18 +63,15 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
-	int					m_nEnemies;
-	int					m_nObstacles;
-	int					m_nTiles;
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
 
 private:
-	void InitInstances(Object obj, ObjectInstance** arr, int size);
+	void InitInstances(Object obj, ObjectInstance *&object);
 	void CreateBuffers(ID3D11Device* device);
 	bool LoadTextures(ID3D11Device* device);
-	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
+	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
 
 public:
 	ObjectManager();

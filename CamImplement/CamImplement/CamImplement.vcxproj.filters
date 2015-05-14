@@ -84,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LQueue.h">
+	  <Filter>Header Files</Filter>
+	</ClInclude>
+    <ClInclude Include="PathfindingLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

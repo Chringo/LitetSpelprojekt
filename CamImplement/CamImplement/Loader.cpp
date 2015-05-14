@@ -55,9 +55,9 @@ void Loader::Initialize(Object* objects, int nObjects)
 	//LoadTextures(device, filename);
 }
 
-ObjectType& Loader::getObject(Object obj) const
+ObjectType* Loader::getObject(Object obj) const
 {
-	return *m_objects[obj];
+	return m_objects[obj];
 }
 
 int Loader::getVertexCount(Object index) const
