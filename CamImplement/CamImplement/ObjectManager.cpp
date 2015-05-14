@@ -21,7 +21,7 @@ ObjectManager::~ObjectManager()
 }
 
 // *** FIX THIS ***
-//Normals and texture coordinates are not loaded in the proper place
+//Current code makes index buffer useless
 void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 {
 	if (size <= 0) { return; }
@@ -32,64 +32,66 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance** arr, int size)
 	float u, v;
 	float nx, ny, nz;
 
-	int pos_i, tex_i, nor_i;
+	int iV, iT, iN;
+	int nV, nT, nN, nI;
 
 	ObjectType temp = m_loader->getObject(obj);
 	for (int i = 0; i < size; i++)
 	{
-		(*arr)[i].nVertices = m_loader->getVertexCount(obj);
-		(*arr)[i].nIndices = m_loader->getIndexCount(obj);
+		nV = m_loader->getVertexCount(obj);
+		nT = m_loader->getTextureCoordCount(obj);
+		nN = m_loader->getNormalCount(obj);
+		nI = m_loader->getIndexCount(obj);
 
-		(*arr)[i].input = new InputType[(*arr)[i].nVertices];
-		(*arr)[i].indices = new UINT[(*arr)[i].nIndices];
+		(*arr)[i].nIndices = nI;
+		(*arr)[i].nVertices = nI;
+		(*arr)[i].indices = new UINT[nI];
+		(*arr)[i].input = new InputType[nI];
 
-		int k = 0;
-		for (int j = 0; j < (*arr)[i].nIndices / 3; j++)
+		for (int j = 0; j < nI / 3; j++)
 		{
-			(*arr)[i].indices[k] = temp.faces[j].vIndex1 - 1;
-			(*arr)[i].indices[k + 1] = temp.faces[j].vIndex2 - 1;
-			(*arr)[i].indices[k + 2] = temp.faces[j].vIndex3 - 1;
-			k += 3;
-		}
+			(*arr)[i].indices[(j * 3)] = (j * 3);
+			(*arr)[i].indices[(j * 3) + 1] = (j * 3) + 1;
+			(*arr)[i].indices[(j * 3) + 2] = (j * 3) + 2;
 
-		for (int j = 0; j < (*arr)[i].nVertices; j++)
-		{	
-			pos_i = j;
-			tex_i = -1;
-			nor_i = -1;
+			iV = temp.faces[j].vIndex1 - 1;
+			iT = temp.faces[j].tIndex1 - 1;
+			iN = temp.faces[j].nIndex1 - 1;
+			x = temp.vertices[iV].x;
+			y = temp.vertices[iV].y;
+			z = temp.vertices[iV].z;
+			u = temp.texCoords[iT].u;
+			v = temp.texCoords[iT].v;
+			nx = temp.normals[iN].x;
+			ny = temp.normals[iN].y;
+			nz = temp.normals[iN].z;
+			(*arr)[i].input[(j * 3)] = InputType(x, y, z, u, v, nx, ny, nz);
 
-			//Fix this
-			for (k = 0; (tex_i == -1 || nor_i == -1) && k < (*arr)[i].nIndices / 3; k++)
-			{
-				if (pos_i == temp.faces[k].vIndex1 - 1)
-				{
-					tex_i = temp.faces[k].tIndex1 - 1;
-					nor_i = temp.faces[k].nIndex1 - 1;
-				}
-				else if (pos_i == temp.faces[k].vIndex2 - 1)
-				{
-					tex_i = temp.faces[k].tIndex2 - 1;
-					nor_i = temp.faces[k].nIndex1 - 1;
-				}
-				else if (pos_i == temp.faces[k].vIndex3 - 1)
-				{
-					tex_i = temp.faces[k].tIndex3 - 1;
-					nor_i = temp.faces[k].nIndex1 - 1;
-				}
-			}
+			iV = temp.faces[j].vIndex2 - 1;
+			iT = temp.faces[j].tIndex2 - 1;
+			iN = temp.faces[j].nIndex2 - 1;
+			x = temp.vertices[iV].x;
+			y = temp.vertices[iV].y;
+			z = temp.vertices[iV].z;
+			u = temp.texCoords[iT].u;
+			v = temp.texCoords[iT].v;
+			nx = temp.normals[iN].x;
+			ny = temp.normals[iN].y;
+			nz = temp.normals[iN].z;
+			(*arr)[i].input[(j * 3 + 1)] = InputType(x, y, z, u, v, nx, ny, nz);
 
-			x = temp.vertices[pos_i].x;
-			y = temp.vertices[pos_i].y;
-			z = temp.vertices[pos_i].z;
-
-			u = temp.texCoords[tex_i].u;
-			v = temp.texCoords[tex_i].v;
-			
-			nx = temp.normals[nor_i].x;
-			ny = temp.normals[nor_i].y;
-			nz = temp.normals[nor_i].z;
-
-			(*arr)[i].input[j] = InputType(x, y, z, u, v, nx, ny, nz);
+			iV = temp.faces[j].vIndex3 - 1;
+			iT = temp.faces[j].tIndex3 - 1;
+			iN = temp.faces[j].nIndex3 - 1;
+			x = temp.vertices[iV].x;
+			y = temp.vertices[iV].y;
+			z = temp.vertices[iV].z;
+			u = temp.texCoords[iT].u;
+			v = temp.texCoords[iT].v;
+			nx = temp.normals[iN].x;
+			ny = temp.normals[iN].y;
+			nz = temp.normals[iN].z;
+			(*arr)[i].input[(j * 3 + 2)] = InputType(x, y, z, u, v, nx, ny, nz);
 		}
 
 		(*arr)[i].textureIndex = obj;
