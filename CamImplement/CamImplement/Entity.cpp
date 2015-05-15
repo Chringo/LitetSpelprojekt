@@ -10,13 +10,9 @@ using namespace Collision;
 
 // Entity
 
-Entity::Entity()
-{
-}
+Entity::Entity(){}
 
-Entity::~Entity()
-{
-}
+Entity::~Entity(){}
 
 HRESULT Entity::Update(float deltaTime)
 {
@@ -174,7 +170,6 @@ void Player::Attack()
 
 // Enemy
 
-<<<<<<< HEAD
 Enemy::Enemy(float x, float z)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
@@ -185,47 +180,25 @@ Enemy::Enemy(float x, float z)
 Enemy::Enemy(XMFLOAT3 position)
 {
 	Entity::m_Position = XMVectorSet(position.x, 0.f, position.z, 1.f);
-=======
-Enemy::Enemy(DirectX::XMVECTOR position, DirectX::XMVECTOR rotation)
-{
-	Entity::m_Position = position;
-	Entity::m_Rotation = rotation;
-}
-
-Enemy::Enemy(float x, float z)
-{
-	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
->>>>>>> origin/collision-v2
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	orders = LQueue<Action>();
 }
 
-Enemy::~Enemy()
-{
-}
+Enemy::~Enemy(){}
 
 HRESULT Enemy::Update(float deltaTime)
 {
-<<<<<<< HEAD
 	m_Move = XMVectorZero();
 
 	while (orders.Size() != 0)
 	{
 		PerformAction(dequeueAction());
 	}
-=======
-	
->>>>>>> origin/collision-v2
 
 	// Apply movement vector.
 	Entity::Update(deltaTime);
 
-	m_Move = XMVectorZero();
-
 	return S_OK;
 }
-
-<<<<<<< HEAD
 
 void Enemy::enqueueAction(Action action)
 {
@@ -243,9 +216,8 @@ Action Enemy::dequeueAction()
 		action = orders.Dequeue();
 	}
 	return action;
-=======
+}
 void Enemy::Attack()
 {
 
->>>>>>> origin/collision-v2
 }

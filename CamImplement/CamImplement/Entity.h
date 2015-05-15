@@ -94,7 +94,6 @@ namespace Collision
 	class Enemy : public Entity
 	{
 	public:
-<<<<<<< HEAD
 		Enemy(float x, float z);
 		Enemy(DirectX::XMFLOAT3 position);
 
@@ -104,21 +103,10 @@ namespace Collision
 		Action dequeueAction();
 
 		HRESULT Update(float deltaTime);
-	private:
-		LQueue<Action> orders;
-=======
-		Enemy(DirectX::XMVECTOR position,
-			DirectX::XMVECTOR rotation);
-		Enemy(float x, float z);
-		virtual ~Enemy();
-
-		HRESULT Update(float deltaTime) override;
-
 		void Attack() override;
 
 	private:
-
->>>>>>> origin/collision-v2
+		LQueue<Action> orders;
 	};
 	
 
