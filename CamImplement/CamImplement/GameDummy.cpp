@@ -54,8 +54,13 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArr = new Collision::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
+<<<<<<< HEAD
 		enemyArr[i] = new Collision::Enemy(map->getBaseTiles()[0][i+3].worldpos);
 		enemyArr[i]->SetMovementSpeed(4.f);
+=======
+		enemyArr[i] = new Collision::Enemy(0, i * 5 + 3);
+		enemyArr[i]->SetMovementSpeed(2.0f);
+>>>>>>> origin/collision-v2
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
@@ -78,8 +83,8 @@ void GameDummy::Update(float deltaTime)
 	ScreenToClient(windowHandle, &cursor);
 
 	// Adjust to client center.
-	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
-	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
+	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
+	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
@@ -88,23 +93,39 @@ void GameDummy::Update(float deltaTime)
 	bool there = true;
 	if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
 	{
+<<<<<<< HEAD
 		enemyArr[2]->enqueueAction(Collision::MoveRight);
+=======
+		enemyArr[2]->PerformAction(Collision::MoveRight);
+>>>>>>> origin/collision-v2
 		there = false;
 	}
 	else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
 	{
+<<<<<<< HEAD
 		enemyArr[2]->enqueueAction(Collision::MoveLeft);
+=======
+		enemyArr[2]->PerformAction(Collision::MoveLeft);
+>>>>>>> origin/collision-v2
 		there = false;
 	}
 
 	if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
 	{
+<<<<<<< HEAD
 		enemyArr[2]->enqueueAction(Collision::MoveUp);
+=======
+		enemyArr[2]->PerformAction(Collision::MoveUp);
+>>>>>>> origin/collision-v2
 		there = false;
 	}
 	else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
 	{
+<<<<<<< HEAD
 		enemyArr[2]->enqueueAction(Collision::MoveDown);
+=======
+		enemyArr[2]->PerformAction(Collision::MoveDown);
+>>>>>>> origin/collision-v2
 		there = false;
 	}
 
@@ -113,17 +134,16 @@ void GameDummy::Update(float deltaTime)
 		path.insertLast(path.elementAt(0));
 		path.removeFirst();
 	}
-	
-	//
 
+	// Update enemies.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		enemyArr[i]->Update(deltaTime);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{
-			player->Intersect(enemyArr[j]);
-			enemyArr[i]->Intersect(enemyArr[j]);
+			if (i != j)
+				enemyArr[i]->Intersect(enemyArr[j]);
 		}
 	}
 }
@@ -137,8 +157,6 @@ XMVECTOR GameDummy::GetPlayerPosition()
 {
 	return player->GetPosition();
 }
-
-
 
 /// 
 /// Enemies
