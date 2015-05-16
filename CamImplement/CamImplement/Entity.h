@@ -34,59 +34,60 @@ namespace Collision
 		Entity();
 		virtual ~Entity();
 
-		virtual HRESULT Update(float deltaTime) = 0;
+		virtual HRESULT Update(float deltaTime);
 
-		void SetMovementSpeed(float speed);
-
+		// Positional
 		DirectX::XMMATRIX GetTransform();
 		DirectX::XMVECTOR GetPosition();
+		void MoveTo(DirectX::XMVECTOR target);//
+		void SetPosition(DirectX::XMVECTOR position);//
 
-		DirectX::ContainmentType Intersect(Entity *Entity);
-		void CollisionHit(Entity *Entity);
+		// Collision
+		DirectX::ContainmentType Intersect(Entity *entity);
+		void CollisionHit(Entity *entity);
 		void Push(DirectX::XMVECTOR force);
 
+		// Combat
+		void SetMovementSpeed(float speed);
+		void PerformAction(Action action);
+		Action GetCurrentAction();
+		virtual void Attack() = 0;
+
 	protected:
+		
+		// Movement data.
 		DirectX::XMVECTOR m_Position;
 		DirectX::XMVECTOR m_Rotation;
-		const DirectX::XMVECTOR m_Scaling = DirectX::XMVectorSet(1.f, 1.f, 1.f, 1.f);
+		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
+		DirectX::XMVECTOR m_TargetLocation;
 
+		// Combat data.
+		float m_AttackRange = 1.f;
+		float m_HitPoints = 100.f;
 		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
-		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
-
-		void PerformAction(Action action);
 
 	private:
 		float m_Mass = 1.f;
 		float m_Radius = 1.f;
-
 	};
-
-	// [Move to individual files.]
 
 	class Player : public Entity
 	{
 	public:
-		Player(DirectX::XMVECTOR m_Position,
-			DirectX::XMVECTOR m_Rotation);
-
+		Player(DirectX::XMVECTOR position,
+			DirectX::XMVECTOR rotation);
 		virtual ~Player();
 
-		HRESULT Update(float deltaTime);
+		HRESULT Update(float deltaTime) override;
+
+		void Attack() override;
 
 		void SetAttackDirection(POINT clientCursorNDC);
-
 		void SetInputKey(Action action, int key);
-
-		Action GetCurrentAction();
 
 	private:
 		int m_Controls[8];
-
-		// [todo. combat system calculations ]
-		unsigned int m_HitPoints = 0;
-		unsigned int m_Stamina = 0;
-		// Entity *m_Sword;
 
 	};
 
@@ -102,6 +103,8 @@ namespace Collision
 		Action dequeueAction();
 
 		HRESULT Update(float deltaTime);
+		void Attack() override;
+
 	private:
 		LQueue<Action> orders;
 	};

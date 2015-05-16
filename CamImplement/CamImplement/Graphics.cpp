@@ -47,10 +47,15 @@ HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
 	scDesc.SampleDesc.Quality = 0;
 	scDesc.Windowed = TRUE;
 
+	int deviceFlag = 0;
+#ifdef _DEBUG
+	deviceFlag = D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		D3D11_CREATE_DEVICE_DEBUG,
+		deviceFlag,
 		nullptr,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -59,8 +64,7 @@ HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
 		&rDevice,
 		nullptr,
 		&rDeviceContext);
-
-
+	 
 	if (SUCCEEDED(hr))
 	{
 		ID3D11Texture2D* pBackbuffer = nullptr;

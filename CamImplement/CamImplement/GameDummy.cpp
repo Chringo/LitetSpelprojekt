@@ -78,8 +78,8 @@ void GameDummy::Update(float deltaTime)
 	ScreenToClient(windowHandle, &cursor);
 
 	// Adjust to client center.
-	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
-	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
+	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
+	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
 	// Temporary example that should be removed later
 	bool there = true;
@@ -110,20 +110,19 @@ void GameDummy::Update(float deltaTime)
 		path.insertLast(path.elementAt(0));
 		path.removeFirst();
 	}
-	
-	//
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
 
+	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		enemyArr[i]->Update(deltaTime);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{
-			player->Intersect(enemyArr[j]);
-			enemyArr[i]->Intersect(enemyArr[j]);
+			if (i != j)
+				enemyArr[i]->Intersect(enemyArr[j]);
 		}
 	}
 }
@@ -137,8 +136,6 @@ XMVECTOR GameDummy::GetPlayerPosition()
 {
 	return player->GetPosition();
 }
-
-
 
 /// 
 /// Enemies

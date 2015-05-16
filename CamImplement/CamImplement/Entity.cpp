@@ -14,6 +14,17 @@ Entity::Entity(){}
 
 Entity::~Entity(){}
 
+HRESULT Entity::Update(float deltaTime)
+{
+	// Set proper movement speed => 'm_Speed' UnitLengths per second.
+	m_Move = XMVector3Normalize(m_Move) * deltaTime * m_Speed;
+
+	// Update position.
+	m_Position += m_Move;
+
+	return S_OK;
+}
+
 void Entity::SetMovementSpeed(float speed)
 {
 	m_Speed = speed;
@@ -21,8 +32,7 @@ void Entity::SetMovementSpeed(float speed)
 
 DirectX::XMMATRIX Entity::GetTransform()
 {
-	return XMMatrixScalingFromVector(m_Scaling)
-		* XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
+	return XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
 		* XMMatrixTranslationFromVector(m_Position);
 }
 
@@ -34,31 +44,28 @@ DirectX::XMVECTOR Entity::GetPosition()
 ContainmentType Entity::Intersect(Entity *Entity)
 {
 	// Super optimized!
-	XMVECTOR dist = Entity->m_Position - m_Position;
+	XMVECTOR distance = Entity->m_Position - m_Position;
 
-	if (XMVector3LengthEst(dist).m128_f32[0] > m_Radius + Entity->m_Radius)
+	if (XMVector3LengthEst(distance).m128_f32[0] > m_Radius + Entity->m_Radius)
 		return DISJOINT;
 
 	CollisionHit(Entity);
-
+	
 	return INTERSECTS;
 }
 
-void Entity::CollisionHit(Entity *Entity)
+void Entity::CollisionHit(Entity *entity)
 {
-	XMVECTOR direction = Entity->m_Position - m_Position;
+	XMVECTOR direction = entity->m_Position - m_Position;
 	XMVECTOR force = XMVector3Normalize(direction);
+	float length = XMVector3LengthEst(m_Move - entity->m_Move).m128_f32[0];
 
-	// Player VS Static Entity.
-	m_Position += XMVector3Reflect(m_Move, force);
+	// Apply collision force to objects.
 
-	// Player VS Movable Entity. [include force magnitude calculations.]
-	Entity->Push(force * XMVector3LengthEst(m_Move) * m_Mass);
 }
 
 void Entity::Push(DirectX::XMVECTOR force)
 {
-	// [collision physics. angular momentum.]
 	m_Move = force;
 }
 
@@ -82,19 +89,26 @@ void Entity::PerformAction(Action action)
 	case Dodge:
 		// Tumble away.
 		break;
+
+		// Issue moves.
 	case MoveUp:
-		m_Move.m128_f32[2] += 1.0f;
+		m_Move.m128_f32[2] = 1.0f;
 		break;
 	case MoveDown:
-		m_Move.m128_f32[2] -= 1.0f;
+		m_Move.m128_f32[2] = -1.0f;
 		break;
 	case MoveRight:
-		m_Move.m128_f32[0] += 1.0f;
+		m_Move.m128_f32[0] = 1.0f;
 		break;
 	case MoveLeft:
-		m_Move.m128_f32[0] -= 1.0f;
+		m_Move.m128_f32[0] = -1.0f;
 		break;
 	}
+}
+
+Action Entity::GetCurrentAction()
+{
+	return m_CurrentAction;
 }
 
 // Player
@@ -125,14 +139,12 @@ HRESULT Player::Update(float deltaTime)
 		if (KEYDOWN(m_Controls[i]))
 			PerformAction((Action)i);
 
-	// Rotate to match camera.
-	m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
-
-	// Set proper movement speed => 'm_Speed' UnitLengths per second.
-	m_Move = XMVector3Normalize(m_Move) * deltaTime * m_Speed;
+	// Rotate input.
+	if (!XMVector3Equal(m_Move, XMVectorZero()))
+		m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
 
 	// Update position.
-	m_Position += m_Move;
+	Entity::Update(deltaTime);
 
 	return S_OK;
 }
@@ -154,9 +166,9 @@ void Player::SetInputKey(Action action, int key)
 	m_Controls[(int)action] = key;
 }
 
-Action Player::GetCurrentAction()
+void Player::Attack()
 {
-	return m_CurrentAction;
+
 }
 
 // Enemy
@@ -172,7 +184,6 @@ Enemy::Enemy(XMFLOAT3 position)
 {
 	Entity::m_Position = XMVectorSet(position.x, 0.f, position.z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	orders = LQueue<Action>();
 }
 
 Enemy::~Enemy(){}
@@ -186,17 +197,11 @@ HRESULT Enemy::Update(float deltaTime)
 		PerformAction(dequeueAction());
 	}
 
-	//// Rotate to match camera.
-	m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
-
-	//// Set proper movement speed => 'm_Speed' UnitLengths per second.
-	m_Move = XMVector3Normalize(m_Move) * deltaTime * m_Speed;
-
-	m_Position += m_Move;
+	// Apply movement vector.
+	Entity::Update(deltaTime);
 
 	return S_OK;
 }
-
 
 void Enemy::enqueueAction(Action action)
 {
@@ -214,4 +219,8 @@ Action Enemy::dequeueAction()
 		action = orders.Dequeue();
 	}
 	return action;
+}
+void Enemy::Attack()
+{
+
 }
