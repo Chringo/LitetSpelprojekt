@@ -142,7 +142,10 @@ void Player::SetAttackDirection(POINT clientCursorNDC)
 	float a = (float)clientCursorNDC.x;
 	float b = (float)clientCursorNDC.y;
 
-	m_Rotation.m128_f32[1] = -atan2(a, b);
+	// Arbitrary rotation to match mesh
+	static float f = 2.4f;	
+
+	m_Rotation.m128_f32[1] = -atan2(a, b) + f;
 }
 
 void Player::SetInputKey(Action action, int key)

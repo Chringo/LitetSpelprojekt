@@ -48,6 +48,9 @@
     <ClCompile Include="TileClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -88,6 +91,9 @@
 	</ClInclude>
     <ClInclude Include="PathfindingLib.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

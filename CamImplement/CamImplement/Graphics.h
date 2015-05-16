@@ -22,24 +22,24 @@ private:
 		DirLight dirLight;
 	} cbPerFrame;
 
-	ObjectManager*		objManager;
-	GameDummy*			game;
-	Camera*				camera;
-	DirectionalLight*	dirLight;
+	ObjectManager*			objManager;
+	GameDummy*				game;
+	Camera*					camera;
+	DirectionalLight*		dirLight;
 
-	ID3D11Buffer*		cbPerFrameBuffer;
+	ID3D11Buffer*			cbPerFrameBuffer;
 
-	ID3D11InputLayout*	rVertexLayout;
-	ID3D11VertexShader* rVS;
-	ID3D11PixelShader*	rPS;
+	ID3D11InputLayout*		rVertexLayout;
+	ID3D11VertexShader*		rVS;
+	ID3D11PixelShader*		rPS;
 
-	D3D11_VIEWPORT		viewport;
-	IDXGISwapChain*		rSwapChain;
-	ID3D11Device*		rDevice;
-	ID3D11DeviceContext* rDeviceContext;
+	D3D11_VIEWPORT			viewport;
+	IDXGISwapChain*			rSwapChain;
+	ID3D11Device*			rDevice;
+	ID3D11DeviceContext*	rDeviceContext;
 	ID3D11RenderTargetView* rBackbufferRTV;
 	ID3D11DepthStencilView* rDepthStencilView;
-	ID3D11Texture2D*	rDepthStencilBuffer;
+	ID3D11Texture2D*		rDepthStencilBuffer;
 
 private:
 	HRESULT CreateDirect3DContext(HWND &wndHandle);

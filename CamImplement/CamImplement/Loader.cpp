@@ -13,42 +13,37 @@ Loader::Loader(const Loader& obj)
 
 Loader::~Loader()
 {
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
-	{
-		m_objects[i]->Delete();
-	}
 	delete[] m_objects;
 	delete[] m_fileCounts;
+	delete[] m_textures;
 }
 
-void Loader::Initialize(Object* objects, int nObjects)
+void Loader::FindModelFilename(Object object, char** filename)
 {
-	nObjectsTotal = nObjects;
-	m_fileCounts = new FileCountType[MAX_OBJECT_COUNT];
-	m_objects = new ObjectType*[MAX_OBJECT_COUNT];
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	switch (object)
 	{
-		m_fileCounts[i].nVertices = 0;
-		m_fileCounts[i].nTextures = 0;
-		m_fileCounts[i].nNormals = 0;
-		m_fileCounts[i].nFaces = 0;
-		m_objects[i] = nullptr;
-	}
-
-	char* filename = nullptr;
-
-	for (int i = 0; i < nObjectsTotal; i++)
-	{
-		if (!m_objects[objects[i]])
+		case Player:
 		{
-			nObjectsCurrent = objects[i];
-			m_objects[objects[i]] = new ObjectType();
-			FindModelFilename(objects[i], &filename);
-			if (ReadFileCounts(filename))
-			{
-				LoadDataStructures(filename);
-			}
+			*filename = "Meshes/dummyMan.obj";
+			break;
 		}
+		case Enemy:
+		{
+			*filename = "Meshes/tree01.obj";
+			break;
+		}
+		case Obstacle:
+		{
+			*filename = "Meshes/tree03.obj";
+			break;
+		}
+		case Tile:
+		{
+			*filename = "Meshes/groundTile01.obj";
+			break;
+		}
+		default:
+			break;
 	}
 
 	//filename = "dummyTexture.png";
@@ -75,40 +70,18 @@ int Loader::getNormalCount(Object index) const
 	return m_fileCounts[index].nNormals;
 }
 
-void Loader::FindModelFilename(Object object, char** filename)
+ID3D11ShaderResourceView* Loader::getTexture(int index) const
 {
-	//char* localFilename;
-	switch (object)
-	{
-		case Player:
-		{
-			*filename = "Meshes/dummyMan.obj";
-			break;
-		}
-		case Enemy:
-		{
-			*filename = "Meshes/tree01.obj";
-			break;
-		}
-		case Obstacle:
-		{
-			*filename = "Meshes/tree03.obj";
-			break;
-		}
-		case Tile:
-		{
-			*filename = "Meshes/groundTile01.obj";
-			break;
-		}
-		default:
-			break;
-	}
+	return m_textures[index];
+}
+
+int Loader::getTextureCoordCount(Object index) const
+{
+	return m_fileCounts[index].nTextures;
 }
 
 bool Loader::ReadFileCounts(char* filename)
 {
-	//if (nObjectsCurrent == nObjectsTotal) { return false; }
-
 	std::ifstream fin;
 	char input;
 
@@ -159,8 +132,6 @@ bool Loader::ReadFileCounts(char* filename)
 
 bool Loader::LoadDataStructures(char* filename)
 {
-	//if (nObjectsCurrent == nObjectsTotal) { return false; }
-
 	std::ifstream fin;
 	std::ofstream fout;
 	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
@@ -247,4 +218,63 @@ bool Loader::LoadDataStructures(char* filename)
 	fin.close();
 
 	return true;
+}
+
+void Loader::LoadTextures(ID3D11Device* device)
+{
+	CoInitialize(NULL);
+
+	WCHAR* filename[TEXTURE_COUNT] = { L"dummyTexture.png", L"dummyTexture.png", L"dummyTexture.png", L"dummyTexture.png" };
+	m_textures = new ID3D11ShaderResourceView*[TEXTURE_COUNT];
+
+	for (int i = 0; i < TEXTURE_COUNT; i++)
+	{
+		DirectX::CreateWICTextureFromFile(device, filename[i], nullptr, &m_textures[i]);
+	}
+}
+
+void Loader::Initialize(ID3D11Device* device, Object* objects, int nObjects)
+{
+	nObjectsTotal = nObjects;
+	m_fileCounts = new FileCountType[MAX_OBJECT_COUNT];
+	m_objects = new ObjectType*[MAX_OBJECT_COUNT];
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	{
+		m_fileCounts[i].nVertices = 0;
+		m_fileCounts[i].nTextures = 0;
+		m_fileCounts[i].nNormals = 0;
+		m_fileCounts[i].nFaces = 0;
+		m_objects[i] = nullptr;
+	}
+
+	char* filename = nullptr;
+
+	for (int i = 0; i < nObjectsTotal; i++)
+	{
+		if (!m_objects[objects[i]])
+		{
+			nObjectsCurrent = objects[i];
+			m_objects[objects[i]] = new ObjectType();
+			FindModelFilename(objects[i], &filename);
+			if (ReadFileCounts(filename))
+			{
+				LoadDataStructures(filename);
+			}
+		}
+	}
+
+	LoadTextures(device);
+}
+
+void Loader::ReleaseCOM()
+{
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	{
+		if (m_objects[i]) { m_objects[i]->Delete(); }
+	}
+
+	for (int i = 0; i < TEXTURE_COUNT; i++)
+	{
+		if (m_textures[i]) { m_textures[i]->Release(); }
+	}
 }

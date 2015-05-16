@@ -64,7 +64,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 void GameDummy::Update(float deltaTime)
 {
-	// Output fps.
+	// Output (total average) fps.
 	elapsedTime += deltaTime;
 	frames++;
 
@@ -80,9 +80,6 @@ void GameDummy::Update(float deltaTime)
 	// Adjust to client center.
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 5);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 15);
-
-	player->Update(deltaTime);
-	player->SetAttackDirection(cursor);
 
 	// Temporary example that should be removed later
 	bool there = true;
@@ -115,6 +112,9 @@ void GameDummy::Update(float deltaTime)
 	}
 	
 	//
+
+	player->Update(deltaTime);
+	player->SetAttackDirection(cursor);
 
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{

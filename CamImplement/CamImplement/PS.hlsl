@@ -1,10 +1,12 @@
+Texture2D objTex : register(t0);
+SamplerState objSamp : register(s0);
+
 struct DirectionalLight
 {
 	float3 dir;
 	float pad;
 	float4 ambient;
 	float4 diffuse;
-	float4 color;
 };
 
 cbuffer cbPerFrame : register(b0)
@@ -23,10 +25,12 @@ float4 main(VS_OUT input) : SV_TARGET
 {
 	input.normal = normalize(input.normal);
 
+	float4 diffuse = objTex.Sample(objSamp, input.tex);
+
 	float3 finalColor;
 
-	finalColor = dirLight.ambient + float3(input.tex, 1.0f);
+	finalColor = diffuse * dirLight.ambient;
 	finalColor += saturate(dot(dirLight.dir, input.normal) * dirLight.diffuse);
 
-	return float4(finalColor, 1.0f);
+	return float4(finalColor, diffuse.a);
 }

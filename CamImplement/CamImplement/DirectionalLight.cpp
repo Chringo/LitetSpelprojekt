@@ -6,7 +6,6 @@ DirectionalLight::DirectionalLight()
 	light.pad = 0.0f;
 	light.ambient = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	light.diffuse = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	light.color = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 DirectionalLight::DirectionalLight(const DirectionalLight& obj)
@@ -19,12 +18,11 @@ DirectionalLight::~DirectionalLight()
 
 }
 
-void DirectionalLight::Initialize(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 ambient, DirectX::XMFLOAT4 diffuse, DirectX::XMFLOAT4 color)
+void DirectionalLight::Initialize(DirectX::XMFLOAT3 dir, DirectX::XMFLOAT4 ambient, DirectX::XMFLOAT4 diffuse)
 {
 	light.dir = dir;
 	light.ambient = ambient;
 	light.diffuse = diffuse;
-	light.color = color;
 }
 
 DirLight DirectionalLight::getLight()

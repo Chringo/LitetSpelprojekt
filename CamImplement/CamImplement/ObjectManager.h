@@ -25,7 +25,6 @@ struct ObjectInstance
 {
 	ID3D11Buffer*		vertexBuffer;
 	ID3D11Buffer*		indexBuffer;
-	ID3D11ShaderResourceView* texture;
 
 	std::vector<DirectX::XMFLOAT4X4> world;
 
@@ -35,12 +34,13 @@ struct ObjectInstance
 	int					nVertices;
 	int					nIndices;
 	int					nNormals;
+	int					textureIndex;
 
 	void Delete()
 	{
 		if (vertexBuffer) { vertexBuffer->Release(); }
 		if (indexBuffer) { indexBuffer->Release(); }
-		if (texture) { texture->Release(); }
+		delete[] input;
 		delete[] indices;
 	}
 };
@@ -70,8 +70,12 @@ private:
 private:
 	void InitInstances(Object obj, ObjectInstance *&object);
 	void CreateBuffers(ID3D11Device* device);
+
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
+	//void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
+
+	void CreateSamplers(ID3D11Device* device);
 
 public:
 	ObjectManager();

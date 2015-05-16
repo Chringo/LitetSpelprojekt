@@ -22,6 +22,9 @@ ObjectManager::~ObjectManager()
 {
 }
 
+// *** FIX THIS ***
+//Current code makes index buffer useless
+
 void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 {
 	// We only need 1 instance of each object.
@@ -30,78 +33,75 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 	float x, y, z;
 	float u, v;
 	float nx, ny, nz;
+	int iV, iT, iN;
+	int nV, nT, nN, nI;
 
 	ObjectType *temp = m_loader->getObject(obj);
-	
+
 	if (!temp)
 		return;
 
 	object = new ObjectInstance();
 
-	object->nVertices = m_loader->getVertexCount(obj);
-	object->nNormals = m_loader->getVertexCount(obj);
-	object->nIndices = m_loader->getIndexCount(obj);
+	nV = m_loader->getVertexCount(obj);
+	nT = m_loader->getTextureCoordCount(obj);
+	nN = m_loader->getNormalCount(obj);
+	nI = m_loader->getIndexCount(obj);
 
-	object->input = new InputType[object->nVertices];
-	//object->.normals = new NormalType[(*arr)[i].nNormals];
-	object->indices = new UINT[object->nIndices];
+	object->nIndices = nI;
+	object->nVertices = nI;
+	object->indices = new UINT[nI];
+	object->input = new InputType[nI];
 
-	//-- Used for testing, to be removed -------------------------
-	switch (obj)
+	for (int j = 0; j < nI / 3; j++)
 	{
-		case Player:
-		{
-			u = 1.0f;
-			v = 1.0f;
-			break;
-		}
-		case Enemy:
-		{
-			u = 1.0f;
-			v = 0.0f;
-			break;
-		}
-		case Tile:
-		{
-			u = 0.0f;
-			v = 1.0f;
-			break;
-		}
-		default:
-		{
-			u = 0.0f;
-			v = 0.0f;
-			break;
-		}
-	}
-	//------------------------------------------------------------
+		object->indices[(j * 3)] = (j * 3);
+		object->indices[(j * 3) + 1] = (j * 3) + 1;
+		object->indices[(j * 3) + 2] = (j * 3) + 2;
 
-	for (int j = 0; j < object->nVertices; j++)
-	{
-		x = temp->vertices[j].x;
-		y = temp->vertices[j].y;
-		z = temp->vertices[j].z;
-		//u = temp->texCoords[j].u;
-		//v = temp->texCoords[j].v;
-		nx = temp->normals[j].x;
-		ny = temp->normals[j].y;
-		nz = temp->normals[j].z;
+		iV = temp->faces[j].vIndex1 - 1;
+		iT = temp->faces[j].tIndex1 - 1;
+		iN = temp->faces[j].nIndex1 - 1;
+		x = temp->vertices[iV].x;
+		y = temp->vertices[iV].y;
+		z = temp->vertices[iV].z;
+		u = temp->texCoords[iT].u;
+		v = temp->texCoords[iT].v;
+		nx = temp->normals[iN].x;
+		ny = temp->normals[iN].y;
+		nz = temp->normals[iN].z;
+		object->input[(j * 3)] = InputType(x, y, z, u, v, nx, ny, nz);
 
-		object->input[j] = InputType(x, y, z, u, v, nx, ny, nz);
-	}
+		iV = temp->faces[j].vIndex2 - 1;
+		iT = temp->faces[j].tIndex2 - 1;
+		iN = temp->faces[j].nIndex2 - 1;
+		x = temp->vertices[iV].x;
+		y = temp->vertices[iV].y;
+		z = temp->vertices[iV].z;
+		u = temp->texCoords[iT].u;
+		v = temp->texCoords[iT].v;
+		nx = temp->normals[iN].x;
+		ny = temp->normals[iN].y;
+		nz = temp->normals[iN].z;
+		object->input[(j * 3 + 1)] = InputType(x, y, z, u, v, nx, ny, nz);
 
-	int k = 0;
-	for (int j = 0; j < object->nIndices / 3; j++)
-	{
-		object->indices[k] = temp->faces[j].vIndex1 - 1;
-		object->indices[k + 1] = temp->faces[j].vIndex2 - 1;
-		object->indices[k + 2] = temp->faces[j].vIndex3 - 1;
-		k += 3;
+		iV = temp->faces[j].vIndex3 - 1;
+		iT = temp->faces[j].tIndex3 - 1;
+		iN = temp->faces[j].nIndex3 - 1;
+		x = temp->vertices[iV].x;
+		y = temp->vertices[iV].y;
+		z = temp->vertices[iV].z;
+		u = temp->texCoords[iT].u;
+		v = temp->texCoords[iT].v;
+		nx = temp->normals[iN].x;
+		ny = temp->normals[iN].y;
+		nz = temp->normals[iN].z;
+		object->input[(j * 3 + 2)] = InputType(x, y, z, u, v, nx, ny, nz);
 	}
 
+	object->textureIndex = obj;
 	object->vertexBuffer = nullptr;
 	object->indexBuffer = nullptr;
-	object->texture = nullptr;
 }
 
 void ObjectManager::CreateBuffers(ID3D11Device* device)
@@ -190,10 +190,19 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 	}
 }
 
-bool ObjectManager::LoadTextures(ID3D11Device* device)
+void ObjectManager::CreateSamplers(ID3D11Device* device)
 {
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	return false;
+	device->CreateSamplerState(&sampDesc, &samplerState);
 }
 
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr)
@@ -203,17 +212,22 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 
 	UINT stride = sizeof(InputType);
 	UINT offset = 0;
-	XMMATRIX view = XMLoadFloat4x4(&m_view);
-	XMMATRIX projection = XMLoadFloat4x4(&m_projection);
+	ID3D11ShaderResourceView* srv = nullptr;
 
-	// Set buffers.
-	deviceContext->IASetIndexBuffer(arr->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+	// Set object buffer & textures.
 	deviceContext->IASetVertexBuffers(0, 1, &arr->vertexBuffer, &stride, &offset);
+	deviceContext->IASetIndexBuffer(arr->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+
+	srv = m_loader->getTexture(arr->textureIndex);
+	deviceContext->PSSetShaderResources(0, 1, &srv);
+
+	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
+	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&m_projection);
 
 	// Draw buffers for each world matrix.
 	for (UINT i = 0; i < arr->world.size(); i++)
 	{
-		// Update constant buffer.
+		// Update buffers & textures.
 		XMMATRIX world = XMLoadFloat4x4(&arr->world[i]);
 		XMMATRIX wvp = world * view * projection;
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
@@ -225,9 +239,10 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
 		deviceContext->Unmap(cbPerObjectBuffer, 0);
 
+		// Pass data to shaders.
 		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
-		// Draw buffers.
+		// Draw mesh.
 		deviceContext->DrawIndexed(arr->nIndices, 0, 0);
 	}
 }
@@ -236,7 +251,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 {
 	m_loader = new Loader();
 	Object obj[] = { Player, Enemy, Tile };
-	m_loader->Initialize(obj, (sizeof(obj) / sizeof(Object)));
+	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
 	InitInstances(Player, m_objPlayer);
@@ -245,6 +260,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Tile, m_objTiles);
 
 	CreateBuffers(device);
+	CreateSamplers(device);
 
 	// Create instances.
 	XMFLOAT4X4 mat;
@@ -340,6 +356,8 @@ void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &proj
 
 void ObjectManager::ReleaseCOM()
 {
+	m_loader->ReleaseCOM();
+
 	if (m_objPlayer)
 	{
 		m_objPlayer->Delete();
@@ -362,4 +380,5 @@ void ObjectManager::ReleaseCOM()
 	}
 
 	cbPerObjectBuffer->Release();
+	samplerState->Release();
 }
