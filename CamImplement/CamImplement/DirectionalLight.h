@@ -14,7 +14,6 @@ struct DirLight
 	float pad;
 	DirectX::XMFLOAT4 ambient;
 	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 color;
 };
 
 class DirectionalLight

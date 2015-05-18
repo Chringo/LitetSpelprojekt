@@ -225,13 +225,16 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
 	//camera = new Camera(Orthographic, 1.0f, 40, 24, 0.1f, 100.f);		(projektionsalternativ..)
 	dirLight = new DirectionalLight();
+	pointLight = new PointLight();
 
 	game->Initialize(wndHandle, hInstance, viewport);
 	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
+	pointLight->Initialize(1);
 	
 	cbPerFrame.dirLight = dirLight->getLight();
+	cbPerFrame.light = pointLight->getLight(0);
 
 	CreateCamera();
 	CreateBuffers();
@@ -250,6 +253,15 @@ void Graphics::Update(float deltaTime)
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
 	objManager->Update();
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
+
+	pointLight->setPosition(0, game->GetPlayerPosition());
+	cbPerFrame.light = pointLight->getLight(0);
+
+	D3D11_MAPPED_SUBRESOURCE cb;
+	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	rDeviceContext->Map(cbPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+	memcpy(cb.pData, &cbPerFrame, sizeof(constBufferPerFrame));
+	rDeviceContext->Unmap(cbPerFrameBuffer, 0);
 }
 
 void Graphics::Render()
