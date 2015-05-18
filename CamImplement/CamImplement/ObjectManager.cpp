@@ -342,6 +342,8 @@ void ObjectManager::Update()
 
 void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 {
+	deviceContext->PSSetSamplers(0, 1, &samplerState);
+
 	RenderInstances(deviceContext, m_objPlayer);
 	RenderInstances(deviceContext, m_objEnemies);
 	RenderInstances(deviceContext, m_objObstacles);
