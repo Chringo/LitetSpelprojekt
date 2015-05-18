@@ -184,11 +184,13 @@ void Graphics::CreateBuffers()
 	//Constant buffer
 	D3D11_BUFFER_DESC cbFrameDesc;
 	cbFrameDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbFrameDesc.ByteWidth = sizeof(constBufferPerFrame);
+	cbFrameDesc.ByteWidth = sizeof(DirLight) + (sizeof(Light) * NUMBER_OF_LIGHTS);
 	cbFrameDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbFrameDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbFrameDesc.MiscFlags = 0;
 	cbFrameDesc.StructureByteStride = 0;
+
+	cbPerFrame.light = new Light[NUMBER_OF_LIGHTS];
 
 	D3D11_SUBRESOURCE_DATA cbData;
 	cbData.pSysMem = &cbPerFrame;
@@ -231,10 +233,9 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
-	pointLight->Initialize(1);
+	pointLight->Initialize(NUMBER_OF_LIGHTS);
 	
 	cbPerFrame.dirLight = dirLight->getLight();
-	cbPerFrame.light = pointLight->getLight(0);
 
 	CreateCamera();
 	CreateBuffers();
@@ -255,12 +256,17 @@ void Graphics::Update(float deltaTime)
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
 	pointLight->setPosition(0, game->GetPlayerPosition());
-	cbPerFrame.light = pointLight->getLight(0);
+	cbPerFrame.light[0] = pointLight->getLight(0);
+	for (int i = 1; i < NUMBER_OF_LIGHTS; i++)
+	{
+		pointLight->setPosition(i, DirectX::XMVectorSet(i * 10.0f, 0.0f, 0.0f, 0.0f));
+		cbPerFrame.light[i] = pointLight->getLight(i);
+	}
 
 	D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	rDeviceContext->Map(cbPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-	memcpy(cb.pData, &cbPerFrame, sizeof(constBufferPerFrame));
+	memcpy(cb.pData, &cbPerFrame, (sizeof(DirLight) + (sizeof(Light) * NUMBER_OF_LIGHTS)));
 	rDeviceContext->Unmap(cbPerFrameBuffer, 0);
 }
 

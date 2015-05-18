@@ -32,7 +32,6 @@ void PointLight::Initialize(int _nLights)
 
 void PointLight::setPosition(int index, DirectX::XMVECTOR pos)
 {
-	//DirectX::XMStoreFloat3(&lightArr[index].pos, pos);
 	lightArr[index].pos.x = DirectX::XMVectorGetX(pos);
 	lightArr[index].pos.z = DirectX::XMVectorGetZ(pos);
 }

@@ -5,9 +5,9 @@
 #include<DirectXMath.h>
 
 #define LIGHT_DEFAULT_RANGE			10.0f
-#define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.0f, 0.3f, 0.0f)
-#define LIGHT_DEFAULT_AMBIENT		DirectX::XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f)
-#define LIGHT_DEFAULT_DIFFUSE		DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)
+#define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.3f, 0.3f, 0.0f)
+#define LIGHT_DEFAULT_AMBIENT		DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
+#define LIGHT_DEFAULT_DIFFUSE		DirectX::XMFLOAT4(0.2f, 0.8f, 0.2f, 1.0f)
 
 struct Light
 {
