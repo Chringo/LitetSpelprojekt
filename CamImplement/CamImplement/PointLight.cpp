@@ -36,6 +36,23 @@ void PointLight::setPosition(int index, DirectX::XMVECTOR pos)
 	lightArr[index].pos.z = DirectX::XMVectorGetZ(pos);
 }
 
+void PointLight::setColor(int index, int action)
+{
+	switch (action)
+	{
+	case Attack1:
+
+	case Attack2:
+		lightArr[index].diffuse = LIGHT_ATTACK_DIFFUSE;
+		break;
+	case Idle:
+		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
+		break;
+	default:
+		break;
+	}
+}
+
 Light& PointLight::getLight(int index) const
 {
 	return lightArr[index];

@@ -15,7 +15,7 @@
 #pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
 
-#define NUMBER_OF_LIGHTS 4
+#define NUMBER_OF_LIGHTS 1
 
 class Graphics
 {
@@ -23,7 +23,7 @@ private:
 	struct constBufferPerFrame
 	{
 		DirLight dirLight;
-		Light* light;
+		Light light;
 	} cbPerFrame;
 
 	ObjectManager*			objManager;

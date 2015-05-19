@@ -5,9 +5,23 @@
 #include<DirectXMath.h>
 
 #define LIGHT_DEFAULT_RANGE			10.0f
-#define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.3f, 0.3f, 0.0f)
+#define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.0f, 0.2f, 0.0f)
 #define LIGHT_DEFAULT_AMBIENT		DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
 #define LIGHT_DEFAULT_DIFFUSE		DirectX::XMFLOAT4(0.2f, 0.8f, 0.2f, 1.0f)
+#define LIGHT_ATTACK_DIFFUSE		DirectX::XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f)
+
+enum Action
+{
+	Attack1,
+	Attack2,
+	Block,
+	Dodge,
+	MoveUp,
+	MoveDown,
+	MoveRight,
+	MoveLeft,
+	Idle
+};
 
 struct Light
 {
@@ -33,6 +47,7 @@ public:
 	void Initialize(int _nLights);
 
 	void setPosition(int index, DirectX::XMVECTOR pos);
+	void setColor(int index, int action);
 
 	Light& getLight(int index) const;
 };
