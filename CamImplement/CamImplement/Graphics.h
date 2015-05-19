@@ -8,11 +8,14 @@
 #include "Camera.h"
 #include "GameDummy.h"
 #include "DirectionalLight.h"
+#include "PointLight.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
+
+#define NUMBER_OF_LIGHTS 1
 
 class Graphics
 {
@@ -20,12 +23,14 @@ private:
 	struct constBufferPerFrame
 	{
 		DirLight dirLight;
+		Light light;
 	} cbPerFrame;
 
 	ObjectManager*			objManager;
 	GameDummy*				game;
 	Camera*					camera;
 	DirectionalLight*		dirLight;
+	PointLight*				pointLight;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
 

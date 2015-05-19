@@ -137,6 +137,11 @@ XMVECTOR GameDummy::GetPlayerPosition()
 	return player->GetPosition();
 }
 
+Collision::Action GameDummy::GetPlayerAction()
+{
+	return player->GetCurrentAction();
+}
+
 /// 
 /// Enemies
 ///

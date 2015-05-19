@@ -6,7 +6,7 @@
 
 #define DIRLIGHT_DEFAULT_DIRECTION	DirectX::XMFLOAT3(0.0f, 1.0f, -1.0f)
 #define DIRLIGHT_DEFAULT_AMBIENT	DirectX::XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f)
-#define DIRLIGHT_DEFAULT_DIFFUSE	DirectX::XMFLOAT4(0.3f, 0.6f, 0.7f, 1.0f)
+#define DIRLIGHT_DEFAULT_DIFFUSE	DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f)
 
 struct DirLight
 {
@@ -14,7 +14,6 @@ struct DirLight
 	float pad;
 	DirectX::XMFLOAT4 ambient;
 	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 color;
 };
 
 class DirectionalLight
