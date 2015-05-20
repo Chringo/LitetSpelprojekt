@@ -31,6 +31,8 @@ Graphics::~Graphics()
 	delete game;
 	delete camera;
 	delete dirLight;
+	delete pointLight;
+	delete gui;
 }
 
 HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
@@ -228,12 +230,14 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	//camera = new Camera(Orthographic, 1.0f, 40, 24, 0.1f, 100.f);		(projektionsalternativ..)
 	dirLight = new DirectionalLight();
 	pointLight = new PointLight();
+	gui = new GUI();
 
 	game->Initialize(wndHandle, hInstance, viewport);
 	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	pointLight->Initialize(NUMBER_OF_LIGHTS);
+	gui->Initialize();
 	
 	cbPerFrame.dirLight = dirLight->getLight();
 
@@ -285,6 +289,7 @@ void Graphics::Render()
 	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
 
 	objManager->Render(rDeviceContext);
+	gui->Render();
 }
 
 void Graphics::SwapFBBuffer()
@@ -296,6 +301,7 @@ void Graphics::ReleaseCOM()
 {
 	game->ReleaseCOM();
 	objManager->ReleaseCOM();
+	gui->ReleaseCOM();
 
 	if (cbPerFrameBuffer) { cbPerFrameBuffer->Release(); }
 	if (rVertexLayout) { rVertexLayout->Release(); }

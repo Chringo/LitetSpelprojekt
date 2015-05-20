@@ -9,6 +9,7 @@
 #include "GameDummy.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "GUI.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -31,6 +32,7 @@ private:
 	Camera*					camera;
 	DirectionalLight*		dirLight;
 	PointLight*				pointLight;
+	GUI*					gui;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
 
