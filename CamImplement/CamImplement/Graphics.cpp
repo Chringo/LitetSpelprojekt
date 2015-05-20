@@ -233,7 +233,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	gui = new GUI();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles(), 1);
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	pointLight->Initialize(NUMBER_OF_LIGHTS);

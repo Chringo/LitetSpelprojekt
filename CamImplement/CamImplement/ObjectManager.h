@@ -63,6 +63,7 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
+	ObjectInstance*		m_objGUI;
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
@@ -82,7 +83,7 @@ public:
 	ObjectManager(const ObjectManager& obj);
 	~ObjectManager();
 
-	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles);
+	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles, int nGUI);
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
@@ -91,6 +92,7 @@ public:
 	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
+	void SetGUIWorld(const DirectX::XMMATRIX &world);
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);

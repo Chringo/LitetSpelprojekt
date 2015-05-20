@@ -13,6 +13,7 @@ public:
 	void Initialize();
 	void Render();
 
+
 	void ReleaseCOM();
 };
 

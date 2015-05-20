@@ -10,6 +10,7 @@ ObjectManager::ObjectManager()
 	m_objEnemies = nullptr;
 	m_objObstacles = nullptr;
 	m_objTiles = nullptr;
+	m_objGUI = nullptr;
 	cbPerObjectBuffer = nullptr;
 }
 
@@ -188,6 +189,17 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objTiles->vertexBuffer);
 		device->CreateBuffer(&indexBufferDesc, &iData, &m_objTiles->indexBuffer);
 	}
+
+	//GUI buffers (do we need this?)
+	if (m_objGUI)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objGUI->nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objGUI->nIndices;
+		vData.pSysMem = m_objGUI->input;
+		iData.pSysMem = m_objGUI->indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objGUI->vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objGUI->indexBuffer);
+	}
 }
 
 void ObjectManager::CreateSamplers(ID3D11Device* device)
@@ -247,10 +259,10 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	}
 }
 
-void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
+void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles, int nGUI)
 {
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Tile };
+	Object obj[] = { Player, Enemy, Tile, Menu };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
@@ -258,6 +270,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Enemy, m_objEnemies);
 	InitInstances(Obstacle, m_objObstacles);
 	InitInstances(Tile, m_objTiles);
+	InitInstances(Menu, m_objGUI);
 
 	CreateBuffers(device);
 	CreateSamplers(device);
@@ -276,6 +289,8 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 
 	for (INT i = 0; i < nTiles; i++)
 		m_objTiles->world.push_back(mat);
+
+	//m_objGUI->world.push_back(mat);
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
@@ -335,6 +350,11 @@ void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objTiles->world[index], w);
 }
 
+void ObjectManager::SetGUIWorld(const DirectX::XMMATRIX &world)
+{
+	&m_objGUI[0];
+}
+
 void ObjectManager::Update()
 {
 	
@@ -348,6 +368,7 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 	RenderInstances(deviceContext, m_objEnemies);
 	RenderInstances(deviceContext, m_objObstacles);
 	RenderInstances(deviceContext, m_objTiles);
+	RenderInstances(deviceContext, m_objGUI);
 }
 
 void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &projection)

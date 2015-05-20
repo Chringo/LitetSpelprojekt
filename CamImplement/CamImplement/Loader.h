@@ -9,15 +9,16 @@
 
 #pragma comment (lib, "d3d11.lib")
 
-#define MAX_OBJECT_COUNT 4
-#define TEXTURE_COUNT 4
+#define MAX_OBJECT_COUNT 5
+#define TEXTURE_COUNT 5
 
 enum Object
 {
 	Player,
 	Enemy,
 	Obstacle,
-	Tile
+	Tile,
+	Menu
 };
 
 struct VertexType
