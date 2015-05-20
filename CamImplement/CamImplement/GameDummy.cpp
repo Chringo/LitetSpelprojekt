@@ -36,15 +36,22 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	path = LinkedList<XMFLOAT3>();
-
-	for (int x = 1; x < map->getChunkSize(); x++)
+	int mAmount = map->getChunkSize();
+	bool** disable = new bool*[mAmount];
+	for (int i = 0; i < mAmount; i++)
 	{
-		for (int z = 0; z < map->getChunkSize(); z++)
+		disable[i] = new bool[mAmount];
+		for (int j = 0; j < mAmount; j++)
 		{
-			path.insertLast(map->getBaseTiles()[x][z].worldpos);
-		}	
+			disable[i][j] = false;
+		}
 	}
+
+	
+
+
+
+
 
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
@@ -58,6 +65,36 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		enemyArr[i]->SetMovementSpeed(4.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
+
+	PF::Map pfMap = PF::Map(disable, mAmount);
+
+	// Need to extract the tile integers that the enemy is on
+
+	int x = 8;
+	int z = 0;
+
+	//int x = (int)enemyArr[2]->GetPosition().m128_i32[0];
+	//int z = (int)enemyArr[2]->GetPosition().m128_i32[2];
+
+	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(x, z);
+	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(0, 3);
+	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, pfMap);
+
+	path = LinkedList<XMFLOAT3>();
+
+	for (int i = 0; i < aPath.size(); i++)
+	{
+		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
+		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
+	}
+
+	//for (int x = 1; x < map->getChunkSize(); x++)
+	//{
+	//	for (int z = 0; z < map->getChunkSize(); z++)
+	//	{
+	//		path.insertLast(map->getBaseTiles()[x][z].worldpos);
+	//	}
+	//}
 
 	return S_OK;
 }
@@ -82,33 +119,36 @@ void GameDummy::Update(float deltaTime)
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
 	// Temporary example that should be removed later
-	bool there = true;
-	if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+	if (path.size() > 0)
 	{
-		enemyArr[2]->enqueueAction(Collision::MoveRight);
-		there = false;
-	}
-	else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
-	{
-		enemyArr[2]->enqueueAction(Collision::MoveLeft);
-		there = false;
-	}
+		bool there = true;
+		if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+		{
+			enemyArr[2]->enqueueAction(Collision::MoveRight);
+			there = false;
+		}
+		else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
+		{
+			enemyArr[2]->enqueueAction(Collision::MoveLeft);
+			there = false;
+		}
 
-	if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
-	{
-		enemyArr[2]->enqueueAction(Collision::MoveUp);
-		there = false;
-	}
-	else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
-	{
-		enemyArr[2]->enqueueAction(Collision::MoveDown);
-		there = false;
-	}
+		if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
+		{
+			enemyArr[2]->enqueueAction(Collision::MoveUp);
+			there = false;
+		}
+		else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
+		{
+			enemyArr[2]->enqueueAction(Collision::MoveDown);
+			there = false;
+		}
 
-	if (there)
-	{
-		path.insertLast(path.elementAt(0));
-		path.removeFirst();
+		if (there)
+		{
+			//path.insertLast(path.elementAt(0));
+			path.removeFirst();
+		}
 	}
 
 	player->Update(deltaTime);
