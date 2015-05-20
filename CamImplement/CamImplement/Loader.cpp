@@ -224,7 +224,7 @@ void Loader::LoadTextures(ID3D11Device* device)
 {
 	CoInitialize(NULL);
 
-	WCHAR* filename[TEXTURE_COUNT] = { L"Meshes/Textures/dummyTexture.png", L"Meshes/Textures/dummyEnemyTexture.png", L"Meshes/Textures/dummyTexture.png", L"Meshes/Textures/dummyTexture.png" };
+	WCHAR* filename[TEXTURE_COUNT] = { L"Meshes/Textures/dummyEnemyTexture.png", L"Meshes/Textures/tree01.png", L"Meshes/Textures/tree03.png", L"Meshes/Textures/groundTile01.png" };
 	m_textures = new ID3D11ShaderResourceView*[TEXTURE_COUNT];
 
 	for (int i = 0; i < TEXTURE_COUNT; i++)

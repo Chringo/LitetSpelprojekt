@@ -69,7 +69,7 @@ void GameDummy::Update(float deltaTime)
 	frames++;
 
 	std::wstringstream wss;
-	wss << "Fps: " << (INT)((float)frames / elapsedTime);
+	wss << "FPS: " << (INT)((float)frames / elapsedTime) << " Timer: " << (INT)(elapsedTime);
 	SetWindowText(windowHandle, wss.str().c_str());
 
 	// Get cursor position.

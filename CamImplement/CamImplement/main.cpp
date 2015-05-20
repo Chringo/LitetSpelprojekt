@@ -6,8 +6,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	const int width = 800;
-	const int height = 600;
+	const int width = 1280;
+	const int height = 720;
 
 	Graphics d3d_Graphics = Graphics();
 	MSG msg = { 0 };
