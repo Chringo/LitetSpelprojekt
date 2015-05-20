@@ -66,6 +66,7 @@ namespace Collision
 		float m_HitPoints = 100.f;
 		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
+		int m_currentActionFrame = 0;
 
 	private:
 		float m_Mass = 1.f;
@@ -85,6 +86,8 @@ namespace Collision
 
 		void SetAttackDirection(POINT clientCursorNDC);
 		void SetInputKey(Action action, int key);
+
+		float GetHitPoints();
 
 	private:
 		int m_Controls[8];

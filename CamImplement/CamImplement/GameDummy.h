@@ -41,6 +41,7 @@ public:
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
 	Collision::Action GetPlayerAction();
+	float GetPlayerHitPoints();
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();

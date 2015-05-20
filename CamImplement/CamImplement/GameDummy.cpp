@@ -113,7 +113,7 @@ void GameDummy::Update(float deltaTime)
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
-
+	
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
@@ -140,6 +140,11 @@ XMVECTOR GameDummy::GetPlayerPosition()
 Collision::Action GameDummy::GetPlayerAction()
 {
 	return player->GetCurrentAction();
+}
+
+float GameDummy::GetPlayerHitPoints()
+{
+	return player->GetHitPoints();
 }
 
 /// 
