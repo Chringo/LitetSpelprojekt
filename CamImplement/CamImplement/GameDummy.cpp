@@ -36,23 +36,6 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	int mAmount = map->getChunkSize();
-	bool** disable = new bool*[mAmount];
-	for (int i = 0; i < mAmount; i++)
-	{
-		disable[i] = new bool[mAmount];
-		for (int j = 0; j < mAmount; j++)
-		{
-			disable[i][j] = false;
-		}
-	}
-
-	
-
-
-
-
-
 	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
 
@@ -66,37 +49,40 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
+	PFTest();
+
+	return S_OK;
+}
+
+void GameDummy::PFTest()
+{
+	int mAmount = map->getChunkSize();
+	bool** disable = new bool*[mAmount];
+	for (int i = 0; i < mAmount; i++)
+	{
+		disable[i] = new bool[mAmount];
+		for (int j = 0; j < mAmount; j++)
+		{
+			disable[i][j] = false;
+		}
+	}
+
+	int xs = (int)enemyArr[2]->GetPosition().m128_f32[0] / map->TILESIZE;
+	int zs = (int)enemyArr[2]->GetPosition().m128_f32[2] / map->TILESIZE;
+	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
+
+	int xg = player->GetPosition().m128_f32[0] / map->TILESIZE;
+	int zg = player->GetPosition().m128_f32[2] / map->TILESIZE;
+	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
+
 	PF::Map pfMap = PF::Map(disable, mAmount);
-
-	// Need to extract the tile integers that the enemy is on
-
-	int x = 8;
-	int z = 0;
-
-	//int x = (int)enemyArr[2]->GetPosition().m128_i32[0];
-	//int z = (int)enemyArr[2]->GetPosition().m128_i32[2];
-
-	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(x, z);
-	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(0, 3);
 	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, pfMap);
-
-	path = LinkedList<XMFLOAT3>();
 
 	for (int i = 0; i < aPath.size(); i++)
 	{
 		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
 		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
 	}
-
-	//for (int x = 1; x < map->getChunkSize(); x++)
-	//{
-	//	for (int z = 0; z < map->getChunkSize(); z++)
-	//	{
-	//		path.insertLast(map->getBaseTiles()[x][z].worldpos);
-	//	}
-	//}
-
-	return S_OK;
 }
 
 void GameDummy::Update(float deltaTime)
@@ -149,6 +135,10 @@ void GameDummy::Update(float deltaTime)
 			//path.insertLast(path.elementAt(0));
 			path.removeFirst();
 		}
+	}
+	else
+	{
+		PFTest();
 	}
 
 	player->Update(deltaTime);

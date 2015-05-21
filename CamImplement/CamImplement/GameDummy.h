@@ -17,6 +17,7 @@ private:
 
 	// Testing bed for pathfinding - TO BE REMOVED LATER
 	LinkedList<DirectX::XMFLOAT3> path;
+	void PFTest();
 	// 
 
 	Collision::Player* player;
