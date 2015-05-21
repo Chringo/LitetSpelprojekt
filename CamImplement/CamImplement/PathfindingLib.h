@@ -46,6 +46,7 @@ namespace PF
 				this->x = copy.x;
 				this->z = copy.z;
 			}
+			~Coordinate() {}
 		};
 
 		struct Emitter
@@ -127,13 +128,21 @@ namespace PF
 			}
 			~Node()
 			{
-				delete self;
-				delete parent;
+				if (self != nullptr)
+				{
+					delete self;
+					self = nullptr;
+				}
+				if (parent != nullptr)
+				{
+					delete parent;
+					parent = nullptr;
+				}
 			}
 		};
 
-		static inline LinkedList<Coordinate> adjecentLinearNodes(Coordinate node, bool** disable, int amount);
-		static inline LinkedList<Emitter> adjecentLinearNodes(Emitter node, bool** disable, int amount);
+		static inline LinkedList<Coordinate> adjecentLinearNodes(const Coordinate* node, bool** disable, int amount);
+		static inline LinkedList<Emitter> adjecentLinearNodes(const Emitter* node, bool** disable, int amount);
 		static inline int limit(int check, int maxValue);
 
 
@@ -183,7 +192,7 @@ namespace PF
 
 			if (newEmitterBase.emitValue <= 255 && newEmitterBase.emitValue > 0)
 			{
-				LinkedList<Emitter> toAdd = adjecentLinearNodes(newEmitterBase, disable, map.arrSize);
+				LinkedList<Emitter> toAdd = adjecentLinearNodes(&newEmitterBase, disable, map.arrSize);
 				for (int j = 0; j < toAdd.size(); j++)
 				{
 					toVisit.insertLast(toAdd.elementAt(j));
@@ -210,27 +219,13 @@ namespace PF
 		int amount = map.arrSize;
 
 		Node*** nodeMap = new Node**[amount];
-		std::string s = "";
 		for (int x = 0; x < amount; x++)
 		{
 			nodeMap[x] = new Node*[amount];
 			for (int z = 0; z < amount; z++)
 			{
-				
-				//Node asdf = Node(new Coordinate(x, z), iM[x][z]);
 				Coordinate* c = new Coordinate(x, z);
 				nodeMap[x][z] = new Node(c, iM[x][z]);
-				s += "[" + std::to_string(nodeMap[x][z]->self->x) + "][" + std::to_string(nodeMap[x][z]->self->z) + "]";
-			}
-			s += "\n";
-		}
-
-		for (int x = 0; x < amount; x++)
-		{
-			for (int z = 0; z < amount; z++)
-			{
-				Node* asdf = nodeMap[x][z];
-				bool darknesIsYourAlly = false;
 			}
 		}
 
@@ -247,8 +242,8 @@ namespace PF
 		LinkedList<Coordinate*> openList = LinkedList<Coordinate*>();
 		LinkedList<Coordinate*> closedList = LinkedList<Coordinate*>();
 
-		Node currentNode = *nodeMap[start.x][start.z];
-		openList.insertLast(currentNode.self);
+		Node* currentNode = nodeMap[start.x][start.z];
+		openList.insertLast(currentNode->self);
 
 		bool pathFound = false;
 		int count = 0;
@@ -257,23 +252,23 @@ namespace PF
 			count++;
 			// Pick the node with the lowest F cost
 			int index = 0;
-			currentNode = *nodeMap[openList.elementAt(0)->x][openList.elementAt(0)->z];
+			currentNode = nodeMap[openList.elementAt(0)->x][openList.elementAt(0)->z];
 			for (int i = 1; i < openList.size(); i++)
 			{
-				Coordinate c = *openList.elementAt(i);
-				if (nodeMap[c.x][c.z]->fCost < currentNode.fCost)
+				Coordinate* c = openList.elementAt(i);
+				if (nodeMap[c->x][c->z]->fCost < currentNode->fCost)
 				{
-					currentNode = *nodeMap[c.x][c.z];
+					currentNode = nodeMap[c->x][c->z];
 					index = i;
 				}
 			}
 
 			openList.removeAt(index);
-			closedList.insertLast(currentNode.self);
+			closedList.insertLast(currentNode->self);
 			//
 
 			// Check if goal was reached
-			if (currentNode.self->x == goal.x && currentNode.self->z == goal.z)
+			if (currentNode->self->x == goal.x && currentNode->self->z == goal.z)
 			{
 				pathFound = true;
 				break;
@@ -281,37 +276,32 @@ namespace PF
 			//
 
 			// disable the position so it won´t show as adjacent
-			disable[currentNode.self->x][currentNode.self->z] = true;
+			disable[currentNode->self->x][currentNode->self->z] = true;
 			//
 
 			// Get adjecent coordinates of Nodes
-			LinkedList<Coordinate> adj = adjecentLinearNodes(*currentNode.self, disable, amount);
+			LinkedList<Coordinate> adj = adjecentLinearNodes(currentNode->self, disable, amount);
 			//
 
 			// Process adjecent nodes
 			for (int i = 0; i < adj.size(); i++)
 			{
-				Coordinate c = *nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->self;
-
-				if (c.x > 32 || c.z > 32)
-				{
-					int wtf = 1;
-				}
+				Coordinate* c = nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->self;
 
 				if (nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->parent == nullptr)
 				{
-					nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->parent = currentNode.self;
-					nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->gCost = currentNode.gCost + moveCost;
+					nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->parent = new Coordinate( *currentNode->self );
+					nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->gCost = currentNode->gCost + moveCost;
 					nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->fCost = nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->gCost + nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->hCost;
 
 					// Add to open list
 					openList.insertLast(nodeMap[adj.elementAt(i).x][adj.elementAt(i).z]->self);
 				}
-				else if ((currentNode.gCost + moveCost) < nodeMap[c.x][c.z]->gCost)
+				else if ((currentNode->gCost + moveCost) < nodeMap[c->x][c->z]->gCost)
 				{
-					nodeMap[c.x][c.z]->parent = currentNode.self;
-					nodeMap[c.x][c.z]->gCost = currentNode.gCost + moveCost;
-					nodeMap[c.x][c.z]->fCost = nodeMap[c.x][c.z]->gCost + nodeMap[c.x][c.z]->hCost;
+					nodeMap[c->x][c->z]->parent = new Coordinate( *currentNode->self );
+					nodeMap[c->x][c->z]->gCost = currentNode->gCost + moveCost;
+					nodeMap[c->x][c->z]->fCost = nodeMap[c->x][c->z]->gCost + nodeMap[c->x][c->z]->hCost;
 				}
 			}
 		}
@@ -320,30 +310,36 @@ namespace PF
 		LinkedList<Coordinate> path = LinkedList<Coordinate>();
 		if (pathFound) // Check if a path exists
 		{
-			while (currentNode.parent != nullptr)
+			while (currentNode->parent != nullptr)
 			{
-				path.insertFirst(*currentNode.self);
-				currentNode = *nodeMap[currentNode.parent->x][currentNode.parent->z];
+				path.insertFirst(*currentNode->self);
+				currentNode = nodeMap[currentNode->parent->x][currentNode->parent->z];
 			}
 		}
 		//
 
-		for (int i = 0; i < map.arrSize; i++)
+		for (int i = 0; i < amount; i++)
 		{
 			delete[] disable[i];
+			delete[] iM[i];
+			for (int j = 0; j < amount; j++)
+			{
+				delete nodeMap[i][j];
+			}
 			delete[] nodeMap[i];
 		}
 		delete[] disable;
 		delete[] nodeMap;
+		delete[] iM;
 
 		return path;
 	}
 
-	LinkedList<Pathfinding::Coordinate> Pathfinding::adjecentLinearNodes(Coordinate node, bool** disable, int amount)
+	LinkedList<Pathfinding::Coordinate> Pathfinding::adjecentLinearNodes(const Coordinate* node, bool** disable, int amount)
 	{
 		LinkedList<Coordinate> adjecentNodes = LinkedList<Coordinate>();
 
-		Coordinate newNode = Coordinate(node);
+		Coordinate newNode = Coordinate(*node);
 		newNode.x--; // linear
 		if (newNode.x >= 0 && !disable[newNode.x][newNode.z])
 		{
@@ -351,7 +347,7 @@ namespace PF
 			*disable[newNode.x, newNode.z] = true;
 		}
 
-		newNode = Coordinate(node);
+		newNode = Coordinate(*node);
 		newNode.x++; // linear
 		if (newNode.x < amount && !disable[newNode.x][newNode.z])
 		{
@@ -359,7 +355,7 @@ namespace PF
 			disable[newNode.x][newNode.z] = true;
 		}
 
-		newNode = Coordinate(node);
+		newNode = Coordinate(*node);
 		newNode.z--; // Linear
 		if (newNode.z >= 0 && !disable[newNode.x][newNode.z])
 		{
@@ -367,7 +363,7 @@ namespace PF
 			disable[newNode.x][newNode.z] = true;
 		}
 
-		newNode = Coordinate(node);
+		newNode = Coordinate(*node);
 		newNode.z++; // Linear
 		if (newNode.z < amount && !disable[newNode.x][newNode.z])
 		{
@@ -377,11 +373,11 @@ namespace PF
 
 		return adjecentNodes;
 	}
-	LinkedList<Pathfinding::Emitter> Pathfinding::adjecentLinearNodes(Emitter node, bool** disable, int amount)
+	LinkedList<Pathfinding::Emitter> Pathfinding::adjecentLinearNodes(const Emitter* node, bool** disable, int amount)
 	{
 		LinkedList<Emitter> adjecentNodes = LinkedList<Emitter>();
 
-		Emitter newNode = Emitter(node);
+		Emitter newNode = Emitter(*node);
 		newNode.x--; // linear
 		if (newNode.x >= 0 && !disable[newNode.x][newNode.z])
 		{
@@ -389,7 +385,7 @@ namespace PF
 			*disable[newNode.x, newNode.z] = true;
 		}
 
-		newNode = Emitter(node);
+		newNode = Emitter(*node);
 		newNode.x++; // linear
 		if (newNode.x < amount && !disable[newNode.x][newNode.z])
 		{
@@ -397,7 +393,7 @@ namespace PF
 			disable[newNode.x][newNode.z] = true;
 		}
 
-		newNode = Emitter(node);
+		newNode = Emitter(*node);
 		newNode.z--; // Linear
 		if (newNode.z >= 0 && !disable[newNode.x][newNode.z])
 		{
@@ -405,7 +401,7 @@ namespace PF
 			disable[newNode.x][newNode.z] = true;
 		}
 
-		newNode = Emitter(node);
+		newNode = Emitter(*node);
 		newNode.z++; // Linear
 		if (newNode.z < amount && !disable[newNode.x][newNode.z])
 		{
