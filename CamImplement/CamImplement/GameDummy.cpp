@@ -54,6 +54,18 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	return S_OK;
 }
 
+int GameDummy::floatToIntSpace(float floatCoord)
+{
+	int counter = 0;
+	while (floatCoord - map->TILESIZE > -map->TILESIZE)
+	{
+		counter++;
+		floatCoord -= map->TILESIZE;
+	}
+
+	return counter;
+}
+
 void GameDummy::PFTest()
 {
 	int mAmount = map->getChunkSize();
@@ -67,12 +79,14 @@ void GameDummy::PFTest()
 		}
 	}
 
-	int xs = (int)enemyArr[2]->GetPosition().m128_f32[0] / map->TILESIZE;
-	int zs = (int)enemyArr[2]->GetPosition().m128_f32[2] / map->TILESIZE;
+	int test = floatToIntSpace(15.0f);
+
+	int xs = floatToIntSpace(enemyArr[2]->GetPosition().m128_f32[0]);
+	int zs = floatToIntSpace(enemyArr[2]->GetPosition().m128_f32[2]);
 	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
 
-	int xg = player->GetPosition().m128_f32[0] / map->TILESIZE;
-	int zg = player->GetPosition().m128_f32[2] / map->TILESIZE;
+	int xg = floatToIntSpace(player->GetPosition().m128_f32[0]);
+	int zg = floatToIntSpace(player->GetPosition().m128_f32[2]);
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
 	PF::Map pfMap = PF::Map(disable, mAmount);
