@@ -17,9 +17,10 @@ private:
 
 	// Testing bed for pathfinding - TO BE REMOVED LATER
 	LinkedList<DirectX::XMFLOAT3> path;
-	void PFTest();
+	//
+
+	void setPathfinding(int enemyIndex);
 	int floatToIntSpace(float floatCoord);
-	// 
 
 	Collision::Player* player;
 	

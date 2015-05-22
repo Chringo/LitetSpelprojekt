@@ -49,7 +49,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	PFTest();
+	setPathfinding(2);
 
 	return S_OK;
 }
@@ -66,8 +66,9 @@ int GameDummy::floatToIntSpace(float floatCoord)
 	return counter;
 }
 
-void GameDummy::PFTest()
+void GameDummy::setPathfinding(int enemyIndex)
 {
+	// Allocates 2D bool array used for marking tiles as blocked
 	int mAmount = map->getChunkSize();
 	bool** disable = new bool*[mAmount];
 	for (int i = 0; i < mAmount; i++)
@@ -79,19 +80,26 @@ void GameDummy::PFTest()
 		}
 	}
 
-	int test = floatToIntSpace(15.0f);
-
-	int xs = floatToIntSpace(enemyArr[2]->GetPosition().m128_f32[0]);
-	int zs = floatToIntSpace(enemyArr[2]->GetPosition().m128_f32[2]);
+	// Converting the Enemy float space to int/Tile space and setting as start for A*
+	int xs = floatToIntSpace(enemyArr[enemyIndex]->GetPosition().m128_f32[0]);
+	int zs = floatToIntSpace(enemyArr[enemyIndex]->GetPosition().m128_f32[2]);
 	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
 
+	// Converting the Player float space to int/Tile space and setting as start for A*
 	int xg = floatToIntSpace(player->GetPosition().m128_f32[0]);
 	int zg = floatToIntSpace(player->GetPosition().m128_f32[2]);
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
+	// Makes handling of A* easier. Deallocates the 2D bool array
 	PF::Map pfMap = PF::Map(disable, mAmount);
+
+	// Feeding A* with data to deliver a path to target
 	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, pfMap);
 
+	// Removes the last Coordinate so the Enemy won´t try to occypy the same coord as the player
+	aPath.removeLast();
+
+	// Converts int/Tile coordinates to float Coordinates
 	for (int i = 0; i < aPath.size(); i++)
 	{
 		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
@@ -152,7 +160,7 @@ void GameDummy::Update(float deltaTime)
 	}
 	else
 	{
-		PFTest();
+		setPathfinding(2);
 	}
 
 	player->Update(deltaTime);
