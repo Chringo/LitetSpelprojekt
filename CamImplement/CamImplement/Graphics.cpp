@@ -261,6 +261,7 @@ void Graphics::Update(float deltaTime)
 
 	pointLight->setPosition(0, game->GetPlayerPosition());
 	pointLight->setColor(0, game->GetPlayerAction());
+	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
 	cbPerFrame.light = pointLight->getLight(0);
 	/*for (int i = 1; i < NUMBER_OF_LIGHTS; i++)
 	{

@@ -92,7 +92,7 @@ void GameDummy::Update(float deltaTime)
 	frames++;
 
 	std::wstringstream wss;
-	wss << "Fps: " << (INT)((float)frames / elapsedTime);
+	wss << "FPS: " << (INT)((float)frames / elapsedTime) << " Timer: " << (INT)(elapsedTime);
 	SetWindowText(windowHandle, wss.str().c_str());
 
 	// Get cursor position.
@@ -143,7 +143,7 @@ void GameDummy::Update(float deltaTime)
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
-
+	
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
@@ -170,6 +170,11 @@ XMVECTOR GameDummy::GetPlayerPosition()
 Collision::Action GameDummy::GetPlayerAction()
 {
 	return player->GetCurrentAction();
+}
+
+float GameDummy::GetPlayerHitPoints()
+{
+	return player->GetHitPoints();
 }
 
 /// 

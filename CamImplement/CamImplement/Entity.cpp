@@ -72,7 +72,8 @@ void Entity::Push(DirectX::XMVECTOR force)
 void Entity::PerformAction(Action action)
 {
 	// Only handle exlusive actions. Movement works independently.
-	m_CurrentAction = action < 4 ? action : Idle;
+	if (m_CurrentAction == Idle && action < 4)
+		m_CurrentAction = action;
 
 	// Higher number action overwrite lower.
 	switch (action)
@@ -139,6 +140,21 @@ HRESULT Player::Update(float deltaTime)
 		if (KEYDOWN(m_Controls[i]))
 			PerformAction((Action)i);
 
+	if (m_CurrentAction != Idle)
+	{
+		m_currentActionFrame++;
+
+		if ((m_CurrentAction == Attack1 || m_CurrentAction == Attack2) && m_currentActionFrame == 30)
+		{
+			m_HitPoints > 0 ? m_HitPoints -= 10.0f : m_HitPoints = 100.0f;
+		}
+		if (m_currentActionFrame == 60)
+		{
+			m_CurrentAction = Idle;
+			m_currentActionFrame = 0;
+		}
+	}
+
 	// Rotate input.
 	if (!XMVector3Equal(m_Move, XMVectorZero()))
 		m_Move = XMVector3Rotate(m_Move, XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV4, 0.f));
@@ -164,6 +180,11 @@ void Player::SetInputKey(Action action, int key)
 {
 	// Allow multiple non-exclusive bind.
 	m_Controls[(int)action] = key;
+}
+
+float Player::GetHitPoints()
+{
+	return m_HitPoints;
 }
 
 void Player::Attack()
