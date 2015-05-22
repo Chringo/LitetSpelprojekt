@@ -36,15 +36,15 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
 
 	enemyArrSize = 3;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
-	enemyArr = new Collision::Enemy*[enemyArrSize];
+	enemyArr = new Ent::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(map->getBaseTiles()[0][i+3].worldpos);
+		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
 		enemyArr[i]->SetMovementSpeed(4.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
@@ -132,23 +132,23 @@ void GameDummy::Update(float deltaTime)
 		bool there = true;
 		if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
 		{
-			enemyArr[2]->enqueueAction(Collision::MoveRight);
+			enemyArr[2]->enqueueAction(Ent::MoveRight);
 			there = false;
 		}
 		else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
 		{
-			enemyArr[2]->enqueueAction(Collision::MoveLeft);
+			enemyArr[2]->enqueueAction(Ent::MoveLeft);
 			there = false;
 		}
 
 		if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
 		{
-			enemyArr[2]->enqueueAction(Collision::MoveUp);
+			enemyArr[2]->enqueueAction(Ent::MoveUp);
 			there = false;
 		}
 		else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
 		{
-			enemyArr[2]->enqueueAction(Collision::MoveDown);
+			enemyArr[2]->enqueueAction(Ent::MoveDown);
 			there = false;
 		}
 
@@ -162,6 +162,7 @@ void GameDummy::Update(float deltaTime)
 	{
 		setPathfinding(2);
 	}
+	//
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
@@ -189,7 +190,7 @@ XMVECTOR GameDummy::GetPlayerPosition()
 	return player->GetPosition();
 }
 
-Collision::Action GameDummy::GetPlayerAction()
+Ent::Action GameDummy::GetPlayerAction()
 {
 	return player->GetCurrentAction();
 }

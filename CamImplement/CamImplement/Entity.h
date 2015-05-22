@@ -13,7 +13,7 @@
 
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x8000)
 
-namespace Collision
+namespace Ent
 {
 	enum Action
 	{

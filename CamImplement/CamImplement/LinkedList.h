@@ -211,7 +211,7 @@ T LinkedList<T>::removeLast()
 		throw std::string("List is empty!");
 	}
 
-	T value = -1;
+	T value;
 	if (size() == 1)
 	{
 		value = removeFirst();
@@ -228,7 +228,6 @@ T LinkedList<T>::removeLast()
 		value = temp->value;
 		delete temp;
 	}
-	size()--;
 	return value;
 }
 template<typename T>

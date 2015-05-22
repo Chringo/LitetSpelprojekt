@@ -6,7 +6,7 @@
 
 using namespace DirectX;
 using namespace std;
-using namespace Collision;
+using namespace Ent;
 
 // Entity
 
