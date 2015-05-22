@@ -39,6 +39,7 @@ namespace Collision
 		// Positional
 		DirectX::XMMATRIX GetTransform();
 		DirectX::XMVECTOR GetPosition();
+		DirectX::XMVECTOR GetAttackPosition();
 		void MoveTo(DirectX::XMVECTOR target);//
 		void SetPosition(DirectX::XMVECTOR position);//
 
@@ -51,6 +52,7 @@ namespace Collision
 		void SetMovementSpeed(float speed);
 		void PerformAction(Action action);
 		Action GetCurrentAction();
+		int GetCurrentActionFrame();
 		virtual void Attack() = 0;
 
 	protected:
@@ -62,11 +64,11 @@ namespace Collision
 		DirectX::XMVECTOR m_TargetLocation;
 
 		// Combat data.
-		float m_AttackRange = 1.f;
+		float m_AttackRange = 10.f;
 		float m_HitPoints = 100.f;
 		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
-		int m_currentActionFrame = 0;
+		int m_CurrentActionFrame = 0;
 
 	private:
 		float m_Mass = 1.f;

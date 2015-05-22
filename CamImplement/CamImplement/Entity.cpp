@@ -41,6 +41,11 @@ DirectX::XMVECTOR Entity::GetPosition()
 	return m_Position;
 }
 
+DirectX::XMVECTOR Entity::GetAttackPosition()
+{
+	return m_Position - XMVectorSet(0.f, 0.f, -m_AttackRange, 0.f) * XMQuaternionRotationRollPitchYawFromVector(m_Rotation);
+}
+
 ContainmentType Entity::Intersect(Entity *Entity)
 {
 	// Super optimized!
@@ -72,8 +77,10 @@ void Entity::Push(DirectX::XMVECTOR force)
 void Entity::PerformAction(Action action)
 {
 	// Only handle exlusive actions. Movement works independently.
-	if (m_CurrentAction == Idle && action < 4)
-		m_CurrentAction = action;
+	if (m_CurrentAction < 4)
+		return;
+
+	m_CurrentAction = (action < 4 ? action : Idle);
 
 	// Higher number action overwrite lower.
 	switch (action)
@@ -112,6 +119,11 @@ Action Entity::GetCurrentAction()
 	return m_CurrentAction;
 }
 
+int Entity::GetCurrentActionFrame()
+{
+	return m_CurrentActionFrame;
+}
+
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
@@ -142,16 +154,16 @@ HRESULT Player::Update(float deltaTime)
 
 	if (m_CurrentAction != Idle)
 	{
-		m_currentActionFrame++;
+		m_CurrentActionFrame++;
 
-		if ((m_CurrentAction == Attack1 || m_CurrentAction == Attack2) && m_currentActionFrame == 30)
+		if ((m_CurrentAction == Attack1 || m_CurrentAction == Attack2) && m_CurrentActionFrame == 30)
 		{
-			m_HitPoints > 0 ? m_HitPoints -= 10.0f : m_HitPoints = 100.0f;
+			m_HitPoints > 0 ? m_HitPoints -= 10.f : m_HitPoints = 100.f;
 		}
-		if (m_currentActionFrame == 60)
+		if (m_CurrentActionFrame == 60)
 		{
 			m_CurrentAction = Idle;
-			m_currentActionFrame = 0;
+			m_CurrentActionFrame = 0;
 		}
 	}
 
@@ -189,7 +201,7 @@ float Player::GetHitPoints()
 
 void Player::Attack()
 {
-
+	m_HitPoints > 0 ? m_HitPoints -= 10.f : m_HitPoints = 100.f;
 }
 
 // Enemy
@@ -221,6 +233,9 @@ HRESULT Enemy::Update(float deltaTime)
 	// Apply movement vector.
 	Entity::Update(deltaTime);
 
+	if (m_HitPoints <= 0)
+		m_Position = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+
 	return S_OK;
 }
 
@@ -243,5 +258,5 @@ Action Enemy::dequeueAction()
 }
 void Enemy::Attack()
 {
-
+	m_HitPoints = 0.f;
 }

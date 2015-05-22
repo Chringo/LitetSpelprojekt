@@ -20,6 +20,11 @@ private:
 	void PFTest();
 	// 
 
+	//- Attack data ------
+	bool* hitData;
+	void CheckPlayerAttack();
+	//--------------------
+
 	Collision::Player* player;
 	
 	int enemyArrSize;
