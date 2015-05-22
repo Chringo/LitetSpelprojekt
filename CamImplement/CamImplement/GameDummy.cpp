@@ -49,62 +49,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		enemyMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	setPathfinding(2);
-
 	return S_OK;
-}
-
-int GameDummy::floatToIntSpace(float floatCoord)
-{
-	int counter = 0;
-	while (floatCoord - map->TILESIZE > -map->TILESIZE)
-	{
-		counter++;
-		floatCoord -= map->TILESIZE;
-	}
-
-	return counter;
-}
-
-void GameDummy::setPathfinding(int enemyIndex)
-{
-	// Allocates 2D bool array used for marking tiles as blocked
-	int mAmount = map->getChunkSize();
-	bool** disable = new bool*[mAmount];
-	for (int i = 0; i < mAmount; i++)
-	{
-		disable[i] = new bool[mAmount];
-		for (int j = 0; j < mAmount; j++)
-		{
-			disable[i][j] = false;
-		}
-	}
-
-	// Converting the Enemy float space to int/Tile space and setting as start for A*
-	int xs = floatToIntSpace(enemyArr[enemyIndex]->GetPosition().m128_f32[0]);
-	int zs = floatToIntSpace(enemyArr[enemyIndex]->GetPosition().m128_f32[2]);
-	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
-
-	// Converting the Player float space to int/Tile space and setting as start for A*
-	int xg = floatToIntSpace(player->GetPosition().m128_f32[0]);
-	int zg = floatToIntSpace(player->GetPosition().m128_f32[2]);
-	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
-
-	// Makes handling of A* easier. Deallocates the 2D bool array
-	PF::Map pfMap = PF::Map(disable, mAmount);
-
-	// Feeding A* with data to deliver a path to target
-	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, pfMap);
-
-	// Removes the last Coordinate so the Enemy won´t try to occypy the same coord as the player
-	aPath.removeLast();
-
-	// Converts int/Tile coordinates to float Coordinates
-	for (int i = 0; i < aPath.size(); i++)
-	{
-		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
-		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
-	}
 }
 
 void GameDummy::Update(float deltaTime)
@@ -126,43 +71,51 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
-	// Temporary example that should be removed later
-	if (path.size() > 0)
+	/************************************* Pathfinding *************************************/
+
+	// Allocates 2D bool array used for marking tiles as blocked
+	bool** disable = new bool*[map->getChunkSize()];
+	for (int i = 0; i < map->getChunkSize(); i++)
 	{
-		bool there = true;
-		if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+		disable[i] = new bool[map->getChunkSize()];
+		for (int j = 0; j < map->getChunkSize(); j++)
 		{
-			enemyArr[2]->enqueueAction(Ent::MoveRight);
-			there = false;
-		}
-		else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Ent::MoveLeft);
-			there = false;
-		}
-
-		if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Ent::MoveUp);
-			there = false;
-		}
-		else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Ent::MoveDown);
-			there = false;
-		}
-
-		if (there)
-		{
-			//path.insertLast(path.elementAt(0));
-			path.removeFirst();
+			disable[i][j] = false;
 		}
 	}
-	else
+
+	float ts = map->TILESIZE;
+
+	// To make it so the enemies doesn´t go though each other. Not working as intended
+	for (int i = 0; i < enemyArrSize; i++)
 	{
-		setPathfinding(2);
+		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
 	}
-	//
+
+	// Makes handling of A* easier. Deallocates the 2D bool array
+	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
+
+	for (int i = 0; i < enemyArrSize; i++)
+	{
+		if (enemyArr[i]->path.size() > 0)
+		{
+			enemyArr[i]->updateMoveOrder();
+		}
+		else
+		{
+			enemyArr[i]->setPathfinding
+			(
+				map,
+				pfMap,
+				player->GetPosition().m128_f32[0], 
+				player->GetPosition().m128_f32[2]
+			);
+		}
+	}
+
+	delete pfMap;
+	
+	/************************************* Pathfinding *************************************/
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);

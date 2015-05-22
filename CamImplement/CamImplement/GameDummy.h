@@ -15,13 +15,6 @@ private:
 	Map* map;
 	DirectX::XMMATRIX* tileMatrixArr;
 
-	// Testing bed for pathfinding - TO BE REMOVED LATER
-	LinkedList<DirectX::XMFLOAT3> path;
-	//
-
-	void setPathfinding(int enemyIndex);
-	int floatToIntSpace(float floatCoord);
-
 	Ent::Player* player;
 	
 	int enemyArrSize;
