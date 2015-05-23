@@ -36,22 +36,20 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
 
-	player = new Collision::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
 
 	enemyArrSize = 3;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
-	enemyArr = new Collision::Enemy*[enemyArrSize];
 	hitData = new bool[enemyArrSize];
+	enemyArr = new Ent::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		enemyArr[i] = new Collision::Enemy(map->getBaseTiles()[0][i+3].worldpos);
+		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
 		enemyArr[i]->SetMovementSpeed(4.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[i] = false;
 	}
-
-	PFTest();
 
 	return S_OK;
 }
@@ -89,13 +87,13 @@ void GameDummy::PFTest()
 
 void GameDummy::CheckPlayerAttack()
 {
-	Collision::Action action = player->GetCurrentAction();
+	Ent::Action action = player->GetCurrentAction();
 	int frame = player->GetCurrentActionFrame();
 
-	if ((action != Collision::Attack1 && action != Collision::Attack2)
+	if ((action != Ent::Attack1 && action != Ent::Attack2)
 		|| (frame <= 20 || frame >= 40))
 		return;
-	else if ((action == Collision::Attack1 || action == Collision::Attack2)
+	else if ((action == Ent::Attack1 || action == Ent::Attack2)
 		&& frame == 50)
 	{
 		for (int i = 0; i < enemyArrSize; i++)
@@ -137,42 +135,51 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
-	// Temporary example that should be removed later
-	if (path.size() > 0)
+	/************************************* Pathfinding *************************************/
+
+	// Allocates 2D bool array used for marking tiles as blocked
+	bool** disable = new bool*[map->getChunkSize()];
+	for (int i = 0; i < map->getChunkSize(); i++)
 	{
-		bool there = true;
-		if (enemyArr[2]->GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+		disable[i] = new bool[map->getChunkSize()];
+		for (int j = 0; j < map->getChunkSize(); j++)
 		{
-			enemyArr[2]->enqueueAction(Collision::MoveRight);
-			there = false;
-		}
-		else if (enemyArr[2]->GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Collision::MoveLeft);
-			there = false;
-		}
-
-		if (enemyArr[2]->GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Collision::MoveUp);
-			there = false;
-		}
-		else if (enemyArr[2]->GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
-		{
-			enemyArr[2]->enqueueAction(Collision::MoveDown);
-			there = false;
-		}
-
-		if (there)
-		{
-			//path.insertLast(path.elementAt(0));
-			path.removeFirst();
+			disable[i][j] = false;
 		}
 	}
-	else
+
+	float ts = map->TILESIZE;
+
+	// To make it so the enemies doesn´t go though each other. Not working as intended
+	for (int i = 0; i < enemyArrSize; i++)
 	{
-		PFTest();
+		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
 	}
+
+	// Makes handling of A* easier. Deallocates the 2D bool array
+	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
+
+	for (int i = 0; i < enemyArrSize; i++)
+	{
+		if (enemyArr[i]->path.size() > 0)
+		{
+			enemyArr[i]->updateMoveOrder();
+		}
+		else
+		{
+			enemyArr[i]->setPathfinding
+			(
+				map,
+				pfMap,
+				player->GetPosition().m128_f32[0], 
+				player->GetPosition().m128_f32[2]
+			);
+		}
+	}
+
+	delete pfMap;
+	
+	/************************************* Pathfinding *************************************/
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
@@ -201,7 +208,7 @@ XMVECTOR GameDummy::GetPlayerPosition()
 	return player->GetPosition();
 }
 
-Collision::Action GameDummy::GetPlayerAction()
+Ent::Action GameDummy::GetPlayerAction()
 {
 	return player->GetCurrentAction();
 }

@@ -8,12 +8,14 @@
 #include <Windows.h>
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
+#include "PathfindingLib.h"
+#include "Map.h"
 
 #include "LQueue.h"
 
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x8000)
 
-namespace Collision
+namespace Ent
 {
 	enum Action
 	{
@@ -110,8 +112,20 @@ namespace Collision
 		HRESULT Update(float deltaTime);
 		void Attack() override;
 
+		int getXTileSpace(const float TILESIZE);
+		int getZTileSpace(const float TILESIZE);
+
+		void setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ);
+		void updateMoveOrder();
+
+		//public for the moment
+		LinkedList<DirectX::XMFLOAT3> path;
+
 	private:
 		LQueue<Action> orders;
+		int floatToIntSpace(float floatCoord, const float TILESIZE);
+		
+		
 	};
 	
 

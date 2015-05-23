@@ -25,10 +25,10 @@ private:
 	void CheckPlayerAttack();
 	//--------------------
 
-	Collision::Player* player;
+	Ent::Player* player;
 	
 	int enemyArrSize;
-	Collision::Enemy** enemyArr;
+	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 
 	POINT clientSize;
@@ -46,7 +46,7 @@ public:
 
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
-	Collision::Action GetPlayerAction();
+	Ent::Action GetPlayerAction();
 	float GetPlayerHitPoints();
 
 	int GetEnemyArrSize();
