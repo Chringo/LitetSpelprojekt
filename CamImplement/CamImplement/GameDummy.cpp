@@ -54,37 +54,6 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	return S_OK;
 }
 
-void GameDummy::PFTest()
-{
-	int mAmount = map->getChunkSize();
-	bool** disable = new bool*[mAmount];
-	for (int i = 0; i < mAmount; i++)
-	{
-		disable[i] = new bool[mAmount];
-		for (int j = 0; j < mAmount; j++)
-		{
-			disable[i][j] = false;
-		}
-	}
-
-	int xs = (int)enemyArr[2]->GetPosition().m128_f32[0] / map->TILESIZE;
-	int zs = (int)enemyArr[2]->GetPosition().m128_f32[2] / map->TILESIZE;
-	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
-
-	int xg = player->GetPosition().m128_f32[0] / map->TILESIZE;
-	int zg = player->GetPosition().m128_f32[2] / map->TILESIZE;
-	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
-
-	PF::Map pfMap = PF::Map(disable, mAmount);
-	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, pfMap);
-
-	for (int i = 0; i < aPath.size(); i++)
-	{
-		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
-		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
-	}
-}
-
 void GameDummy::CheckPlayerAttack()
 {
 	Ent::Action action = player->GetCurrentAction();

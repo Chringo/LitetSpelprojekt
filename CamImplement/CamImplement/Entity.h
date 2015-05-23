@@ -1,7 +1,3 @@
-//
-//
-//
-
 #ifndef ENTITY__H
 #define ENTITY__H
 
@@ -129,7 +125,7 @@ namespace Ent
 	};
 	
 
-} /// namespace Collision
+}
 
 
 #endif /// ENTITY__H
