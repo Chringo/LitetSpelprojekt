@@ -96,7 +96,7 @@ void GameDummy::CheckPlayerAttack()
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		d = XMVector3LengthEst(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
-		if (d < 10.f && !hitData[i])
+		if (d < 5.f && !hitData[i])
 		{
 			hitData[i] = true;
 			enemyArr[i]->Attack();

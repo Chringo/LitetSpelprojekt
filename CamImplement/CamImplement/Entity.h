@@ -65,7 +65,7 @@ namespace Ent
 		DirectX::XMVECTOR m_Force = DirectX::XMVectorZero();
 
 		// Combat data.
-		float m_AttackRange = 10.f;
+		float m_AttackRange = 5.f;
 		float m_HitPoints = 100.f;
 		Action m_CurrentAction = Idle;
 		int m_CurrentActionFrame = 0;
