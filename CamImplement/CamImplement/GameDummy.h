@@ -15,6 +15,11 @@ private:
 	Map* map;
 	DirectX::XMMATRIX* tileMatrixArr;
 
+	int obsArrSize;
+	Ent::Obstacle** obsArr;
+	DirectX::XMMATRIX* obsMatrixArr;
+
+
 	//- Attack data ------
 	bool* hitData;
 	void CheckPlayerAttack();
@@ -24,7 +29,7 @@ private:
 	// Stores the last tile coords of the player necessary for updating path of enemies
 	int lastX;
 	int lastZ;
-	
+
 	int enemyArrSize;
 	// Stores the last tile coords of the enemies (necessary for updating path of enemies)
 	PF::Pathfinding::Coordinate* lastEnemyCoord;
@@ -52,6 +57,9 @@ public:
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
+
+	//DirectX::XMMATRIX* GetObsMatrices();
+	//int GetObsArrSize() const;
 
 	DirectX::XMMATRIX* GetTileMatrices();
 	int GetNrOfTiles() const;

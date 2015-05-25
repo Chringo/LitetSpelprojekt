@@ -36,6 +36,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.y = r.bottom - r.top;
 
 	/************************************** Map  **************************************/
+
 	map = new Map(1, 5, 60.0f);
 	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
 	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
@@ -55,8 +56,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		{
 			if (map->getBaseTiles()[h][w].obstacle)
 			{
-				obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
-				obsArr[i]->SetMovementSpeed(0.f);
+				//obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
 				obsMatrixArr[i] = XMMatrixIdentity();
 				i++;
 			}
@@ -188,24 +188,24 @@ void GameDummy::Update(float deltaTime)
 		if (update)
 		{
 			enemyArr[i]->setPathfinding
-			(
+				(
 				map,
 				pfMap,
 				player->GetPosition().m128_f32[0],
 				player->GetPosition().m128_f32[2]
-			);
+				);
 		}
 		enemyArr[i]->updateMoveOrder();
 	}
 
 	delete pfMap;
-	
+
 	/************************************* Pathfinding *************************************/
 
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
 	CheckPlayerAttack();
-	
+
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
@@ -256,6 +256,23 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 }
 /// 
 /// Enemies
+///
+
+///
+/// Obstacles
+///
+//DirectX::XMMATRIX* GameDummy::GetObsMatrices()
+//{
+//	for (size_t i = 0; i < (size_t)obsArrSize; i++)
+//	{
+//		//obsMatrixArr[i] = obsArr[i]->GetBoundingBox();//Needs a modification...
+//	}
+//	return obsMatrixArr;
+//}
+//int GameDummy::GetObsArrSize() const
+//{
+//	return this->obsArrSize;
+//}
 ///
 
 DirectX::XMMATRIX* GameDummy::GetTileMatrices()
