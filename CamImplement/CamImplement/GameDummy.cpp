@@ -162,7 +162,7 @@ void GameDummy::Update(float deltaTime)
 	// Block and update if an Enemy moves
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
+		//disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
 		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts), enemyArr[i]->getZTileSpace(ts));
 		if (c != lastEnemyCoord[i])
 		{
