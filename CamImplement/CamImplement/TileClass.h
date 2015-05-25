@@ -16,8 +16,9 @@ private:
 
 	enum Type
 	{
-		Dummy,
-		Water
+		Grass,
+		Water,
+		Stone
 		/*
 		Grass1,
 		Grass2,
