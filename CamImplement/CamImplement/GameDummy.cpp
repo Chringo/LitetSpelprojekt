@@ -56,7 +56,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		{
 			if (map->getBaseTiles()[h][w].obstacle)
 			{
-				//obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
+				obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 10.f, 10.f);
 				obsMatrixArr[i] = XMMatrixIdentity();
 				i++;
 			}
@@ -202,14 +202,21 @@ void GameDummy::Update(float deltaTime)
 
 	/************************************* Pathfinding *************************************/
 
+	// Update game objects.
 	player->Update(deltaTime);
 	player->SetAttackDirection(cursor);
 	CheckPlayerAttack();
 
-	// Update game objects.
+	for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
+		player->Intersect(obsArr[obstacleId]);
+
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		enemyArr[i]->Update(deltaTime);
+
+		//for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
+			//enemyArr[i]->Intersect(obsArr[obstacleId]);
+		
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{

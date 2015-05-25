@@ -15,10 +15,9 @@ private:
 	Map* map;
 	DirectX::XMMATRIX* tileMatrixArr;
 
-	int obsArrSize;
+	unsigned int obsArrSize;
 	Ent::Obstacle** obsArr;
 	DirectX::XMMATRIX* obsMatrixArr;
-
 
 	//- Attack data ------
 	bool* hitData;
@@ -30,7 +29,7 @@ private:
 	int lastX;
 	int lastZ;
 
-	int enemyArrSize;
+	unsigned int enemyArrSize;
 	// Stores the last tile coords of the enemies (necessary for updating path of enemies)
 	PF::Pathfinding::Coordinate* lastEnemyCoord;
 	// The array of enemies
