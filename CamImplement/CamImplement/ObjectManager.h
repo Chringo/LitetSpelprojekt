@@ -65,6 +65,9 @@ private:
 	ObjectInstance*		m_objTiles;
 	ObjectInstance*		m_objMenu;
 	ObjectInstance*		m_objArrow;
+	int					m_objArrowStateSize;
+	int					currentState;
+	DirectX::XMFLOAT2*	m_objArrowPosState;
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;

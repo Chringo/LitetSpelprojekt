@@ -12,6 +12,7 @@ ObjectManager::ObjectManager()
 	m_objTiles = nullptr;
 	m_objMenu = nullptr;
 	m_objArrow = nullptr;
+	m_objArrowPosState = nullptr;
 	cbPerObjectBuffer = nullptr;
 }
 
@@ -22,6 +23,7 @@ ObjectManager::ObjectManager(const ObjectManager& obj)
 
 ObjectManager::~ObjectManager()
 {
+	delete[] m_objArrowPosState;
 }
 
 // *** FIX THIS ***
@@ -294,7 +296,16 @@ void ObjectManager::RenderGUI(ID3D11DeviceContext* deviceContext, ObjectInstance
 	for (UINT i = 0; i < arr->world.size (); i++)
 	{
 		// Update buffers & textures.
-		XMMATRIX world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
+		XMMATRIX world;
+		if (arr == m_objMenu)
+		{
+			world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
+		}
+		else
+		{
+			world = XMMatrixScaling(0.7f, 1.15f, 1.0f);
+			world *= XMMatrixTranslation(m_objArrowPosState[currentState].x, m_objArrowPosState[currentState].y, 0.0f);
+		}
 		XMMATRIX wvp = world * view * projection;
 		XMStoreFloat4x4 (&cbPerObject.World, XMMatrixTranspose (world));
 		XMStoreFloat4x4 (&cbPerObject.WVP, XMMatrixTranspose (wvp));
@@ -327,6 +338,12 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Tile, m_objTiles);
 	InitInstances(Menu, m_objMenu);
 	InitInstances(Arrow, m_objArrow);
+
+	m_objArrowStateSize = 2;
+	m_objArrowPosState = new DirectX::XMFLOAT2[m_objArrowStateSize];
+	m_objArrowPosState[0] = DirectX::XMFLOAT2(0.5f, -0.7f);
+	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
+	currentState = 1;
 
 	CreateBuffers(device);
 	CreateSamplers(device);
