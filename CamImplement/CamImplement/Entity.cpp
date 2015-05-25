@@ -10,7 +10,16 @@ using namespace Ent;
 
 // Entity
 
-Entity::Entity(){}
+Entity::Entity(XMVECTOR position, float moveSpeed, float mass)
+{
+	m_Position = position;
+	m_Speed = moveSpeed;
+	m_Mass = mass;
+}
+
+Entity::Entity(float xPosition, float zPosition, float moveSpeed, float mass)
+	: Entity(XMVectorSet(xPosition, 0.f, zPosition, 1.f), moveSpeed, mass)
+{}
 
 Entity::~Entity(){}
 
@@ -57,10 +66,11 @@ ContainmentType Entity::Intersect(Entity *entity)
 	if (XMVector3LengthEst(distance).m128_f32[0] > m_Radius + entity->m_Radius)
 		return DISJOINT;
 
-	// Momentum = mass * velocity.
+	// Calculate movement versus collision angle.
 	float angle0 = XMVector3AngleBetweenVectors(distance, this->m_Move).m128_f32[0];
 	float angle1 = XMVector3AngleBetweenVectors(distance, entity->m_Move).m128_f32[0];
 
+	// Mass * movespeed * angular modifier.
 	XMVECTOR force0 = XMVector3Normalize(-distance) * this->m_Mass * XMVector3LengthEst(m_Move) * angle0;
 	XMVECTOR force1 = XMVector3Normalize(distance) * entity->m_Mass * XMVector3LengthEst(entity->m_Move) * angle1;
 
@@ -148,6 +158,7 @@ int Entity::getZTileSpace(const float TILESIZE)
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
+	: Entity(position.m128_f32[0], position.m128_f32[2], 2.f, 1.f)
 {
 	Entity::m_Position = position;
 	Entity::m_Rotation = rotation;
@@ -228,6 +239,7 @@ void Player::Attack()
 // Enemy
 
 Enemy::Enemy(float x, float z)
+	: Entity(x, z, 1.f, 1.5f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -236,11 +248,9 @@ Enemy::Enemy(float x, float z)
 }
 
 Enemy::Enemy(XMFLOAT3 position)
+	: Entity(position.x, position.z, 1.f, 1.5f)
 {
-	Entity::m_Position = XMVectorSet(position.x, 0.f, position.z, 1.f);
-	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	orders = LQueue<Action>();
-	path = LinkedList<DirectX::XMFLOAT3>();
+	Enemy(position.x, position.z);
 }
 
 Enemy::~Enemy(){}
@@ -300,23 +310,17 @@ void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 	int zg = floatToIntSpace(goalZ, map->TILESIZE);
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
-
 	if (start != goal)
 	{
 		// Feeding A* with data to deliver a path to target
 		LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
-
-		if (aPath.size() != 0 && aPath.elementAt(0) == start)
-		{
-			aPath.removeFirst();
-		}
 
 		// Converts int/Tile coordinates to float Coordinates
 		for (int i = 0; i < aPath.size(); i++)
 		{
 			PF::Pathfinding::Coordinate c = aPath.elementAt(i);
 			path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
-		}
+		};
 	}
 }
 

@@ -153,7 +153,7 @@ void GameDummy::Update(float deltaTime)
 	}
 
 	// Update if player moves
-	if (lastX != player->getXTileSpace(ts) && lastZ != player->getZTileSpace(ts))
+	if (lastX != player->getXTileSpace(ts) || lastZ != player->getZTileSpace(ts))
 	{
 		lastX = player->getXTileSpace(ts);
 		lastZ = player->getZTileSpace(ts);
@@ -165,6 +165,7 @@ void GameDummy::Update(float deltaTime)
 
 	for (int i = 0; i < enemyArrSize; i++)
 	{
+		// Update path if a player or Enemy have moved from a tile to another
 		if (update)
 		{
 			enemyArr[i]->setPathfinding

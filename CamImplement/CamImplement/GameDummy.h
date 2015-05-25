@@ -21,11 +21,14 @@ private:
 	//--------------------
 
 	Ent::Player* player;
+	// Stores the last tile coords of the player necessary for updating path of enemies
 	int lastX;
 	int lastZ;
 	
 	int enemyArrSize;
+	// Stores the last tile coords of the enemies (necessary for updating path of enemies)
 	PF::Pathfinding::Coordinate* lastEnemyCoord;
+	// The array of enemies
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 
