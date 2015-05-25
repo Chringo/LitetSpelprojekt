@@ -279,19 +279,23 @@ void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 	int zs = getZTileSpace(map->TILESIZE);
 	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
 
-	// Converting the Player float space to int/Tile space and setting as start for A*
+	// Converting the Player float space to int/Tile space and setting as goal for A*
 	int xg = floatToIntSpace(goalX, map->TILESIZE);
 	int zg = floatToIntSpace(goalZ, map->TILESIZE);
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
-	// Feeding A* with data to deliver a path to target
-	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
 
-	// Converts int/Tile coordinates to float Coordinates
-	for (int i = 0; i < aPath.size(); i++)
+	if (start != goal)
 	{
-		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
-		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
+		// Feeding A* with data to deliver a path to target
+		LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
+
+		// Converts int/Tile coordinates to float Coordinates
+		for (int i = 0; i < aPath.size(); i++)
+		{
+			PF::Pathfinding::Coordinate c = aPath.elementAt(i);
+			path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
+		}
 	}
 }
 
