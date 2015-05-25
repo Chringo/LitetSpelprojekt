@@ -9,7 +9,7 @@ TileClass::TileClass()
 	this->base.worldpos.y = 0.0f;
 	this->base.worldpos.z = 0.0f;
 
-	this->type = Dummy;
+	this->type = Grass;
 }
 TileClass::TileClass(float startValue)
 {
@@ -20,7 +20,7 @@ TileClass::TileClass(float startValue)
 	this->base.worldpos.y = 0.0f;
 	this->base.worldpos.z = 0.0f;
 
-	this->type = Dummy;
+	this->type = Grass;
 }
 TileClass::TileClass(float startValue, DirectX::XMFLOAT3 _worldpos)
 {
@@ -29,7 +29,7 @@ TileClass::TileClass(float startValue, DirectX::XMFLOAT3 _worldpos)
 
 	this->base.worldpos = _worldpos;
 
-	this->type = Dummy;
+	this->type = Grass;
 }
 TileClass::~TileClass()
 {
@@ -73,9 +73,31 @@ DirectX::XMFLOAT3  TileClass::getWorldPos() const
 
 void TileClass::setType(int type)
 {
-	this->type = (Type)type;
+	switch (type)
+	{
+	case 0:
+		this->type = Grass;
+		break;
+	case 1:
+		this->type = Water;
+		break;
+	case 2:
+		this->type = Stone;
+		break;
+	default:
+		this->type = Grass;
+		break;
+	}
 }
 int TileClass::getType() const
 {
-	return (int)(this->type);
+	switch (type)
+	{
+	case Grass:
+		return 0;
+	case Water:
+		return 1;
+	case Stone:
+		return 2;
+	}
 }

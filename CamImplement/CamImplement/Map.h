@@ -22,8 +22,8 @@ private:
 
 	// Evaluation
 	int water;
-	int hill;// might not be needed
-	void EvaluateTile(TileClass tile);//TODO expand the variations
+	int peak;// might not be needed
+	void EvaluateTile(TileClass& tile);//TODO expand the variations
 	bool EvaluateMap();//TODO more accurate eval
 
 	// Calcs
@@ -36,8 +36,7 @@ public:
 	const float TILESIZE = 4.0f;
 
 	Map();
-	Map(int exponent, float startValue);//TODO Map starting point others than origo
-	Map(int exponent, float startValue, int seed);
+	Map(int randSeed, int exponent, float startValue);//TODO Map starting point others than origo
 	virtual ~Map();
 
 	void setSeed(float seed);
@@ -48,6 +47,8 @@ public:
 	float getOffset() const;
 	void setRandom(int value);
 	float getRandom();
+	int getWater() const;
+	int getPeak() const;
 
 	BaseTile** getBaseTiles();
 

@@ -57,7 +57,10 @@ DirectX::XMVECTOR Entity::GetPosition()
 
 DirectX::XMVECTOR Entity::GetAttackPosition()
 {
-	return m_Position - XMVectorSet(0.f, 0.f, -m_AttackRange, 0.f) * XMQuaternionRotationRollPitchYawFromVector(m_Rotation);
+	XMVECTOR atkPos = XMVectorSet(cosf(XMVectorGetY(m_Rotation)), 0.f, -sinf(XMVectorGetY(m_Rotation)), 0.f);
+	atkPos *= m_AttackRange;
+	atkPos += m_Position;
+	return atkPos;
 }
 
 bool Entity::Intersect(Entity *entity)
@@ -156,6 +159,26 @@ int Entity::GetCurrentActionFrame()
 	return m_CurrentActionFrame;
 }
 
+int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
+{
+	int counter = 0;
+	while (floatCoord - TILESIZE > -TILESIZE)
+	{
+		counter++;
+		floatCoord -= TILESIZE;
+	}
+	return counter;
+}
+
+int Entity::getXTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
+}
+int Entity::getZTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
+}
+
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
@@ -240,7 +263,7 @@ void Player::Attack()
 // Enemy
 
 Enemy::Enemy(float x, float z)
-	: Entity(x, z, 1.f, 1.f, 1.4f)
+	: Entity(x, z, 1.f, 1.f, 1.5f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -249,7 +272,7 @@ Enemy::Enemy(float x, float z)
 }
 
 Enemy::Enemy(XMFLOAT3 position)
-	: Entity(position.x, position.z, 1.f, 1.f, 1.f)
+	: Entity(position.x, position.z, 1.f, 1.f, 1.5f)
 {
 	Enemy(position.x, position.z);
 }
@@ -301,78 +324,67 @@ void Enemy::Attack()
 	m_HitPoints = 0.f;
 }
 
-int Enemy::getXTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
-}
-int Enemy::getZTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
-}
-
 void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 {
+	orders = LQueue<Action>();
+	path = LinkedList<DirectX::XMFLOAT3>();
+
 	// Converting the Enemy float space to int/Tile space and setting as start for A*
 	int xs = getXTileSpace(map->TILESIZE);
 	int zs = getZTileSpace(map->TILESIZE);
 	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
 
-	// Converting the Player float space to int/Tile space and setting as start for A*
+	// Converting the Player float space to int/Tile space and setting as goal for A*
 	int xg = floatToIntSpace(goalX, map->TILESIZE);
 	int zg = floatToIntSpace(goalZ, map->TILESIZE);
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
-	// Feeding A* with data to deliver a path to target
-	LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
-
-	// Converts int/Tile coordinates to float Coordinates
-	for (int i = 0; i < aPath.size(); i++)
+	if (start != goal)
 	{
-		PF::Pathfinding::Coordinate c = aPath.elementAt(i);
-		path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
+		// Feeding A* with data to deliver a path to target
+		LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
+
+		// Converts int/Tile coordinates to float Coordinates
+		for (int i = 0; i < aPath.size(); i++)
+		{
+			PF::Pathfinding::Coordinate c = aPath.elementAt(i);
+			path.insertLast(map->getBaseTiles()[c.x][c.z].worldpos);
+		};
 	}
 }
 
 void Enemy::updateMoveOrder()
 {
-	bool there = true;
-	if (GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+	if (path.size() != 0)
 	{
-		enqueueAction(Ent::MoveRight);
-		there = false;
-	}
-	else if (GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
-	{
-		enqueueAction(Ent::MoveLeft);
-		there = false;
-	}
+		bool there = true;
+		if (GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+		{
+			enqueueAction(Ent::MoveRight);
+			there = false;
+		}
+		else if (GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
+		{
+			enqueueAction(Ent::MoveLeft);
+			there = false;
+		}
 
-	if (GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
-	{
-		enqueueAction(Ent::MoveUp);
-		there = false;
-	}
-	else if (GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
-	{
-		enqueueAction(Ent::MoveDown);
-		there = false;
-	}
+		if (GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
+		{
+			enqueueAction(Ent::MoveUp);
+			there = false;
+		}
+		else if (GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
+		{
+			enqueueAction(Ent::MoveDown);
+			there = false;
+		}
 
-	if (there)
-	{
-		path.removeFirst();
+		if (there)
+		{
+			path.removeFirst();
+		}
 	}
-}
-
-int Enemy::floatToIntSpace(float floatCoord, const float TILESIZE)
-{
-	int counter = 0;
-	while (floatCoord - TILESIZE > -TILESIZE)
-	{
-		counter++;
-		floatCoord -= TILESIZE;
-	}
-	return counter;
 }
 
 Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
