@@ -10,7 +10,8 @@ ObjectManager::ObjectManager()
 	m_objEnemies = nullptr;
 	m_objObstacles = nullptr;
 	m_objTiles = nullptr;
-	m_objGUI = nullptr;
+	m_objMenu = nullptr;
+	m_objArrow = nullptr;
 	cbPerObjectBuffer = nullptr;
 }
 
@@ -190,15 +191,26 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 		device->CreateBuffer(&indexBufferDesc, &iData, &m_objTiles->indexBuffer);
 	}
 
-	//GUI buffers (do we need this?)
-	if (m_objGUI)
+	//Menu buffers
+	if (m_objMenu)
 	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objGUI->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objGUI->nIndices;
-		vData.pSysMem = m_objGUI->input;
-		iData.pSysMem = m_objGUI->indices;
-		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objGUI->vertexBuffer);
-		device->CreateBuffer(&indexBufferDesc, &iData, &m_objGUI->indexBuffer);
+		vertexBufferDesc.ByteWidth = sizeof (InputType) * m_objMenu->nVertices;
+		indexBufferDesc.ByteWidth = sizeof (UINT) * m_objMenu->nIndices;
+		vData.pSysMem = m_objMenu->input;
+		iData.pSysMem = m_objMenu->indices;
+		device->CreateBuffer (&vertexBufferDesc, &vData, &m_objMenu->vertexBuffer);
+		device->CreateBuffer (&indexBufferDesc, &iData, &m_objMenu->indexBuffer);
+	}
+
+	//Menu Arrow buffers
+	if (m_objArrow)
+	{
+		vertexBufferDesc.ByteWidth = sizeof (InputType) * m_objArrow->nVertices;
+		indexBufferDesc.ByteWidth = sizeof (UINT) * m_objArrow->nIndices;
+		vData.pSysMem = m_objArrow->input;
+		iData.pSysMem = m_objArrow->indices;
+		device->CreateBuffer (&vertexBufferDesc, &vData, &m_objArrow->vertexBuffer);
+		device->CreateBuffer (&indexBufferDesc, &iData, &m_objArrow->indexBuffer);
 	}
 }
 
@@ -259,10 +271,53 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	}
 }
 
-void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles, int nGUI)
+void ObjectManager::RenderGUI(ID3D11DeviceContext* deviceContext, ObjectInstance* arr)
+{
+	if (!arr)
+		return;
+
+	UINT stride = sizeof (InputType);
+	UINT offset = 0;
+	ID3D11ShaderResourceView* srv = nullptr;
+
+	// Set object buffer & textures.
+	deviceContext->IASetVertexBuffers (0, 1, &arr->vertexBuffer, &stride, &offset);
+	deviceContext->IASetIndexBuffer (arr->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+
+	srv = m_loader->getTexture (arr->textureIndex);
+	deviceContext->PSSetShaderResources (0, 1, &srv);
+
+	DirectX::XMMATRIX view = XMMatrixIdentity ();
+	DirectX::XMMATRIX projection = XMMatrixIdentity();
+
+	// Draw buffers for each world matrix.
+	for (UINT i = 0; i < arr->world.size (); i++)
+	{
+		// Update buffers & textures.
+		XMMATRIX world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
+		XMMATRIX wvp = world * view * projection;
+		XMStoreFloat4x4 (&cbPerObject.World, XMMatrixTranspose (world));
+		XMStoreFloat4x4 (&cbPerObject.WVP, XMMatrixTranspose (wvp));
+
+		D3D11_MAPPED_SUBRESOURCE cb;
+		ZeroMemory (&cb, sizeof (D3D11_MAPPED_SUBRESOURCE));
+		deviceContext->Map (cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+		memcpy (cb.pData, &cbPerObject, sizeof (constBufferPerObject));
+		deviceContext->Unmap (cbPerObjectBuffer, 0);
+
+		// Pass data to shaders.
+		deviceContext->VSSetConstantBuffers (0, 1, &cbPerObjectBuffer);
+		//deviceContext->PSSetShader (pixeshader, 0, 0); <-- add later if we want to remove lights
+
+		// Draw mesh.
+		deviceContext->DrawIndexed (arr->nIndices, 0, 0);
+	}
+}
+
+void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Tile, Menu };
+	Object obj[] = { Player, Enemy, Tile, Menu, Arrow };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
@@ -270,14 +325,15 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Enemy, m_objEnemies);
 	InitInstances(Obstacle, m_objObstacles);
 	InitInstances(Tile, m_objTiles);
-	InitInstances(Menu, m_objGUI);
+	InitInstances(Menu, m_objMenu);
+	InitInstances(Arrow, m_objArrow);
 
 	CreateBuffers(device);
 	CreateSamplers(device);
 
 	// Create instances.
 	XMFLOAT4X4 mat;
-	XMStoreFloat4x4(&mat, XMMatrixIdentity());
+	XMStoreFloat4x4(&mat, XMMatrixIdentity ());
 
 	m_objPlayer->world.push_back(mat);
 
@@ -290,7 +346,9 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	for (INT i = 0; i < nTiles; i++)
 		m_objTiles->world.push_back(mat);
 
-	//m_objGUI->world.push_back(mat);
+	m_objMenu->world.push_back (mat);
+
+	m_objArrow->world.push_back (mat);
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
@@ -350,9 +408,9 @@ void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objTiles->world[index], w);
 }
 
-void ObjectManager::SetGUIWorld(const DirectX::XMMATRIX &world)
+void ObjectManager::SetGUIWorld (const DirectX::XMMATRIX &world)
 {
-	&m_objGUI[0];
+	//&m_objGUI[0];
 }
 
 void ObjectManager::Update()
@@ -364,11 +422,16 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
+
+	//IMPORTANT: If you put two planes in the same matrix pos,
+	//the one that is called first (Arrow vs Menu for example)
+	//gets rendered over the other one.
 	RenderInstances(deviceContext, m_objPlayer);
 	RenderInstances(deviceContext, m_objEnemies);
 	RenderInstances(deviceContext, m_objObstacles);
 	RenderInstances(deviceContext, m_objTiles);
-	RenderInstances(deviceContext, m_objGUI);
+	RenderGUI	   (deviceContext, m_objArrow);
+	RenderGUI	   (deviceContext, m_objMenu);
 }
 
 void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &projection)
@@ -400,6 +463,16 @@ void ObjectManager::ReleaseCOM()
 	{
 		m_objObstacles->Delete();
 		delete m_objObstacles;
+	}
+	if (m_objMenu)
+	{
+		m_objMenu->Delete ();
+		delete m_objMenu;
+	}
+	if (m_objArrow)
+	{
+		m_objArrow->Delete ();
+		delete m_objArrow;
 	}
 
 	cbPerObjectBuffer->Release();

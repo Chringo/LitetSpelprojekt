@@ -233,7 +233,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	gui = new GUI();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles(), 1);
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	pointLight->Initialize(NUMBER_OF_LIGHTS);
@@ -288,7 +288,7 @@ void Graphics::Render()
 	rDeviceContext->PSSetShader(rPS, nullptr, 0);
 	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
 
-	objManager->Render(rDeviceContext);
+	objManager->Render (rDeviceContext);
 	gui->Render();
 }
 

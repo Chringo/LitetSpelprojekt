@@ -63,7 +63,8 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
-	ObjectInstance*		m_objGUI;
+	ObjectInstance*		m_objMenu;
+	ObjectInstance*		m_objArrow;
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
@@ -74,6 +75,7 @@ private:
 
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
+	void RenderGUI(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
 	//void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
 
 	void CreateSamplers(ID3D11Device* device);
@@ -83,7 +85,7 @@ public:
 	ObjectManager(const ObjectManager& obj);
 	~ObjectManager();
 
-	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles, int nGUI);
+	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles);
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
@@ -92,7 +94,7 @@ public:
 	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
-	void SetGUIWorld(const DirectX::XMMATRIX &world);
+	void SetGUIWorld (const DirectX::XMMATRIX &world);
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);

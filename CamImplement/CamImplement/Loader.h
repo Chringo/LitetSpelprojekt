@@ -9,8 +9,8 @@
 
 #pragma comment (lib, "d3d11.lib")
 
-#define MAX_OBJECT_COUNT 5
-#define TEXTURE_COUNT 5
+#define MAX_OBJECT_COUNT 6
+#define TEXTURE_COUNT 6
 
 enum Object
 {
@@ -18,7 +18,8 @@ enum Object
 	Enemy,
 	Obstacle,
 	Tile,
-	Menu
+	Menu,
+	Arrow
 };
 
 struct VertexType
