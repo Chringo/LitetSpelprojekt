@@ -36,6 +36,9 @@ HRESULT Entity::Update(float deltaTime)
 	m_Position += m_Move;
 	m_Position += m_Force;
 
+	if (m_HitFrameCount > 0)
+		m_HitFrameCount < 20 ? m_HitFrameCount++ : m_HitFrameCount = 0;
+
 	return S_OK;
 }
 
@@ -159,6 +162,16 @@ int Entity::GetCurrentActionFrame()
 	return m_CurrentActionFrame;
 }
 
+int Entity::GetHitFrameCount()
+{
+	return m_HitFrameCount;
+}
+
+bool Entity::IsDead()
+{
+	return m_Dead;
+}
+
 int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
 {
 	int counter = 0;
@@ -214,7 +227,7 @@ HRESULT Player::Update(float deltaTime)
 
 		if ((m_CurrentAction == Attack1 || m_CurrentAction == Attack2) && m_CurrentActionFrame == 30)
 		{
-			m_HitPoints > 0 ? m_HitPoints -= 10.f : m_HitPoints = 100.f;
+			//Attack();
 		}
 		if (m_CurrentActionFrame == 60)
 		{
@@ -257,7 +270,10 @@ float Player::GetHitPoints()
 
 void Player::Attack()
 {
-	m_HitPoints > 0 ? m_HitPoints -= 10.f : m_HitPoints = 100.f;
+	if (m_HitFrameCount == 0)
+		m_HitFrameCount++;
+
+	m_HitPoints > 0 ? m_HitPoints -= 10.f : m_Dead = true;
 }
 
 // Enemy
@@ -296,9 +312,6 @@ HRESULT Enemy::Update(float deltaTime)
 	// Apply movement vector.
 	Entity::Update(deltaTime);
 
-	if (m_HitPoints <= 0)
-		m_Position = XMVectorSet(0.f, 0.f, 0.f, 0.f);
-
 	return S_OK;
 }
 
@@ -321,7 +334,9 @@ Action Enemy::dequeueAction()
 }
 void Enemy::Attack()
 {
-	m_HitPoints = 0.f;
+	m_HitPoints -= 50.f;
+	m_HitFrameCount = 1;
+	m_Dead = m_HitPoints <= 0.f;
 }
 
 void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)

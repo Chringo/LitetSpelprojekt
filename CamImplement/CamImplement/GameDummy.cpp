@@ -78,24 +78,22 @@ void GameDummy::CheckPlayerAttack()
 	Ent::Action action = player->GetCurrentAction();
 	int frame = player->GetCurrentActionFrame();
 
-	if ((action != Ent::Attack1 && action != Ent::Attack2)
-		|| (frame <= 20 || frame >= 40))
-		return;
-	else if ((action == Ent::Attack1 || action == Ent::Attack2)
-		&& frame == 50)
+	if (frame == 50)
 	{
 		for (int i = 0; i < enemyArrSize; i++)
 		{
 			hitData[i] = false;
 		}
-		return;
 	}
+	if ((action != Ent::Attack1 && action != Ent::Attack2)
+		|| (frame <= 20 || frame >= 40))
+		return;
 
 	XMVECTOR atkPos = player->GetAttackPosition();
 	float d = 0.f;
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		d = XMVector3LengthEst(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
+		d = XMVector3Length(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
 		if (d < 5.f && !hitData[i])
 		{
 			hitData[i] = true;
@@ -183,19 +181,26 @@ void GameDummy::Update(float deltaTime)
 	
 	/************************************* Pathfinding *************************************/
 
-	player->Update(deltaTime);
-	player->SetAttackDirection(cursor);
-	CheckPlayerAttack();
+	if (!player->IsDead())
+	{
+		player->Update(deltaTime);
+		player->SetAttackDirection(cursor);
+		CheckPlayerAttack();
+	}
 	
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		enemyArr[i]->Update(deltaTime);
-		player->Intersect(enemyArr[i]);
-		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
+		bool dead = enemyArr[i]->IsDead();
+		if (!dead)
 		{
-			if (i != j)
-				enemyArr[i]->Intersect(enemyArr[j]);
+			enemyArr[i]->Update(deltaTime);
+			player->Intersect(enemyArr[i]);
+			for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
+			{
+				if (i != j)
+					enemyArr[i]->Intersect(enemyArr[j]);
+			}
 		}
 	}
 }
@@ -247,6 +252,16 @@ DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 int GameDummy::GetNrOfTiles() const
 {
 	return map->getNrOfTiles();
+}
+
+bool GameDummy::IsPlayerHit()
+{
+	return player->GetHitFrameCount() || player->IsDead();
+}
+
+bool GameDummy::IsEnemyHit(int index)
+{
+	return enemyArr[index]->GetHitFrameCount() || enemyArr[index]->IsDead();
 }
 
 void GameDummy::ReleaseCOM(){}

@@ -53,6 +53,8 @@ namespace Ent
 		void PerformAction(Action action);
 		Action GetCurrentAction();
 		int GetCurrentActionFrame();
+		int GetHitFrameCount();
+		bool IsDead();
 		virtual void Attack() = 0;
 
 		int getXTileSpace(const float TILESIZE);
@@ -73,6 +75,8 @@ namespace Ent
 		float m_HitPoints = 100.f;
 		Action m_CurrentAction = Idle;
 		int m_CurrentActionFrame = 0;
+		int m_HitFrameCount = 0;
+		bool m_Dead = false;
 
 		int floatToIntSpace(float floatCoord, const float TILESIZE);
 

@@ -56,6 +56,9 @@ public:
 	DirectX::XMMATRIX* GetTileMatrices();
 	int GetNrOfTiles() const;
 
+	bool IsPlayerHit();
+	bool IsEnemyHit(int index);
+
 	void ReleaseCOM();
 };
 

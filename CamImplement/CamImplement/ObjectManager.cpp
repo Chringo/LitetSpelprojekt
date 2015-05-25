@@ -233,6 +233,16 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
 
+		if (arr->hit.size() > 0)
+		{
+			if (arr->hit.at(i))
+				cbPerObject.Hue = HUE_HIT;
+			else
+				cbPerObject.Hue = HUE_DEFAULT;
+		}
+		else
+			cbPerObject.Hue = HUE_DEFAULT;
+		
 		D3D11_MAPPED_SUBRESOURCE cb;
 		ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		deviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
@@ -267,9 +277,13 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	XMStoreFloat4x4(&mat, XMMatrixIdentity());
 
 	m_objPlayer->world.push_back(mat);
+	m_objPlayer->hit.push_back(false);
 
 	for (INT i = 0; i < nEnemies; i++)
+	{
 		m_objEnemies->world.push_back(mat);
+		m_objEnemies->hit.push_back(false);
+	}
 	
 	for (INT i = 0; i < nObstacles; i++)
 		m_objObstacles->world.push_back(mat);
@@ -279,6 +293,16 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
+}
+
+void ObjectManager::SetPlayerHit(bool hit)
+{
+	m_objPlayer->hit[0] = hit;
+}
+
+void ObjectManager::SetEnemyHit(int index, bool hit)
+{
+	m_objEnemies->hit[index] = hit;
 }
 
 void ObjectManager::SetPlayerWorld(const XMMATRIX &world)
@@ -333,6 +357,21 @@ void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
 	//Passing world directly into StoreFloat causes random access violation
 	XMMATRIX w = world;
 	XMStoreFloat4x4(&m_objTiles->world[index], w);
+}
+
+int ObjectManager::GetEnemyCount()
+{
+	return m_objEnemies->world.size();
+}
+
+int ObjectManager::GetObstacleCount()
+{
+	return m_objObstacles->world.size();
+}
+
+int ObjectManager::GetTileCount()
+{
+	return m_objTiles->world.size();
 }
 
 void ObjectManager::Update()

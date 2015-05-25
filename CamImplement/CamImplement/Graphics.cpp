@@ -259,15 +259,16 @@ void Graphics::Update(float deltaTime)
 	objManager->Update();
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
+	objManager->SetPlayerHit(game->IsPlayerHit());
+	for (int i = 0; i < objManager->GetEnemyCount(); i++)
+	{
+		objManager->SetEnemyHit(i, game->IsEnemyHit(i));
+	}
+
 	pointLight->setPosition(0, game->GetPlayerPosition());
 	pointLight->setColor(0, game->GetPlayerAction());
 	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
 	cbPerFrame.light = pointLight->getLight(0);
-	/*for (int i = 1; i < NUMBER_OF_LIGHTS; i++)
-	{
-		pointLight->setPosition(i, DirectX::XMVectorSet(i * 50.0f, 0.0f, i * 50.0f, 0.0f));
-		cbPerFrame.light[i] = pointLight->getLight(i);
-	}*/
 
 	D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
