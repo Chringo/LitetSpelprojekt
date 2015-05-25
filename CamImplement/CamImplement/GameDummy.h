@@ -21,8 +21,11 @@ private:
 	//--------------------
 
 	Ent::Player* player;
+	int lastX;
+	int lastZ;
 	
 	int enemyArrSize;
+	PF::Pathfinding::Coordinate* lastEnemyCoord;
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 

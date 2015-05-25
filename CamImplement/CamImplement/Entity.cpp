@@ -124,6 +124,26 @@ int Entity::GetCurrentActionFrame()
 	return m_CurrentActionFrame;
 }
 
+int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
+{
+	int counter = 0;
+	while (floatCoord - TILESIZE > -TILESIZE)
+	{
+		counter++;
+		floatCoord -= TILESIZE;
+	}
+	return counter;
+}
+
+int Entity::getXTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
+}
+int Entity::getZTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
+}
+
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
@@ -218,6 +238,7 @@ Enemy::Enemy(XMFLOAT3 position)
 {
 	Entity::m_Position = XMVectorSet(position.x, 0.f, position.z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	orders = LQueue<Action>();
 	path = LinkedList<DirectX::XMFLOAT3>();
 }
 
@@ -263,17 +284,11 @@ void Enemy::Attack()
 	m_HitPoints = 0.f;
 }
 
-int Enemy::getXTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
-}
-int Enemy::getZTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
-}
-
 void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 {
+	orders = LQueue<Action>();
+	path = LinkedList<DirectX::XMFLOAT3>();
+
 	// Converting the Enemy float space to int/Tile space and setting as start for A*
 	int xs = getXTileSpace(map->TILESIZE);
 	int zs = getZTileSpace(map->TILESIZE);
@@ -290,6 +305,11 @@ void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 		// Feeding A* with data to deliver a path to target
 		LinkedList<PF::Pathfinding::Coordinate> aPath = PF::Pathfinding::Astar(start, goal, *pfMap);
 
+		if (aPath.size() != 0 && aPath.elementAt(0) == start)
+		{
+			aPath.removeFirst();
+		}
+
 		// Converts int/Tile coordinates to float Coordinates
 		for (int i = 0; i < aPath.size(); i++)
 		{
@@ -301,42 +321,35 @@ void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 
 void Enemy::updateMoveOrder()
 {
-	bool there = true;
-	if (GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+	if (path.size() != 0)
 	{
-		enqueueAction(Ent::MoveRight);
-		there = false;
-	}
-	else if (GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
-	{
-		enqueueAction(Ent::MoveLeft);
-		there = false;
-	}
+		bool there = true;
+		if (GetPosition().m128_f32[0] < path.elementAt(0).x - 0.1f)
+		{
+			enqueueAction(Ent::MoveRight);
+			there = false;
+		}
+		else if (GetPosition().m128_f32[0] > path.elementAt(0).x + 0.1f)
+		{
+			enqueueAction(Ent::MoveLeft);
+			there = false;
+		}
 
-	if (GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
-	{
-		enqueueAction(Ent::MoveUp);
-		there = false;
-	}
-	else if (GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
-	{
-		enqueueAction(Ent::MoveDown);
-		there = false;
-	}
+		if (GetPosition().m128_f32[2] < path.elementAt(0).z - 0.1f)
+		{
+			enqueueAction(Ent::MoveUp);
+			there = false;
+		}
+		else if (GetPosition().m128_f32[2] > path.elementAt(0).z + 0.1f)
+		{
+			enqueueAction(Ent::MoveDown);
+			there = false;
+		}
 
-	if (there)
-	{
-		path.removeFirst();
+		if (there)
+		{
+			path.removeFirst();
+		}
 	}
 }
 
-int Enemy::floatToIntSpace(float floatCoord, const float TILESIZE)
-{
-	int counter = 0;
-	while (floatCoord - TILESIZE > -TILESIZE)
-	{
-		counter++;
-		floatCoord -= TILESIZE;
-	}
-	return counter;
-}

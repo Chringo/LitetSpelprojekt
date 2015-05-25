@@ -5,19 +5,25 @@ using namespace DirectX;
 GameDummy::GameDummy()
 {
 	player = nullptr;
+
+	lastEnemyCoord = nullptr;
 	enemyArr = nullptr;
 	enemyMatrixArr = nullptr;
+
 	map = nullptr;
 }
 
 GameDummy::~GameDummy()
 {
 	delete player;
+
+	delete[] lastEnemyCoord;
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		delete enemyArr[i];
 	}
 	delete[] enemyArr;
+
 	delete[] map;
 }
 
@@ -29,27 +35,40 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
 
+	/************************************** Map  **************************************/
+
 	map = new Map();
 	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
 	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
 	{
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
+	/**********************************************************************************/	
+	/************************************* Player *************************************/
 
 	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	player->SetMovementSpeed(4.f);
 
+	lastX = -1;
+	lastZ = -1;
+
+	/**********************************************************************************/	
+	/************************************* Enemy  *************************************/
+
 	enemyArrSize = 3;
+	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	hitData = new bool[enemyArrSize];
 	enemyArr = new Ent::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
+		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
 		enemyArr[i]->SetMovementSpeed(4.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[i] = false;
 	}
+	/**********************************************************************************/
 
 	return S_OK;
 }
@@ -119,10 +138,26 @@ void GameDummy::Update(float deltaTime)
 
 	float ts = map->TILESIZE;
 
-	// To make it so the enemies doesn´t go though each other. Not working as intended
+	bool update = false;
+
+	// Block and update if an Enemy moves
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
+		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts), enemyArr[i]->getZTileSpace(ts));
+		if (c != lastEnemyCoord[i])
+		{
+			lastEnemyCoord[i] = c;
+			update = true;
+		}
+	}
+
+	// Update if player moves
+	if (lastX != player->getXTileSpace(ts) && lastZ != player->getZTileSpace(ts))
+	{
+		lastX = player->getXTileSpace(ts);
+		lastZ = player->getZTileSpace(ts);
+		update = true;
 	}
 
 	// Makes handling of A* easier. Deallocates the 2D bool array
@@ -130,20 +165,17 @@ void GameDummy::Update(float deltaTime)
 
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		if (enemyArr[i]->path.size() > 0)
-		{
-			enemyArr[i]->updateMoveOrder();
-		}
-		else
+		if (update)
 		{
 			enemyArr[i]->setPathfinding
 			(
 				map,
 				pfMap,
-				player->GetPosition().m128_f32[0], 
+				player->GetPosition().m128_f32[0],
 				player->GetPosition().m128_f32[2]
 			);
 		}
+		enemyArr[i]->updateMoveOrder();
 	}
 
 	delete pfMap;

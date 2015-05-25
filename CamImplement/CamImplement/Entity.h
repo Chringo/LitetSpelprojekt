@@ -53,6 +53,9 @@ namespace Ent
 		int GetCurrentActionFrame();
 		virtual void Attack() = 0;
 
+		int getXTileSpace(const float TILESIZE);
+		int getZTileSpace(const float TILESIZE);
+
 	protected:
 		
 		// Movement data.
@@ -67,6 +70,8 @@ namespace Ent
 		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
 		int m_CurrentActionFrame = 0;
+
+		int floatToIntSpace(float floatCoord, const float TILESIZE);
 
 	private:
 		float m_Mass = 1.f;
@@ -108,20 +113,12 @@ namespace Ent
 		HRESULT Update(float deltaTime);
 		void Attack() override;
 
-		int getXTileSpace(const float TILESIZE);
-		int getZTileSpace(const float TILESIZE);
-
 		void setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ);
 		void updateMoveOrder();
 
-		//public for the moment
-		LinkedList<DirectX::XMFLOAT3> path;
-
 	private:
+		LinkedList<DirectX::XMFLOAT3> path;
 		LQueue<Action> orders;
-		int floatToIntSpace(float floatCoord, const float TILESIZE);
-		
-		
 	};
 	
 
