@@ -36,14 +36,33 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.y = r.bottom - r.top;
 
 	/************************************** Map  **************************************/
-
 	map = new Map(1, 5, 60.0f);
 	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
 	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
 	{
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
-	/**********************************************************************************/	
+	/**********************************************************************************/
+	/************************************ Obstacle ************************************/
+	obsArrSize = map->getWater();
+	obsMatrixArr = new XMMATRIX[obsArrSize];
+	obsArr = new Ent::Obstacle*[obsArrSize];
+	int cSize = map->getChunkSize();
+	int i = 0;
+	for (int h = 0; h < cSize; h++)
+	{
+		for (int w = 0; w < cSize; w++)
+		{
+			if (map->getBaseTiles()[h][w].obstacle)
+			{
+				obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
+				obsArr[i]->SetMovementSpeed(0.f);
+				obsMatrixArr[i] = XMMatrixIdentity();
+				i++;
+			}
+		}
+	}
+	/**********************************************************************************/
 	/************************************* Player *************************************/
 
 	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
@@ -52,7 +71,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	lastX = -1;
 	lastZ = -1;
 
-	/**********************************************************************************/	
+	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
 
 	enemyArrSize = 3;
