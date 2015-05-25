@@ -43,7 +43,10 @@ DirectX::XMVECTOR Entity::GetPosition()
 
 DirectX::XMVECTOR Entity::GetAttackPosition()
 {
-	return m_Position - XMVectorSet(0.f, 0.f, -m_AttackRange, 0.f) * XMQuaternionRotationRollPitchYawFromVector(m_Rotation);
+	XMVECTOR atkPos = XMVectorSet(cosf(XMVectorGetY(m_Rotation)), 0.f, -sinf(XMVectorGetY(m_Rotation)), 0.f);
+	atkPos *= m_AttackRange;
+	atkPos += m_Position;
+	return atkPos;
 }
 
 ContainmentType Entity::Intersect(Entity *Entity)

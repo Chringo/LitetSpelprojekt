@@ -64,7 +64,7 @@ namespace Collision
 		DirectX::XMVECTOR m_TargetLocation;
 
 		// Combat data.
-		float m_AttackRange = 10.f;
+		float m_AttackRange = 5.f;
 		float m_HitPoints = 100.f;
 		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
