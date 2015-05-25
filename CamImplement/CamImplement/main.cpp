@@ -35,20 +35,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		{
 			// Update time.
 			QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
-			FLOAT deltaTime = (currentTime - previousTime) * secondsPerTick;
+			FLOAT deltaTime = 0;
 
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			//else
-			//{
+
+			// Suspend while application loses focus.
+			if (wndHandle == GetFocus())
+			{
+				deltaTime = (currentTime - previousTime) * secondsPerTick;
+
 				d3d_Graphics.Update(deltaTime);
 				d3d_Graphics.Render();
 
 				d3d_Graphics.SwapFBBuffer();
-			//}
+			}
 
 			// Frame over.
 			previousTime = currentTime;
