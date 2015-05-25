@@ -1,11 +1,14 @@
 #ifndef OBJECTMANAGER_H
 #define OBJECTMANAGER_H
 
+#include <Windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
 
 #include "Loader.h"
+
+#define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x1)
 
 #pragma comment (lib, "d3d11.lib")
 
@@ -78,8 +81,6 @@ private:
 
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
-	void RenderGUI(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
-	//void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
 
 	void CreateSamplers(ID3D11Device* device);
 
