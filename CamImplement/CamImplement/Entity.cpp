@@ -21,6 +21,9 @@ HRESULT Entity::Update(float deltaTime)
 
 	// Update position.
 	m_Position += m_Move;
+	m_Position += m_Force;
+
+	m_Force *= m_Friction;
 
 	return S_OK;
 }
@@ -46,32 +49,30 @@ DirectX::XMVECTOR Entity::GetAttackPosition()
 	return m_Position - XMVectorSet(0.f, 0.f, -m_AttackRange, 0.f) * XMQuaternionRotationRollPitchYawFromVector(m_Rotation);
 }
 
-ContainmentType Entity::Intersect(Entity *Entity)
+ContainmentType Entity::Intersect(Entity *entity)
 {
 	// Super optimized!
-	XMVECTOR distance = Entity->m_Position - m_Position;
+	XMVECTOR distance = entity->m_Position - m_Position;
 
-	if (XMVector3LengthEst(distance).m128_f32[0] > m_Radius + Entity->m_Radius)
+	if (XMVector3LengthEst(distance).m128_f32[0] > m_Radius + entity->m_Radius)
 		return DISJOINT;
 
-	CollisionHit(Entity);
-	
+	// Momentum = mass * velocity.
+	float angle0 = XMVector3AngleBetweenVectors(distance, this->m_Move).m128_f32[0];
+	float angle1 = XMVector3AngleBetweenVectors(distance, entity->m_Move).m128_f32[0];
+
+	XMVECTOR force0 = XMVector3Normalize(-distance) * this->m_Mass * XMVector3LengthEst(m_Move) * angle0;
+	XMVECTOR force1 = XMVector3Normalize(distance) * entity->m_Mass * XMVector3LengthEst(entity->m_Move) * angle1;
+
+	this->Push(force0 - force1);
+	entity->Push(force1 - force0);
+
 	return INTERSECTS;
-}
-
-void Entity::CollisionHit(Entity *entity)
-{
-	XMVECTOR direction = entity->m_Position - m_Position;
-	XMVECTOR force = XMVector3Normalize(direction);
-	float length = XMVector3LengthEst(m_Move - entity->m_Move).m128_f32[0];
-
-	// Apply collision force to objects.
-
 }
 
 void Entity::Push(DirectX::XMVECTOR force)
 {
-	m_Move = force;
+	m_Force = force;
 }
 
 void Entity::PerformAction(Action action)

@@ -43,7 +43,6 @@ namespace Ent
 
 		// Collision
 		DirectX::ContainmentType Intersect(Entity *entity);
-		void CollisionHit(Entity *entity);
 		void Push(DirectX::XMVECTOR force);
 
 		// Combat
@@ -59,12 +58,14 @@ namespace Ent
 		DirectX::XMVECTOR m_Position;
 		DirectX::XMVECTOR m_Rotation;
 		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
+		DirectX::XMVECTOR m_Force = DirectX::XMVectorZero();
 		DirectX::XMVECTOR m_TargetLocation;
+		float m_Friction = 0.7f;
+		float m_Speed = 1.f;
 
 		// Combat data.
 		float m_AttackRange = 10.f;
 		float m_HitPoints = 100.f;
-		float m_Speed = 1.f;
 		Action m_CurrentAction = Idle;
 		int m_CurrentActionFrame = 0;
 
@@ -122,6 +123,13 @@ namespace Ent
 		int floatToIntSpace(float floatCoord, const float TILESIZE);
 		
 		
+	};
+
+	class Obstacle : public Entity
+	{
+		Obstacle() {};
+		~Obstacle() {};
+
 	};
 	
 
