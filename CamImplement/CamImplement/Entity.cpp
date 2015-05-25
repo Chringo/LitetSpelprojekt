@@ -388,18 +388,16 @@ void Enemy::updateMoveOrder()
 }
 
 Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
-	: Entity(xPosition, zPosition, 0, mass, 0.f)
 {
 	m_Bounds.Center = XMFLOAT3(xPosition, 0.f, zPosition);
 	m_Bounds.Extents = XMFLOAT3(xExtend, 10.f, zExtend);
+	XMVECTOR orientation = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XM_PIDIV4);
+	XMStoreFloat4(&m_Bounds.Orientation, orientation);
 };
 
 Obstacle::~Obstacle() {};
 
-DirectX::BoundingBox Obstacle::GetBoundingBox()
+DirectX::BoundingOrientedBox Obstacle::GetBoundingBox()
 {
-	DirectX::BoundingBox out;
-	m_Bounds.Transform(out, Entity::GetTransform());
-
-	return out;
+	return m_Bounds;
 }

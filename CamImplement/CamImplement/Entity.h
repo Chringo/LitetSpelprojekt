@@ -130,16 +130,16 @@ namespace Ent
 	};
 
 	// Collidable square hitbox obstacle.
-	class Obstacle : public Entity
+	class Obstacle
 	{
 	public:
 		Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend);
 		~Obstacle();
 
-		DirectX::BoundingBox GetBoundingBox();
+		DirectX::BoundingOrientedBox GetBoundingBox();
 
 	private:
-		DirectX::BoundingBox m_Bounds;
+		DirectX::BoundingOrientedBox m_Bounds;
 	};
 
 }
