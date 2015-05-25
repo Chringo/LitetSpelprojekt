@@ -91,6 +91,7 @@ bool Entity::Intersect(Obstacle *obstacle)
 
 	bool r = false;
 
+	// Built-in quick discard.
 	if (r = obstacle->GetBoundingBox().Intersects(s))
 	{
 		m_Position -= m_Move;
@@ -239,7 +240,7 @@ void Player::Attack()
 // Enemy
 
 Enemy::Enemy(float x, float z)
-	: Entity(x, z, 1.f, 1.5f, 1.f)
+	: Entity(x, z, 1.f, 1.f, 1.4f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -248,7 +249,7 @@ Enemy::Enemy(float x, float z)
 }
 
 Enemy::Enemy(XMFLOAT3 position)
-	: Entity(position.x, position.z, 1.f, 1.5f, 1.f)
+	: Entity(position.x, position.z, 1.f, 1.f, 1.f)
 {
 	Enemy(position.x, position.z);
 }

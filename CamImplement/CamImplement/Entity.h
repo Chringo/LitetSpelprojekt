@@ -26,11 +26,14 @@ namespace Ent
 		Idle
 	};
 
+	// Forward declaration.
+	class Obstacle;
+	
 	class Entity
 	{
 	public:
-		Entity(DirectX::XMVECTOR position, float moveSpeed, float mass);
-		Entity(float xPosition, float zPosition, float moveSpeed, float mass);
+		Entity(DirectX::XMVECTOR position, float moveSpeed, float mass, float radius);
+		Entity(float xPosition, float zPosition, float moveSpeed, float mass, float radius);
 		virtual ~Entity();
 
 		virtual HRESULT Update(float deltaTime);
@@ -41,7 +44,8 @@ namespace Ent
 		DirectX::XMVECTOR GetAttackPosition();
 
 		// Collision
-		DirectX::ContainmentType Intersect(Entity *entity);
+		bool Intersect(Entity *entity);
+		bool Intersect(Obstacle *obstacle);
 		void Push(DirectX::XMVECTOR force);
 
 		// Combat
@@ -54,7 +58,7 @@ namespace Ent
 	protected:
 		
 		// Movement data.
-		float m_Friction = 0.7f;
+		float m_Friction = 0.5f;
 		float m_Speed = 1.f;
 		DirectX::XMVECTOR m_Position = DirectX::XMVectorZero();
 		DirectX::XMVECTOR m_Rotation = DirectX::XMVectorZero();
@@ -91,6 +95,11 @@ namespace Ent
 	private:
 		int m_Controls[8];
 
+		float m_ActionTimer = 0.f;
+
+		float m_ActionWindUp[8];
+		float m_AbilityExecution[8];
+
 	};
 
 	class Enemy : public Entity
@@ -125,13 +134,16 @@ namespace Ent
 	// Collidable square hitbox obstacle.
 	class Obstacle : public Entity
 	{
-		Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend) : Entity(xPosition, zPosition, 0, mass) {};
-		~Obstacle() {};
+	public:
+		Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend);
+		~Obstacle();
 
+		DirectX::BoundingBox GetBoundingBox();
+
+	private:
+		DirectX::BoundingBox m_Bounds;
 	};
-	
 
 }
-
 
 #endif /// ENTITY__H
