@@ -47,6 +47,16 @@ namespace PF
 				this->z = copy.z;
 			}
 			~Coordinate() {}
+
+			bool operator==(const Coordinate& right)
+			{
+				bool identical = false;
+				if (x == right.x && z == right.z)
+				{
+					identical = true;
+				}
+				return identical;
+			}
 		};
 
 		struct Emitter
