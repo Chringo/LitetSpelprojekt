@@ -10,15 +10,16 @@ using namespace Ent;
 
 // Entity
 
-Entity::Entity(XMVECTOR position, float moveSpeed, float mass)
+Entity::Entity(XMVECTOR position, float moveSpeed, float mass, float radius)
 {
 	m_Position = position;
 	m_Speed = moveSpeed;
 	m_Mass = mass;
+	m_Radius = radius;
 }
 
-Entity::Entity(float xPosition, float zPosition, float moveSpeed, float mass)
-	: Entity(XMVectorSet(xPosition, 0.f, zPosition, 1.f), moveSpeed, mass)
+Entity::Entity(float xPosition, float zPosition, float moveSpeed, float mass, float radius)
+	: Entity(XMVectorSet(xPosition, 0.f, zPosition, 1.f), moveSpeed, mass, radius)
 {}
 
 Entity::~Entity(){}
@@ -28,11 +29,12 @@ HRESULT Entity::Update(float deltaTime)
 	// Set proper movement speed => 'm_Speed' UnitLengths per second.
 	m_Move = XMVector3Normalize(m_Move) * deltaTime * m_Speed;
 
-	// Update position.
+	// Reduce friction.
+	m_Force *= m_Friction;
+
+	// Apply movement and force to position.
 	m_Position += m_Move;
 	m_Position += m_Force;
-
-	m_Force *= m_Friction;
 
 	return S_OK;
 }
@@ -58,7 +60,7 @@ DirectX::XMVECTOR Entity::GetAttackPosition()
 	return m_Position - XMVectorSet(0.f, 0.f, -m_AttackRange, 0.f) * XMQuaternionRotationRollPitchYawFromVector(m_Rotation);
 }
 
-ContainmentType Entity::Intersect(Entity *entity)
+bool Entity::Intersect(Entity *entity)
 {
 	// Super optimized!
 	XMVECTOR distance = entity->m_Position - m_Position;
@@ -78,6 +80,24 @@ ContainmentType Entity::Intersect(Entity *entity)
 	entity->Push(force1 - force0);
 
 	return INTERSECTS;
+}
+
+bool Entity::Intersect(Obstacle *obstacle)
+{
+	// Create bounding sphere.
+	BoundingSphere s;
+	XMStoreFloat3(&s.Center, m_Position);
+	s.Radius = m_Radius;
+
+	bool r = false;
+
+	if (r = obstacle->GetBoundingBox().Intersects(s))
+	{
+		m_Position -= m_Move;
+		m_Position -= m_Force;
+	}
+
+	return r;
 }
 
 void Entity::Push(DirectX::XMVECTOR force)
@@ -138,7 +158,7 @@ int Entity::GetCurrentActionFrame()
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation)
-	: Entity(position.m128_f32[0], position.m128_f32[2], 2.f, 1.f)
+	: Entity(position.m128_f32[0], position.m128_f32[2], 2.f, 1.f, 1.f)	
 {
 	Entity::m_Position = position;
 	Entity::m_Rotation = rotation;
@@ -219,7 +239,7 @@ void Player::Attack()
 // Enemy
 
 Enemy::Enemy(float x, float z)
-	: Entity(x, z, 1.f, 1.5f)
+	: Entity(x, z, 1.f, 1.5f, 1.f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -228,7 +248,7 @@ Enemy::Enemy(float x, float z)
 }
 
 Enemy::Enemy(XMFLOAT3 position)
-	: Entity(position.x, position.z, 1.f, 1.5f)
+	: Entity(position.x, position.z, 1.f, 1.5f, 1.f)
 {
 	Enemy(position.x, position.z);
 }
@@ -243,6 +263,11 @@ HRESULT Enemy::Update(float deltaTime)
 	{
 		PerformAction(dequeueAction());
 	}
+
+	// Rotate to match move vector.
+	float a = m_Move.m128_f32[0];
+	float b = m_Move.m128_f32[2];
+	m_Rotation.m128_f32[1] = -atan2(a, b);
 
 	// Apply movement vector.
 	Entity::Update(deltaTime);
@@ -347,4 +372,21 @@ int Enemy::floatToIntSpace(float floatCoord, const float TILESIZE)
 		floatCoord -= TILESIZE;
 	}
 	return counter;
+}
+
+Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
+	: Entity(xPosition, zPosition, 0, mass, 0.f)
+{
+	m_Bounds.Center = XMFLOAT3(xPosition, 0.f, zPosition);
+	m_Bounds.Extents = XMFLOAT3(xExtend, 10.f, zExtend);
+};
+
+Obstacle::~Obstacle() {};
+
+DirectX::BoundingBox Obstacle::GetBoundingBox()
+{
+	DirectX::BoundingBox out;
+	m_Bounds.Transform(out, Entity::GetTransform());
+
+	return out;
 }
