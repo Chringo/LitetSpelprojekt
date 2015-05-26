@@ -8,7 +8,9 @@
 #define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.2f, 0.0f, 0.0f)
 #define LIGHT_DEFAULT_AMBIENT		DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
 #define LIGHT_DEFAULT_DIFFUSE		DirectX::XMFLOAT4(0.2f, 0.8f, 0.2f, 1.0f)
-#define LIGHT_ATTACK_DIFFUSE		DirectX::XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f)
+
+#define LIGHT_ATTACK1_DIFFUSE		DirectX::XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f)
+#define LIGHT_BLOCK_DIFFUSE			DirectX::XMFLOAT4(0.2f, 0.2f, 0.8f, 1.0f)
 
 enum Action
 {

@@ -47,7 +47,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	/************************************* Player *************************************/
 
 	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	player->SetMovementSpeed(4.f);
+	player->SetMovementSpeed(9.f);
 
 	lastX = -1;
 	lastZ = -1;
@@ -64,7 +64,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
-		enemyArr[i]->SetMovementSpeed(4.f);
+		enemyArr[i]->SetMovementSpeed(8.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[i] = false;
 	}

@@ -43,7 +43,12 @@ void PointLight::setColor(int index, int action)
 	case Attack1:
 
 	case Attack2:
-		lightArr[index].diffuse = LIGHT_ATTACK_DIFFUSE;
+		lightArr[index].diffuse = LIGHT_ATTACK1_DIFFUSE;
+		break;
+	case Block:
+
+	case Dodge:
+		lightArr[index].diffuse = LIGHT_BLOCK_DIFFUSE;
 		break;
 	case Idle:
 		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
