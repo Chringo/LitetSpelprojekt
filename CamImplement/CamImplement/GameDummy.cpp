@@ -56,7 +56,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		{
 			if (map->getBaseTiles()[h][w].obstacle)
 			{
-				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
+				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 2.f, 2.f);
 				obsMatrixArr[index] = XMMatrixIdentity();
 				index++;
 			}

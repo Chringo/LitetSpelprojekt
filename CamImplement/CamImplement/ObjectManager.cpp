@@ -313,7 +313,7 @@ void ObjectManager::SetObstaclesWorld(int index, const XMMATRIX &world)
 {
 	//Passing world directly into StoreFloat causes random access violation
 	XMMATRIX w = world;
-	XMStoreFloat4x4(&m_objTiles->world[index], w);
+	XMStoreFloat4x4(&m_objObstacles->world[index], w);
 }
 
 void ObjectManager::SetTilesWorld(const XMMATRIX* arr)
