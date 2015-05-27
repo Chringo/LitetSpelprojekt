@@ -137,6 +137,7 @@ namespace Ent
 		~Obstacle();
 
 		DirectX::BoundingOrientedBox GetBoundingBox();
+		DirectX::XMMATRIX GetTransform();
 
 	private:
 		DirectX::BoundingOrientedBox m_Bounds;

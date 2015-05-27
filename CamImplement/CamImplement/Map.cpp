@@ -114,6 +114,10 @@ int Map::getPeak() const
 {
 	return this->peak;
 }
+int Map::getObstacles() const
+{
+	return (getWater() + getPeak());
+}
 
 int Map::pow(int base, int exponent)
 {

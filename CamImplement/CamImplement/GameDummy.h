@@ -57,8 +57,8 @@ public:
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
 
-	//DirectX::XMMATRIX* GetObsMatrices();
-	//int GetObsArrSize() const;
+	DirectX::XMMATRIX* GetObsMatrices();
+	int GetObsArrSize() const;
 
 	DirectX::XMMATRIX* GetTileMatrices();
 	int GetNrOfTiles() const;

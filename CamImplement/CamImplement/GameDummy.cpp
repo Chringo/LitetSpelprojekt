@@ -45,20 +45,20 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	}
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
-	obsArrSize = map->getWater();
+	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
 	obsArr = new Ent::Obstacle*[obsArrSize];
 	int cSize = map->getChunkSize();
-	int i = 0;
+	int index = 0;
 	for (int h = 0; h < cSize; h++)
 	{
 		for (int w = 0; w < cSize; w++)
 		{
 			if (map->getBaseTiles()[h][w].obstacle)
 			{
-				obsArr[i] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
-				obsMatrixArr[i] = XMMatrixIdentity();
-				i++;
+				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 1.f, 1.f);
+				obsMatrixArr[index] = XMMatrixIdentity();
+				index++;
 			}
 		}
 	}
@@ -268,18 +268,18 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 ///
 /// Obstacles
 ///
-//DirectX::XMMATRIX* GameDummy::GetObsMatrices()
-//{
-//	for (size_t i = 0; i < (size_t)obsArrSize; i++)
-//	{
-//		//obsMatrixArr[i] = obsArr[i]->GetBoundingBox();//Needs a modification...
-//	}
-//	return obsMatrixArr;
-//}
-//int GameDummy::GetObsArrSize() const
-//{
-//	return this->obsArrSize;
-//}
+DirectX::XMMATRIX* GameDummy::GetObsMatrices()
+{
+	for (size_t i = 0; i < (size_t)obsArrSize; i++)
+	{
+		obsMatrixArr[i] = obsArr[i]->GetTransform();
+	}
+	return obsMatrixArr;
+}
+int GameDummy::GetObsArrSize() const
+{
+	return this->obsArrSize;
+}
 ///
 
 DirectX::XMMATRIX* GameDummy::GetTileMatrices()

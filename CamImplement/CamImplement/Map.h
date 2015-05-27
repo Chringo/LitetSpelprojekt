@@ -49,6 +49,7 @@ public:
 	float getRandom();
 	int getWater() const;
 	int getPeak() const;
+	int getObstacles() const;
 
 	BaseTile** getBaseTiles();
 
