@@ -233,8 +233,9 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	gui = new GUI();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
+	objManager->SetObstaclesWorld(game->GetObsMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	pointLight->Initialize(NUMBER_OF_LIGHTS);
 	gui->Initialize();
@@ -256,7 +257,7 @@ void Graphics::Update(float deltaTime)
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
-	objManager->Update();
+	//objManager->Update();// It's empty
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
 	objManager->SetPlayerHit(game->IsPlayerHit());

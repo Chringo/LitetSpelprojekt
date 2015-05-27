@@ -43,7 +43,26 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	{
 		tileMatrixArr[i] = XMMatrixIdentity();
 	}
-	/**********************************************************************************/	
+	/**********************************************************************************/
+	/************************************ Obstacle ************************************/
+	obsArrSize = map->getObstacles();
+	obsMatrixArr = new XMMATRIX[obsArrSize];
+	obsArr = new Ent::Obstacle*[obsArrSize];
+	int cSize = map->getChunkSize();
+	int index = 0;
+	for (int h = 0; h < cSize; h++)
+	{
+		for (int w = 0; w < cSize; w++)
+		{
+			if (map->getBaseTiles()[h][w].obstacle)
+			{
+				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 2.f, 2.f);
+				obsMatrixArr[index] = XMMatrixIdentity();
+				index++;
+			}
+		}
+	}
+	/**********************************************************************************/
 	/************************************* Player *************************************/
 
 	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
@@ -52,7 +71,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	lastX = -1;
 	lastZ = -1;
 
-	/**********************************************************************************/	
+	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
 
 	enemyArrSize = 3;
@@ -167,18 +186,18 @@ void GameDummy::Update(float deltaTime)
 		if (update)
 		{
 			enemyArr[i]->setPathfinding
-			(
+				(
 				map,
 				pfMap,
 				player->GetPosition().m128_f32[0],
 				player->GetPosition().m128_f32[2]
-			);
+				);
 		}
 		enemyArr[i]->updateMoveOrder();
 	}
 
 	delete pfMap;
-	
+
 	/************************************* Pathfinding *************************************/
 
 	if (!player->IsDead())
@@ -242,6 +261,23 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 }
 /// 
 /// Enemies
+///
+
+///
+/// Obstacles
+///
+DirectX::XMMATRIX* GameDummy::GetObsMatrices()
+{
+	for (size_t i = 0; i < (size_t)obsArrSize; i++)
+	{
+		obsMatrixArr[i] = obsArr[i]->GetTransform();
+	}
+	return obsMatrixArr;
+}
+int GameDummy::GetObsArrSize() const
+{
+	return this->obsArrSize;
+}
 ///
 
 DirectX::XMMATRIX* GameDummy::GetTileMatrices()
