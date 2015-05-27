@@ -398,7 +398,7 @@ Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, 
 	//XMStoreFloat4(&m_Bounds.Orientation, orientation);
 
 	// Create world matrix.
-	m_Matrix = XMMatrixRotationX(XM_PIDIV4) * XMMatrixTranslation(xPosition, 0.f, zPosition);
+	m_Matrix = XMMatrixTranslation(xPosition, 0.f, zPosition);
 };
 
 Obstacle::~Obstacle() {};

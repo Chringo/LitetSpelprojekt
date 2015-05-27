@@ -252,7 +252,13 @@ void Map::EvaluateTile(TileClass& tile)
 		tile.setType(1);
 		water++;
 	}
-	else if (tile.getHeight() > 115)
+	else if (tile.getHeight() > 80 && tile.getHeight() < 84)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
+	}
+	else if (tile.getHeight() > 100)
 	{
 		tile.setObstacle(true);
 		tile.setType(2);
