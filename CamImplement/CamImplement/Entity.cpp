@@ -403,6 +403,6 @@ DirectX::BoundingOrientedBox Obstacle::GetBoundingBox()
 }
 DirectX::XMMATRIX Obstacle::GetTransform()
 {
-	return XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
+	return XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f)))
 		* XMMatrixTranslationFromVector(XMVectorSet(m_Bounds.Center.x, 0.f, m_Bounds.Center.z, 1.f));
 }
