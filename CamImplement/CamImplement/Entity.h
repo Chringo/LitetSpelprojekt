@@ -141,6 +141,7 @@ namespace Ent
 
 	private:
 		DirectX::BoundingOrientedBox m_Bounds;
+		DirectX::XMMATRIX m_Matrix;
 	};
 
 }

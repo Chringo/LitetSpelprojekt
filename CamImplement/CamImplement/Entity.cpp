@@ -389,10 +389,14 @@ void Enemy::updateMoveOrder()
 
 Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
 {
+	// Create boundingbox.
 	m_Bounds.Center = XMFLOAT3(xPosition, 0.f, zPosition);
 	m_Bounds.Extents = XMFLOAT3(xExtend, 10.f, zExtend);
 	XMVECTOR orientation = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XM_PIDIV4);
 	XMStoreFloat4(&m_Bounds.Orientation, orientation);
+
+	// Create world matrix.
+	m_Matrix = XMMatrixRotationX(XM_PIDIV4) * XMMatrixTranslation(xPosition, 0.f, zPosition);
 };
 
 Obstacle::~Obstacle() {};
@@ -403,6 +407,5 @@ DirectX::BoundingOrientedBox Obstacle::GetBoundingBox()
 }
 DirectX::XMMATRIX Obstacle::GetTransform()
 {
-	return XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
-		* XMMatrixTranslationFromVector(XMVectorSet(m_Bounds.Center.x, 0.f, m_Bounds.Center.z, 1.f));
+	return m_Matrix;
 }

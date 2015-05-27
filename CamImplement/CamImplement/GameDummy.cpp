@@ -214,6 +214,7 @@ void GameDummy::Update(float deltaTime)
 	{
 		enemyArr[i]->Update(deltaTime);
 
+		// Enemy vs obstacle might not be needed due to pathfinding.
 		//for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
 			//enemyArr[i]->Intersect(obsArr[obstacleId]);
 		
