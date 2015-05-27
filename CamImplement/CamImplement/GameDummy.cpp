@@ -200,13 +200,16 @@ void GameDummy::Update(float deltaTime)
 
 	/************************************* Pathfinding *************************************/
 
+	for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
+		player->Intersect(obsArr[obstacleId]);
+
 	if (!player->IsDead())
 	{
 		player->Update(deltaTime);
 		player->SetAttackDirection(cursor);
 		CheckPlayerAttack();
 	}
-	
+
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
