@@ -34,7 +34,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 		}
 		case Obstacle:
 		{
-			*filename = "Meshes/tree03.obj";
+			*filename = "Meshes/groundTile01.obj";
 			break;
 		}
 		case Tile:

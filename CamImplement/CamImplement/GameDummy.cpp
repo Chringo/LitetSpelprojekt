@@ -155,12 +155,19 @@ void GameDummy::Update(float deltaTime)
 
 	float ts = map->TILESIZE;
 
+	for (int i = 0; i < obsArrSize; i++)
+	{
+		int x = obsArr[i]->getXTileSpace(ts);
+		int z = obsArr[i]->getZTileSpace(ts);
+		disable[x][z] = true;
+	}
+
 	bool update = false;
 
 	// Block and update if an Enemy moves
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		//disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
+		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
 		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts), enemyArr[i]->getZTileSpace(ts));
 		if (c != lastEnemyCoord[i])
 		{

@@ -28,7 +28,7 @@ namespace Ent
 
 	// Forward declaration.
 	class Obstacle;
-	
+
 	class Entity
 	{
 	public:
@@ -143,9 +143,13 @@ namespace Ent
 		DirectX::BoundingOrientedBox GetBoundingBox();
 		DirectX::XMMATRIX GetTransform();
 
+		int getXTileSpace(const float TILESIZE);
+		int getZTileSpace(const float TILESIZE);
+
 	private:
 		DirectX::BoundingOrientedBox m_Bounds;
 		DirectX::XMMATRIX m_Matrix;
+		int floatToIntSpace(float floatCoord, const float TILESIZE);
 	};
 
 }

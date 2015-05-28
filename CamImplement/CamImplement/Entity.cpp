@@ -172,6 +172,15 @@ bool Entity::IsDead()
 	return m_Dead;
 }
 
+int Entity::getXTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
+}
+int Entity::getZTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
+}
+
 int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
 {
 	int counter = 0;
@@ -181,15 +190,6 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
 		floatCoord -= TILESIZE;
 	}
 	return counter;
-}
-
-int Entity::getXTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
-}
-int Entity::getZTileSpace(const float TILESIZE)
-{
-	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
 }
 
 // Player
@@ -426,4 +426,24 @@ DirectX::BoundingOrientedBox Obstacle::GetBoundingBox()
 DirectX::XMMATRIX Obstacle::GetTransform()
 {
 	return m_Matrix;
+}
+
+int Obstacle::getXTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(m_Bounds.Center.x, TILESIZE);
+}
+int Obstacle::getZTileSpace(const float TILESIZE)
+{
+	return floatToIntSpace(m_Bounds.Center.z, TILESIZE);
+}
+
+int Obstacle::floatToIntSpace(float floatCoord, const float TILESIZE)
+{
+	int counter = 0;
+	while (floatCoord - TILESIZE > -TILESIZE)
+	{
+		counter++;
+		floatCoord -= TILESIZE;
+	}
+	return counter;
 }
