@@ -247,13 +247,26 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	srv = m_loader->getTexture(arr->textureIndex);
 	deviceContext->PSSetShaderResources(0, 1, &srv);
 
+	XMMATRIX world;
 	DirectX::XMMATRIX view;
 	DirectX::XMMATRIX projection;
 
-	if (arr == m_objMenu || arr == m_objArrow)
+	bool guiInstance = false;
+
+	if (arr == m_objMenu)
 	{
+		world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
 		view = XMMatrixIdentity();
 		projection = XMMatrixIdentity();
+		guiInstance = true;
+	}
+	else if (arr == m_objArrow)
+	{
+		world = XMMatrixScaling(0.7f, 1.15f, 1.0f);
+		world *= XMMatrixTranslation(m_objArrowPosState[currentState].x, m_objArrowPosState[currentState].y, 0.0f);
+		view = XMMatrixIdentity();
+		projection = XMMatrixIdentity();
+		guiInstance = true;
 	}
 	else
 	{
@@ -265,17 +278,8 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	for (UINT i = 0; i < arr->world.size(); i++)
 	{
 		// Update buffers & textures.
-		XMMATRIX world;
-		if (arr == m_objMenu)
-		{
-			world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
-		}
-		else if (arr == m_objArrow)
-		{
-			world = XMMatrixScaling(0.7f, 1.15f, 1.0f);
-			world *= XMMatrixTranslation(m_objArrowPosState[currentState].x, m_objArrowPosState[currentState].y, 0.0f);
-		}
-		else
+		
+		if (!guiInstance)
 		{
 			world = XMLoadFloat4x4(&arr->world[i]);
 		}
@@ -297,58 +301,6 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		deviceContext->DrawIndexed(arr->nIndices, 0, 0);
 	}
 }
-
-//void ObjectManager::RenderGUI(ID3D11DeviceContext* deviceContext, ObjectInstance* arr)
-//{
-//	if (!arr)
-//		return;
-//
-//	UINT stride = sizeof (InputType);
-//	UINT offset = 0;
-//	ID3D11ShaderResourceView* srv = nullptr;
-//
-//	// Set object buffer & textures.
-//	deviceContext->IASetVertexBuffers (0, 1, &arr->vertexBuffer, &stride, &offset);
-//	deviceContext->IASetIndexBuffer (arr->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
-//
-//	srv = m_loader->getTexture (arr->textureIndex);
-//	deviceContext->PSSetShaderResources (0, 1, &srv);
-//
-//	DirectX::XMMATRIX view = XMMatrixIdentity ();
-//	DirectX::XMMATRIX projection = XMMatrixIdentity();
-//
-//	// Draw buffers for each world matrix.
-//	for (UINT i = 0; i < arr->world.size (); i++)
-//	{
-//		// Update buffers & textures.
-//		XMMATRIX world;
-//		if (arr == m_objMenu)
-//		{
-//			world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
-//		}
-//		else
-//		{
-//			world = XMMatrixScaling(0.7f, 1.15f, 1.0f);
-//			world *= XMMatrixTranslation(m_objArrowPosState[currentState].x, m_objArrowPosState[currentState].y, 0.0f);
-//		}
-//		XMMATRIX wvp = world * view * projection;
-//		XMStoreFloat4x4 (&cbPerObject.World, XMMatrixTranspose (world));
-//		XMStoreFloat4x4 (&cbPerObject.WVP, XMMatrixTranspose (wvp));
-//
-//		D3D11_MAPPED_SUBRESOURCE cb;
-//		ZeroMemory (&cb, sizeof (D3D11_MAPPED_SUBRESOURCE));
-//		deviceContext->Map (cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-//		memcpy (cb.pData, &cbPerObject, sizeof (constBufferPerObject));
-//		deviceContext->Unmap (cbPerObjectBuffer, 0);
-//
-//		// Pass data to shaders.
-//		deviceContext->VSSetConstantBuffers (0, 1, &cbPerObjectBuffer);
-//		//deviceContext->PSSetShader (pixeshader, 0, 0); <-- add later if we want to remove lights
-//
-//		// Draw mesh.
-//		deviceContext->DrawIndexed (arr->nIndices, 0, 0);
-//	}
-//}
 
 void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
