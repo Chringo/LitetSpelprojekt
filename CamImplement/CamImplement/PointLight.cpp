@@ -17,10 +17,10 @@ PointLight::~PointLight()
 
 void PointLight::Initialize(int _nLights)
 {
-	nLights = _nLights;
-	lightArr = new Light[nLights];
+	_nLights <= MAX_NUMBER_OF_LIGHTS ? nLights = _nLights : nLights = MAX_NUMBER_OF_LIGHTS;
+	lightArr = new Light[MAX_NUMBER_OF_LIGHTS];
 
-	for (int i = 0; i < nLights; i++)
+	for (int i = 0; i < MAX_NUMBER_OF_LIGHTS; i++)
 	{
 		lightArr[i].pos = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 		lightArr[i].range = LIGHT_DEFAULT_RANGE;

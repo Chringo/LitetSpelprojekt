@@ -16,16 +16,20 @@
 #pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
 
-#define NUMBER_OF_LIGHTS 1
-
 class Graphics
 {
 private:
 	struct constBufferPerFrame
 	{
 		DirLight dirLight;
-		Light light;
+		int nLights;
+		float pad1, pad2, pad3;
 	} cbPerFrame;
+
+	struct constBufferPointLight
+	{
+		Light light[MAX_NUMBER_OF_LIGHTS];
+	} cbPointLight;
 
 	ObjectManager*			objManager;
 	GameDummy*				game;
@@ -35,6 +39,7 @@ private:
 	GUI*					gui;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
+	ID3D11Buffer*			cbPointLightBuffer;
 
 	ID3D11InputLayout*		rVertexLayout;
 	ID3D11VertexShader*		rVS;
