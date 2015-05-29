@@ -4,7 +4,7 @@
 #include<d3d11.h>
 #include<DirectXMath.h>
 
-#define MAX_NUMBER_OF_LIGHTS 2
+#define MAX_NUMBER_OF_LIGHTS 10
 
 #define LIGHT_DEFAULT_RANGE			10.0f
 #define LIGHT_DEFAULT_ATTENUATION	DirectX::XMFLOAT3(0.2f, 0.0f, 0.0f)

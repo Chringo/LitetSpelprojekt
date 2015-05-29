@@ -239,7 +239,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	cbPerFrame.dirLight = dirLight->getLight();
-	cbPerFrame.nLights = 2;
+	cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
 	pointLight->Initialize(cbPerFrame.nLights);
 	gui->Initialize();
 
@@ -272,8 +272,11 @@ void Graphics::Update(float deltaTime)
 	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
 	cbPointLight.light[0] = pointLight->getLight(0);
 
-	pointLight->setPosition(1, DirectX::XMVectorAdd(game->GetPlayerPosition(), DirectX::XMVectorSet(10.f, 0.f, 10.f, 0.f)));
-	cbPointLight.light[1] = pointLight->getLight(1);
+	for (int i = 1; i < cbPerFrame.nLights; i++)
+	{
+		pointLight->setPosition(i, DirectX::XMVectorAdd(game->GetPlayerPosition(), DirectX::XMVectorSet(i * 10.f, 0.f, i * 10.f, 0.f)));
+		cbPointLight.light[i] = pointLight->getLight(i);
+	}
 
 	D3D11_MAPPED_SUBRESOURCE cb;
 	/*ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -317,6 +320,7 @@ void Graphics::ReleaseCOM()
 	gui->ReleaseCOM();
 
 	if (cbPerFrameBuffer) { cbPerFrameBuffer->Release(); }
+	if (cbPointLightBuffer){ cbPointLightBuffer->Release(); }
 	if (rVertexLayout) { rVertexLayout->Release(); }
 	if (rVS) { rVS->Release(); }
 	if (rPS) { rPS->Release(); }

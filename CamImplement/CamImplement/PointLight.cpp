@@ -12,7 +12,7 @@ PointLight::PointLight(const PointLight& obj)
 
 PointLight::~PointLight()
 {
-
+	delete[] lightArr;
 }
 
 void PointLight::Initialize(int _nLights)
