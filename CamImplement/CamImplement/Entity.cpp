@@ -230,8 +230,26 @@ HRESULT Player::Update(float deltaTime)
 	{
 		m_CurrentActionFrame++;
 
-		if ((m_CurrentAction == Attack1 && m_CurrentActionFrame == 50)
-			|| (m_CurrentAction == Attack2 && m_CurrentActionFrame == 70))
+		int frameLimit = 0;
+		switch (m_CurrentAction)
+		{
+		case Attack1:
+			frameLimit = 50;
+			break;
+		case Attack2:
+			frameLimit = 70;
+			break;
+		case Block:
+			frameLimit = 30;
+			break;
+		case Dodge:
+			frameLimit = 40;
+			break;
+		default:
+			break;
+		}
+			
+		if (m_CurrentActionFrame == frameLimit)
 		{
 			m_CurrentAction = Idle;
 			m_CurrentActionFrame = 0;
@@ -303,6 +321,36 @@ HRESULT Enemy::Update(float deltaTime)
 	while (orders.Size() != 0)
 	{
 		PerformAction(dequeueAction());
+	}
+
+	if (m_CurrentAction != Idle)
+	{
+		m_CurrentActionFrame++;
+
+		int frameLimit = 0;
+		switch (m_CurrentAction)
+		{
+		case Attack1:
+			frameLimit = 50;
+			break;
+		case Attack2:
+			frameLimit = 70;
+			break;
+		case Block:
+			frameLimit = 30;
+			break;
+		case Dodge:
+			frameLimit = 40;
+			break;
+		default:
+			break;
+		}
+
+		if (m_CurrentActionFrame == frameLimit)
+		{
+			m_CurrentAction = Idle;
+			m_CurrentActionFrame = 0;
+		}
 	}
 
 	// Rotate to match move vector.
