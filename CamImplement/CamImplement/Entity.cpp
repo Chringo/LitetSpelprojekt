@@ -230,11 +230,8 @@ HRESULT Player::Update(float deltaTime)
 	{
 		m_CurrentActionFrame++;
 
-		if ((m_CurrentAction == Attack1 || m_CurrentAction == Attack2) && m_CurrentActionFrame == 30)
-		{
-			//Attack();
-		}
-		if (m_CurrentActionFrame == 60)
+		if ((m_CurrentAction == Attack1 && m_CurrentActionFrame == 50)
+			|| (m_CurrentAction == Attack2 && m_CurrentActionFrame == 70))
 		{
 			m_CurrentAction = Idle;
 			m_CurrentActionFrame = 0;
@@ -268,12 +265,16 @@ void Player::SetInputKey(Action action, int key)
 	m_Controls[(int)action] = key;
 }
 
-void Player::Attack()
+void Player::Attack(float mod)
 {
+	if (m_CurrentAction == Dodge)
+		return;
+
 	if (m_HitFrameCount == 0)
 		m_HitFrameCount++;
 
-	m_HitPoints > 0 ? m_HitPoints -= 10.f : m_Dead = true;
+	m_CurrentAction == Block ? m_HitPoints -= 10.f * mod : m_HitPoints -= 20.f * mod;
+	m_Dead = m_HitPoints <= 0.f;
 }
 
 // Enemy
@@ -332,10 +333,11 @@ Action Enemy::dequeueAction()
 	}
 	return action;
 }
-void Enemy::Attack()
+void Enemy::Attack(float mod)
 {
-	m_HitPoints -= 50.f;
-	m_HitFrameCount = 1;
+	m_HitPoints -= 50.f * mod;
+	if (m_HitFrameCount == 0)
+		m_HitFrameCount++;
 	m_Dead = m_HitPoints <= 0.f;
 }
 

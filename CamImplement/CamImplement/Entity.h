@@ -57,7 +57,7 @@ namespace Ent
 
 		int GetHitFrameCount();
 		bool IsDead();
-		virtual void Attack() = 0;
+		virtual void Attack(float mod) = 0;
 
 		int getXTileSpace(const float TILESIZE);
 		int getZTileSpace(const float TILESIZE);
@@ -96,7 +96,7 @@ namespace Ent
 
 		HRESULT Update(float deltaTime) override;
 
-		void Attack() override;
+		void Attack(float mod = 1.f) override;
 
 		void SetAttackDirection(POINT clientCursorNDC);
 		void SetInputKey(Action action, int key);
@@ -123,7 +123,7 @@ namespace Ent
 		Action dequeueAction();
 
 		HRESULT Update(float deltaTime);
-		void Attack() override;
+		void Attack(float mod = 1.f) override;
 
 		void setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ);
 		void updateMoveOrder();

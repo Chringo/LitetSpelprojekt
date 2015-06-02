@@ -16,8 +16,9 @@ private:
 	DirectX::XMMATRIX* tileMatrixArr;
 
 	//- Attack data ------
-	bool* hitData;
+	bool* hitData[2];
 	void CheckPlayerAttack();
+	void CheckEnemyAttack(int index);
 	//--------------------
 
 	Ent::Player* player;

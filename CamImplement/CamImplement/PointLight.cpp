@@ -62,9 +62,9 @@ void PointLight::setColor(int index, int action)
 void PointLight::setRangeByHitPoints(int index, float hp)
 {
 	if (hp > 0)
-	{
 		lightArr[index].range = LIGHT_DEFAULT_RANGE * (hp / 100.0f);
-	}
+	else
+		lightArr[index].range = 0.f;
 }
 
 Light& PointLight::getLight(int index) const
