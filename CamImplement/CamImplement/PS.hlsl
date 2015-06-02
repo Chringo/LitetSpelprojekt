@@ -71,7 +71,7 @@ float4 main(VS_OUT input) : SV_TARGET
 
 			if (lightRatio > 0.0f)
 			{
-				pointColor = lightRatio * diffuse * light[0].diffuse;
+				pointColor = lightRatio * diffuse * light[i].diffuse;
 				pointColor /= light[i].att[0] + (light[i].att[1] * d) + (light[i].att[2] * (d*d));
 				finalColor += pointColor;
 			}

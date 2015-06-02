@@ -162,6 +162,11 @@ int Entity::GetCurrentActionFrame()
 	return m_CurrentActionFrame;
 }
 
+float Entity::GetHitPoints()
+{
+	return m_HitPoints;
+}
+
 int Entity::GetHitFrameCount()
 {
 	return m_HitFrameCount;
@@ -261,11 +266,6 @@ void Player::SetInputKey(Action action, int key)
 {
 	// Allow multiple non-exclusive bind.
 	m_Controls[(int)action] = key;
-}
-
-float Player::GetHitPoints()
-{
-	return m_HitPoints;
 }
 
 void Player::Attack()

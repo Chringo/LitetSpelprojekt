@@ -274,7 +274,9 @@ void Graphics::Update(float deltaTime)
 
 	for (int i = 1; i < cbPerFrame.nLights; i++)
 	{
-		pointLight->setPosition(i, DirectX::XMVectorAdd(game->GetPlayerPosition(), DirectX::XMVectorSet(i * 10.f, 0.f, i * 10.f, 0.f)));
+		pointLight->setPosition(i, game->GetEnemyPosition(i - 1));
+		pointLight->setColor(i, game->GetEnemyAction(i - 1));
+		pointLight->setRangeByHitPoints(i, game->GetEnemyHitPoints(i - 1));
 		cbPointLight.light[i] = pointLight->getLight(i);
 	}
 

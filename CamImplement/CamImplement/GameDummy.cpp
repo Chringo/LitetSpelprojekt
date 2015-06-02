@@ -217,7 +217,8 @@ XMVECTOR GameDummy::GetPlayerPosition()
 
 Ent::Action GameDummy::GetPlayerAction()
 {
-	return player->GetCurrentAction();
+	Ent::Action a = player->GetCurrentAction();
+	return a;
 }
 
 float GameDummy::GetPlayerHitPoints()
@@ -232,6 +233,7 @@ int GameDummy::GetEnemyArrSize()
 {
 	return enemyArrSize;
 }
+
 DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 {
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
@@ -239,6 +241,22 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 		enemyMatrixArr[i] = enemyArr[i]->GetTransform();
 	}
 	return enemyMatrixArr;
+}
+
+DirectX::XMVECTOR GameDummy::GetEnemyPosition(int index)
+{
+	return enemyArr[index]->GetPosition();
+}
+
+Ent::Action GameDummy::GetEnemyAction(int index)
+{
+	Ent::Action a = enemyArr[index]->GetCurrentAction();
+	return a;
+}
+
+float GameDummy::GetEnemyHitPoints(int index)
+{
+	return enemyArr[index]->GetHitPoints();
 }
 /// 
 /// Enemies
@@ -249,6 +267,7 @@ DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 	tileMatrixArr = map->getTileMatrices();
 	return tileMatrixArr;
 }
+
 int GameDummy::GetNrOfTiles() const
 {
 	return map->getNrOfTiles();

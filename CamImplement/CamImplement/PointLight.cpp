@@ -54,6 +54,7 @@ void PointLight::setColor(int index, int action)
 		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
 		break;
 	default:
+		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
 		break;
 	}
 }

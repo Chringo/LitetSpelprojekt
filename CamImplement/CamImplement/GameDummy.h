@@ -52,6 +52,9 @@ public:
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
+	DirectX::XMVECTOR GetEnemyPosition(int index);
+	Ent::Action GetEnemyAction(int index);
+	float GetEnemyHitPoints(int index);
 
 	DirectX::XMMATRIX* GetTileMatrices();
 	int GetNrOfTiles() const;

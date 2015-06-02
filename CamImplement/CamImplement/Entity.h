@@ -53,6 +53,8 @@ namespace Ent
 		void PerformAction(Action action);
 		Action GetCurrentAction();
 		int GetCurrentActionFrame();
+		float GetHitPoints();
+
 		int GetHitFrameCount();
 		bool IsDead();
 		virtual void Attack() = 0;
@@ -98,8 +100,6 @@ namespace Ent
 
 		void SetAttackDirection(POINT clientCursorNDC);
 		void SetInputKey(Action action, int key);
-
-		float GetHitPoints();
 
 	private:
 		int m_Controls[8];
