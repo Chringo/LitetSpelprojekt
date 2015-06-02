@@ -46,6 +46,8 @@ public:
 	GameDummy();
 	~GameDummy();
 
+	void NewGame();
+
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport);
 
 	void Update(float deltaTime);

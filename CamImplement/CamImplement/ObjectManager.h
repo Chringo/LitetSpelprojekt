@@ -1,11 +1,14 @@
 #ifndef OBJECTMANAGER_H
 #define OBJECTMANAGER_H
 
+#include <Windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
 
 #include "Loader.h"
+
+#define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x1)
 
 #pragma comment (lib, "d3d11.lib")
 
@@ -68,6 +71,14 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
+	
+	// GUI
+	ObjectInstance*		m_objMenu;
+	ObjectInstance*		m_objArrow;
+	int					m_objArrowStateSize;
+	int					currentState;
+	DirectX::XMFLOAT2*	m_objArrowPosState;
+	//
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
@@ -78,9 +89,10 @@ private:
 
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
-	//void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
 
 	void CreateSamplers(ID3D11Device* device);
+
+	bool renderMenu;
 
 public:
 	ObjectManager();
@@ -99,6 +111,14 @@ public:
 	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
+	void SetGUIWorld (const DirectX::XMMATRIX &world);
+
+	// GUI
+	void SetRenderMenu(bool render);
+	void IncreaseMenuState();
+	void DecreaseMenuState();
+	int GetMenuState() const;
+	//
 
 	int GetEnemyCount();
 	int GetObstacleCount();
@@ -110,6 +130,8 @@ public:
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
 
 	void ReleaseCOM();
+
+	
 };
 
 #endif

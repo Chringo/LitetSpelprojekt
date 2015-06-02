@@ -30,6 +30,52 @@ GameDummy::~GameDummy()
 	delete[] hitData[1];
 }
 
+void GameDummy::NewGame()
+{
+	/************************************* Player *************************************/
+
+	if (player != nullptr)
+	{
+		delete player;
+	}
+
+	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	player->SetMovementSpeed(4.f);
+
+	lastX = -1;
+	lastZ = -1;
+
+	/**********************************************************************************/
+	/************************************* Enemy  *************************************/
+
+	if (enemyArr != nullptr)
+	{
+		delete[] lastEnemyCoord;
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+		{
+			delete enemyArr[i];
+		}
+		delete[] enemyArr;
+	}
+
+	enemyArrSize = 3;
+	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
+	enemyMatrixArr = new XMMATRIX[enemyArrSize];
+	hitData[0] = new bool[enemyArrSize];
+	hitData[1] = new bool[enemyArrSize];
+	enemyArr = new Ent::Enemy*[enemyArrSize];
+	for (int i = 0; i < enemyArrSize; i++)
+	{
+		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
+		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
+		enemyArr[i]->SetMovementSpeed(4.f);
+		enemyMatrixArr[i] = XMMatrixIdentity();
+		hitData[0][i] = false;
+		hitData[1][i] = false;
+	}
+	/**********************************************************************************/
+}
+
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
 {
 	RECT r;
@@ -65,34 +111,8 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 			}
 		}
 	}
-	/**********************************************************************************/
-	/************************************* Player *************************************/
 
-	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	player->SetMovementSpeed(9.f);
-
-	lastX = -1;
-	lastZ = -1;
-
-	/**********************************************************************************/
-	/************************************* Enemy  *************************************/
-
-	enemyArrSize = 3;
-	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
-	enemyMatrixArr = new XMMATRIX[enemyArrSize];
-	hitData[0] = new bool[enemyArrSize];
-	hitData[1] = new bool[enemyArrSize];
-	enemyArr = new Ent::Enemy*[enemyArrSize];
-	for (int i = 0; i < enemyArrSize; i++)
-	{
-		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
-		enemyArr[i]->SetMovementSpeed(8.f);
-		enemyMatrixArr[i] = XMMatrixIdentity();
-		hitData[0][i] = false;
-		hitData[1][i] = false;
-	}
-	/**********************************************************************************/
+	NewGame();
 
 	return S_OK;
 }
