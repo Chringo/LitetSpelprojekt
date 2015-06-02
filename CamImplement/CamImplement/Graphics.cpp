@@ -224,6 +224,8 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	hr = CreateShaders();
 	if (FAILED(hr)) { return hr; }
 
+	gamePaused = false;
+
 	objManager = new ObjectManager();
 	game = new GameDummy();
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
@@ -234,6 +236,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 
 	game->Initialize(wndHandle, hInstance, viewport);
 	objManager->Initialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
+	objManager->SetRenderMenu(gamePaused);
 	objManager->SetTilesWorld(game->GetTileMatrices());
 	objManager->SetObstaclesWorld(game->GetObsMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
@@ -248,9 +251,45 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	return hr;
 }
 
-void Graphics::Update(float deltaTime)
+bool Graphics::Update(float deltaTime)
 {	
-	game->Update(deltaTime);
+	/********************************** Gamestate handling **********************************/
+	if (KEYDOWN(VK_UP) && gamePaused)
+	{
+		objManager->IncreaseMenuState();
+	}
+	else if (KEYDOWN(VK_DOWN) && gamePaused)
+	{
+		objManager->DecreaseMenuState();
+	}
+	else if (KEYDOWN(VK_ESCAPE))
+	{
+		gamePaused = !gamePaused;
+		objManager->SetRenderMenu(gamePaused);
+	}
+	else if (KEYDOWN(VK_RETURN))
+	{
+		if (gamePaused)
+		{
+			if (objManager->GetMenuState() == 0)
+			{
+				gamePaused = false;
+				objManager->SetRenderMenu(gamePaused);
+				game->NewGame();
+			}
+			else
+			{
+				// Close the game
+				return false;
+			}
+		}
+	}
+	/****************************************************************************************/
+
+	if (!gamePaused)
+	{
+		game->Update(deltaTime);
+	}
 
 	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(deltaTime);
@@ -276,6 +315,8 @@ void Graphics::Update(float deltaTime)
 	rDeviceContext->Map(cbPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
 	memcpy(cb.pData, &cbPerFrame, (sizeof(DirLight) + (sizeof(Light))));// * NUMBER_OF_LIGHTS)));
 	rDeviceContext->Unmap(cbPerFrameBuffer, 0);
+
+	return true;
 }
 
 void Graphics::Render()

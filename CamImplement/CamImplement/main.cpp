@@ -31,7 +31,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		QueryPerformanceCounter((LARGE_INTEGER*)&previousTime);
 		FLOAT secondsPerTick = 1.0f / (FLOAT)tickPerSecond;
 
-		while (WM_QUIT != msg.message)
+		bool quit = false;
+		while (WM_QUIT != msg.message && !quit)
 		{
 			// Update time.
 			QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
@@ -48,7 +49,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			{
 				deltaTime = (currentTime - previousTime) * secondsPerTick;
 
-				d3d_Graphics.Update(deltaTime);
+				if (!d3d_Graphics.Update(deltaTime))
+				{
+					quit = true;
+				}
 				d3d_Graphics.Render();
 
 				d3d_Graphics.SwapFBBuffer();

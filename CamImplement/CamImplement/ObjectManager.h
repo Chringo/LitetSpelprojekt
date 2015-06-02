@@ -71,11 +71,14 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
+	
+	// GUI
 	ObjectInstance*		m_objMenu;
 	ObjectInstance*		m_objArrow;
 	int					m_objArrowStateSize;
 	int					currentState;
 	DirectX::XMFLOAT2*	m_objArrowPosState;
+	//
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
@@ -88,6 +91,8 @@ private:
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
 
 	void CreateSamplers(ID3D11Device* device);
+
+	bool renderMenu;
 
 public:
 	ObjectManager();
@@ -108,6 +113,13 @@ public:
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
 	void SetGUIWorld (const DirectX::XMMATRIX &world);
 
+	// GUI
+	void SetRenderMenu(bool render);
+	void IncreaseMenuState();
+	void DecreaseMenuState();
+	int GetMenuState() const;
+	//
+
 	int GetEnemyCount();
 	int GetObstacleCount();
 	int GetTileCount();
@@ -118,6 +130,8 @@ public:
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
 
 	void ReleaseCOM();
+
+	
 };
 
 #endif

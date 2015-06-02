@@ -10,6 +10,7 @@
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "GUI.h"
+#include <Windows.h>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -17,6 +18,7 @@
 #pragma comment (lib, "dxguid.lib")
 
 #define NUMBER_OF_LIGHTS 1
+#define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x1)
 
 class Graphics
 {
@@ -55,6 +57,7 @@ private:
 	HRESULT CreateShaders();
 	void CreateBuffers();
 	void CreateCamera();
+	bool gamePaused;
 
 public:
 	Graphics();
@@ -63,7 +66,7 @@ public:
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
 
-	void Update(float deltaTime);
+	bool Update(float deltaTime);
 	void Render();
 
 	void SwapFBBuffer();

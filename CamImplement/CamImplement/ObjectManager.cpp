@@ -312,6 +312,8 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 
 void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
+	renderMenu = false;
+
 	m_loader = new Loader();
 	Object obj[] = { Player, Enemy, Obstacle, Tile, Menu, Arrow };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
@@ -420,6 +422,34 @@ void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objTiles->world[index], w);
 }
 
+void ObjectManager::SetRenderMenu(bool render)
+{
+	renderMenu = render;
+}
+
+void ObjectManager::IncreaseMenuState()
+{
+	currentState++;
+	if (currentState > m_objArrowStateSize - 1)
+	{
+		currentState = 0;
+	}
+}
+
+void ObjectManager::DecreaseMenuState()
+{
+	currentState--;
+	if (currentState < 0)
+	{
+		currentState = m_objArrowStateSize - 1;
+	}
+}
+
+int ObjectManager::GetMenuState() const
+{
+	return currentState;
+}
+
 int ObjectManager::GetEnemyCount()
 {
 	return m_objEnemies->world.size();
@@ -467,8 +497,11 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 	RenderInstances(deviceContext, m_objEnemies);
 	RenderInstances(deviceContext, m_objObstacles);
 	RenderInstances(deviceContext, m_objTiles);
-	RenderInstances(deviceContext, m_objArrow);
-	RenderInstances(deviceContext, m_objMenu);
+	if (renderMenu)
+	{
+		RenderInstances(deviceContext, m_objArrow);
+		RenderInstances(deviceContext, m_objMenu);
+	}
 }
 
 void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &projection)
@@ -515,3 +548,4 @@ void ObjectManager::ReleaseCOM()
 	cbPerObjectBuffer->Release();
 	samplerState->Release();
 }
+
