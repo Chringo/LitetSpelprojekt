@@ -233,8 +233,9 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	gui = new GUI();
 
 	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
 	objManager->SetTilesWorld(game->GetTileMatrices());
+	objManager->SetObstaclesWorld(game->GetObsMatrices());
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	pointLight->Initialize(NUMBER_OF_LIGHTS);
 	gui->Initialize();
@@ -256,17 +257,19 @@ void Graphics::Update(float deltaTime)
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
-	objManager->Update();
+	objManager->Update();// Dumb key events
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
+
+	objManager->SetPlayerHit(game->IsPlayerHit());
+	for (int i = 0; i < objManager->GetEnemyCount(); i++)
+	{
+		objManager->SetEnemyHit(i, game->IsEnemyHit(i));
+	}
 
 	pointLight->setPosition(0, game->GetPlayerPosition());
 	pointLight->setColor(0, game->GetPlayerAction());
+	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
 	cbPerFrame.light = pointLight->getLight(0);
-	/*for (int i = 1; i < NUMBER_OF_LIGHTS; i++)
-	{
-		pointLight->setPosition(i, DirectX::XMVectorSet(i * 50.0f, 0.0f, i * 50.0f, 0.0f));
-		cbPerFrame.light[i] = pointLight->getLight(i);
-	}*/
 
 	D3D11_MAPPED_SUBRESOURCE cb;
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));

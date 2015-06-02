@@ -12,6 +12,9 @@
 
 #pragma comment (lib, "d3d11.lib")
 
+#define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
+#define HUE_HIT		DirectX::XMFLOAT4(2.f, 0.5f, 0.5f, 1.f)
+
 struct InputType
 {
 	InputType() {}
@@ -30,6 +33,7 @@ struct ObjectInstance
 	ID3D11Buffer*		indexBuffer;
 
 	std::vector<DirectX::XMFLOAT4X4> world;
+	std::vector<bool>	hit;
 
 	InputType*			input;
 	UINT*				indices;
@@ -55,6 +59,7 @@ private:
 	{
 		DirectX::XMFLOAT4X4 WVP;
 		DirectX::XMFLOAT4X4 World;
+		DirectX::XMFLOAT4	Hue;
 	}					cbPerObject;
 
 	DirectX::XMFLOAT4X4 m_view;
@@ -91,6 +96,9 @@ public:
 
 	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles);
 
+	void SetPlayerHit(bool hit);
+	void SetEnemyHit(int index, bool hit);
+
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
 	void SetEnemiesWorld(int index, const DirectX::XMMATRIX &world);
@@ -99,6 +107,10 @@ public:
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
 	void SetGUIWorld (const DirectX::XMMATRIX &world);
+
+	int GetEnemyCount();
+	int GetObstacleCount();
+	int GetTileCount();
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);

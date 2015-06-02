@@ -22,7 +22,7 @@ void PointLight::Initialize(int _nLights)
 
 	for (int i = 0; i < nLights; i++)
 	{
-		lightArr[i].pos = DirectX::XMFLOAT3(0.0f, 2.0f, 0.0f);
+		lightArr[i].pos = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 		lightArr[i].range = LIGHT_DEFAULT_RANGE;
 		lightArr[i].att = LIGHT_DEFAULT_ATTENUATION;
 		lightArr[i].ambient = LIGHT_DEFAULT_AMBIENT;
@@ -50,6 +50,14 @@ void PointLight::setColor(int index, int action)
 		break;
 	default:
 		break;
+	}
+}
+
+void PointLight::setRangeByHitPoints(int index, float hp)
+{
+	if (hp > 0)
+	{
+		lightArr[index].range = LIGHT_DEFAULT_RANGE * (hp / 100.0f);
 	}
 }
 

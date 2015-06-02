@@ -31,8 +31,9 @@ struct VS_OUT
 {
 	float4 pos : SV_POSITION;
 	float4 worldPos : POSITION;
-	float2 tex : TEXCOORD;
+	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
+	float4 hue : TEXCOORD1;
 };
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -40,6 +41,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	input.normal = normalize(input.normal);
 
 	float4 diffuse = objTex.Sample(objSamp, input.tex);
+	diffuse *= input.hue;
 
 	float3 finalColor = float3(0.0f, 0.0f, 0.0f);
 	float3 pointColor = float3(0.0f, 0.0f, 0.0f);

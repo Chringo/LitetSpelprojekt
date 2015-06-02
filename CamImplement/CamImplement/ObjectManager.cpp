@@ -287,6 +287,14 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
 
+		if (arr->hit.size() > 0 && arr->hit.at(i))
+		{
+			cbPerObject.Hue = HUE_HIT;
+		}
+		else
+		{
+			cbPerObject.Hue = HUE_DEFAULT;
+		}
 
 		D3D11_MAPPED_SUBRESOURCE cb;
 		ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -305,7 +313,7 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
 {
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Tile, Menu, Arrow };
+	Object obj[] = { Player, Enemy, Obstacle, Tile, Menu, Arrow };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
@@ -330,9 +338,13 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	XMStoreFloat4x4(&mat, XMMatrixIdentity ());
 
 	m_objPlayer->world.push_back(mat);
+	m_objPlayer->hit.push_back(false);
 
 	for (INT i = 0; i < nEnemies; i++)
+	{
 		m_objEnemies->world.push_back(mat);
+		m_objEnemies->hit.push_back(false);
+	}
 	
 	for (INT i = 0; i < nObstacles; i++)
 		m_objObstacles->world.push_back(mat);
@@ -346,6 +358,16 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
+}
+
+void ObjectManager::SetPlayerHit(bool hit)
+{
+	m_objPlayer->hit[0] = hit;
+}
+
+void ObjectManager::SetEnemyHit(int index, bool hit)
+{
+	m_objEnemies->hit[index] = hit;
 }
 
 void ObjectManager::SetPlayerWorld(const XMMATRIX &world)
@@ -370,12 +392,6 @@ void ObjectManager::SetEnemiesWorld(int index, const XMMATRIX &world)
 
 void ObjectManager::SetObstaclesWorld(const XMMATRIX* arr)
 {
-	UINT size = sizeof(arr) / sizeof(XMMATRIX);
-	if (size > m_objObstacles->world.size())
-	{
-		size = m_objObstacles->world.size();
-	}
-
 	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
 	{
 		SetObstaclesWorld(i, arr[i]);
@@ -384,7 +400,9 @@ void ObjectManager::SetObstaclesWorld(const XMMATRIX* arr)
 
 void ObjectManager::SetObstaclesWorld(int index, const XMMATRIX &world)
 {
-	XMStoreFloat4x4(&m_objObstacles->world[index], world);
+	//Passing world directly into StoreFloat causes random access violation
+	XMMATRIX w = world;
+	XMStoreFloat4x4(&m_objObstacles->world[index], w);
 }
 
 void ObjectManager::SetTilesWorld(const XMMATRIX* arr)
@@ -402,9 +420,19 @@ void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objTiles->world[index], w);
 }
 
-void ObjectManager::SetGUIWorld (const DirectX::XMMATRIX &world)
+int ObjectManager::GetEnemyCount()
 {
-	//&m_objGUI[0];
+	return m_objEnemies->world.size();
+}
+
+int ObjectManager::GetObstacleCount()
+{
+	return m_objObstacles->world.size();
+}
+
+int ObjectManager::GetTileCount()
+{
+	return m_objTiles->world.size();
 }
 
 void ObjectManager::Update()
