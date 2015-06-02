@@ -25,6 +25,9 @@ GameDummy::~GameDummy()
 	delete[] enemyArr;
 
 	delete[] map;
+
+	delete[] hitData[0];
+	delete[] hitData[1];
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -66,7 +69,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	/************************************* Player *************************************/
 
 	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	player->SetMovementSpeed(4.f);
+	player->SetMovementSpeed(9.f);
 
 	lastX = -1;
 	lastZ = -1;
@@ -77,15 +80,17 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	enemyArrSize = 3;
 	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
-	hitData = new bool[enemyArrSize];
+	hitData[0] = new bool[enemyArrSize];
+	hitData[1] = new bool[enemyArrSize];
 	enemyArr = new Ent::Enemy*[enemyArrSize];
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
-		enemyArr[i]->SetMovementSpeed(4.f);
+		enemyArr[i]->SetMovementSpeed(8.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
-		hitData[i] = false;
+		hitData[0][i] = false;
+		hitData[1][i] = false;
 	}
 	/**********************************************************************************/
 
@@ -97,11 +102,12 @@ void GameDummy::CheckPlayerAttack()
 	Ent::Action action = player->GetCurrentAction();
 	int frame = player->GetCurrentActionFrame();
 
-	if (frame == 50)
+	if ((action == Ent::Attack1 && frame == 40)
+		|| (action == Ent::Attack2 && frame == 60))
 	{
 		for (int i = 0; i < enemyArrSize; i++)
 		{
-			hitData[i] = false;
+			hitData[0][i] = false;
 		}
 	}
 	if ((action != Ent::Attack1 && action != Ent::Attack2)
@@ -113,11 +119,32 @@ void GameDummy::CheckPlayerAttack()
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		d = XMVector3Length(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
-		if (d < 5.f && !hitData[i])
+		if (d < 5.f && !hitData[0][i])
 		{
-			hitData[i] = true;
-			enemyArr[i]->Attack();
+			hitData[0][i] = true;
+			action == Ent::Attack1 ? enemyArr[i]->Attack() : enemyArr[i]->Attack(1.5f);
 		}
+	}
+}
+
+void GameDummy::CheckEnemyAttack(int index)
+{
+	Ent::Action action = enemyArr[index]->GetCurrentAction();
+	int frame = enemyArr[index]->GetCurrentActionFrame();
+
+	if ((action == Ent::Attack1 && frame == 40)
+		|| (action == Ent::Attack2 && frame == 60))
+		hitData[1][index] = false;
+	if ((action != Ent::Attack1 && action != Ent::Attack2)
+		|| (frame <= 20 || frame >= 40))
+		return;
+
+	XMVECTOR atkPos = enemyArr[index]->GetAttackPosition();
+	float d = XMVector3LengthEst(player->GetPosition() - atkPos).m128_f32[0];
+	if (d < 5.f && !hitData[1][index])
+	{
+		hitData[1][index] = true;
+		action == Ent::Attack1 ? player->Attack() : player->Attack(1.5f);
 	}
 }
 
@@ -261,6 +288,7 @@ int GameDummy::GetEnemyArrSize()
 {
 	return enemyArrSize;
 }
+
 DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 {
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
@@ -268,6 +296,21 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 		enemyMatrixArr[i] = enemyArr[i]->GetTransform();
 	}
 	return enemyMatrixArr;
+}
+
+DirectX::XMVECTOR GameDummy::GetEnemyPosition(int index)
+{
+	return enemyArr[index]->GetPosition();
+}
+
+Ent::Action GameDummy::GetEnemyAction(int index)
+{
+	return enemyArr[index]->GetCurrentAction();
+}
+
+float GameDummy::GetEnemyHitPoints(int index)
+{
+	return enemyArr[index]->GetHitPoints();
 }
 /// 
 /// Enemies
@@ -295,6 +338,7 @@ DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 	tileMatrixArr = map->getTileMatrices();
 	return tileMatrixArr;
 }
+
 int GameDummy::GetNrOfTiles() const
 {
 	return map->getNrOfTiles();

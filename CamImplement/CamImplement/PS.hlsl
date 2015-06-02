@@ -1,7 +1,7 @@
 Texture2D objTex : register(t0);
 SamplerState objSamp : register(s0);
 
-#define NUMBER_OF_LIGHTS 1
+#define MAX_NUMBER_OF_LIGHTS 10
 
 struct DirectionalLight
 {
@@ -24,7 +24,13 @@ struct PointLight
 cbuffer cbPerFrame : register(b0)
 {
 	DirectionalLight dirLight;
-	PointLight light;
+	int nLights;
+	float pad1, pad2, pad3;
+};
+
+cbuffer cbPointLight : register(b1)
+{
+	PointLight light[MAX_NUMBER_OF_LIGHTS];
 };
 
 struct VS_OUT
@@ -49,20 +55,26 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	float3 dirColor = saturate(dot(dirLight.dir, input.normal) * dirLight.diffuse);
 
-	float3 pLightVec = light.pos - input.worldPos;
-	float d = length(pLightVec);
+	float3 pLightVec;
+	float d;
 
-	if (d <= light.range)
+	for (int i = 0; i < nLights; i++)
 	{
-		ambient += light.ambient;
-		pLightVec /= d;
-		float lightRatio = dot(input.normal, pLightVec);
+		pLightVec = light[i].pos - input.worldPos;
+		d = length(pLightVec);
 
-		if (lightRatio > 0.0f)
+		if (d <= light[i].range)
 		{
-			pointColor = lightRatio * diffuse * light.diffuse;
-			pointColor /= light.att[0] + (light.att[1] * d) + (light.att[2] * (d*d));
-			finalColor += pointColor;
+			ambient += light[i].ambient;
+			pLightVec /= d;
+			float lightRatio = dot(input.normal, pLightVec);
+
+			if (lightRatio > 0.0f)
+			{
+				pointColor = lightRatio * diffuse * light[i].diffuse;
+				pointColor /= light[i].att[0] + (light[i].att[1] * d) + (light[i].att[2] * (d*d));
+				finalColor += pointColor;
+			}
 		}
 	}
 

@@ -12,15 +12,15 @@ PointLight::PointLight(const PointLight& obj)
 
 PointLight::~PointLight()
 {
-
+	delete[] lightArr;
 }
 
 void PointLight::Initialize(int _nLights)
 {
-	nLights = _nLights;
-	lightArr = new Light[nLights];
+	_nLights <= MAX_NUMBER_OF_LIGHTS ? nLights = _nLights : nLights = MAX_NUMBER_OF_LIGHTS;
+	lightArr = new Light[MAX_NUMBER_OF_LIGHTS];
 
-	for (int i = 0; i < nLights; i++)
+	for (int i = 0; i < MAX_NUMBER_OF_LIGHTS; i++)
 	{
 		lightArr[i].pos = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 		lightArr[i].range = LIGHT_DEFAULT_RANGE;
@@ -43,12 +43,18 @@ void PointLight::setColor(int index, int action)
 	case Attack1:
 
 	case Attack2:
-		lightArr[index].diffuse = LIGHT_ATTACK_DIFFUSE;
+		lightArr[index].diffuse = LIGHT_ATTACK1_DIFFUSE;
+		break;
+	case Block:
+
+	case Dodge:
+		lightArr[index].diffuse = LIGHT_BLOCK_DIFFUSE;
 		break;
 	case Idle:
 		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
 		break;
 	default:
+		lightArr[index].diffuse = LIGHT_DEFAULT_DIFFUSE;
 		break;
 	}
 }
@@ -56,9 +62,9 @@ void PointLight::setColor(int index, int action)
 void PointLight::setRangeByHitPoints(int index, float hp)
 {
 	if (hp > 0)
-	{
 		lightArr[index].range = LIGHT_DEFAULT_RANGE * (hp / 100.0f);
-	}
+	else
+		lightArr[index].range = 0.f;
 }
 
 Light& PointLight::getLight(int index) const

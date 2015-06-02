@@ -20,8 +20,9 @@ private:
 	DirectX::XMMATRIX* obsMatrixArr;
 
 	//- Attack data ------
-	bool* hitData;
+	bool* hitData[2];
 	void CheckPlayerAttack();
+	void CheckEnemyAttack(int index);
 	//--------------------
 
 	Ent::Player* player;
@@ -56,6 +57,9 @@ public:
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
+	DirectX::XMVECTOR GetEnemyPosition(int index);
+	Ent::Action GetEnemyAction(int index);
+	float GetEnemyHitPoints(int index);
 
 	DirectX::XMMATRIX* GetObsMatrices();
 	int GetObsArrSize() const;
