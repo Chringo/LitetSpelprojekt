@@ -467,22 +467,7 @@ int ObjectManager::GetTileCount()
 
 void ObjectManager::Update()
 {
-	if (KEYDOWN(VK_UP))
-	{
-		currentState++;
-		if (currentState > m_objArrowStateSize - 1)
-		{
-			currentState = 0;
-		}
-	}
-	else if (KEYDOWN(VK_DOWN))
-	{
-		currentState--;
-		if (currentState < 0)
-		{
-			currentState = m_objArrowStateSize - 1;
-		}
-	}
+	
 }
 
 void ObjectManager::Render(ID3D11DeviceContext* deviceContext)

@@ -314,6 +314,7 @@ bool Graphics::Update(float deltaTime)
 
 	for (int i = 1; i < cbPerFrame.nLights; i++)
 	{
+		//Enemy array is not aligned with point light array, thus index (i) in light is index (i-1) in enemy
 		pointLight->setPosition(i, game->GetEnemyPosition(i - 1));
 		pointLight->setColor(i, game->GetEnemyAction(i - 1));
 		pointLight->setRangeByHitPoints(i, game->GetEnemyHitPoints(i - 1));
@@ -321,11 +322,6 @@ bool Graphics::Update(float deltaTime)
 	}
 
 	D3D11_MAPPED_SUBRESOURCE cb;
-	/*ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	rDeviceContext->Map(cbPerFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-	memcpy(cb.pData, &cbPerFrame, sizeof(constBufferPerFrame));
-	rDeviceContext->Unmap(cbPerFrameBuffer, 0);*/
-
 	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	rDeviceContext->Map(cbPointLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
 	memcpy(cb.pData, &cbPointLight, (sizeof(Light) * MAX_NUMBER_OF_LIGHTS));
