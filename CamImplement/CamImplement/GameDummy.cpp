@@ -32,6 +32,8 @@ GameDummy::~GameDummy()
 
 void GameDummy::NewGame()
 {
+	gameState = true;
+
 	/************************************* Player *************************************/
 
 	if (player != nullptr)
@@ -199,6 +201,12 @@ void GameDummy::Update(float deltaTime)
 		else index++;
 	}
 
+	// player won
+	if (enemyArrSize == 0)
+	{
+		gameState = false;
+	}
+
 	/************************************* Pathfinding *************************************/
 
 	// Allocates 2D bool array used for marking tiles as blocked
@@ -275,6 +283,10 @@ void GameDummy::Update(float deltaTime)
 		player->Update(deltaTime);
 		player->SetAttackDirection(cursor);
 		CheckPlayerAttack();
+	}
+	else // player lose
+	{
+		gameState = false;
 	}
 
 	// Update game objects.
@@ -380,6 +392,11 @@ bool GameDummy::IsPlayerHit()
 bool GameDummy::IsEnemyHit(int index)
 {
 	return enemyArr[index]->GetHitFrameCount() || enemyArr[index]->IsDead();
+}
+
+bool GameDummy::GetGameState() const
+{
+	return gameState;
 }
 
 void GameDummy::ReleaseCOM(){}

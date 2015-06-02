@@ -377,7 +377,7 @@ void ObjectManager::SetPlayerWorld(const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objPlayer->world[0], world);
 }
 
-void ObjectManager::SetEnemiesWorld(const XMMATRIX* arr, int amount)
+void ObjectManager::SetEnemiesWorld(const XMMATRIX* arr)
 {
 	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
 	{

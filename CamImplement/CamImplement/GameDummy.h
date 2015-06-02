@@ -42,6 +42,9 @@ private:
 	float elapsedTime = 0.f;
 	int frames = 0;
 
+	// Determinates if the player or the enemies won and marks the game for termination 
+	bool gameState; 
+
 public:
 	GameDummy();
 	~GameDummy();
@@ -71,6 +74,8 @@ public:
 
 	bool IsPlayerHit();
 	bool IsEnemyHit(int index);
+
+	bool GetGameState() const;
 
 	void ReleaseCOM();
 };
