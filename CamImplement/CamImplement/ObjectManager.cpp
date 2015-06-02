@@ -377,15 +377,15 @@ void ObjectManager::SetPlayerWorld(const XMMATRIX &world)
 	XMStoreFloat4x4(&m_objPlayer->world[0], world);
 }
 
-void ObjectManager::SetEnemiesWorld(const XMMATRIX* arr)
+void ObjectManager::SetEnemiesWorld(const XMMATRIX* arr, int amount)
 {
 	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
 	{
-		SetEnemiesWorld(i, arr[i]);
+		SetEnemyWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetEnemiesWorld(int index, const XMMATRIX &world)
+void ObjectManager::SetEnemyWorld(int index, const XMMATRIX &world)
 {
 	//Passing world directly into StoreFloat causes random access violation
 	XMMATRIX w = world;
@@ -396,11 +396,11 @@ void ObjectManager::SetObstaclesWorld(const XMMATRIX* arr)
 {
 	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
 	{
-		SetObstaclesWorld(i, arr[i]);
+		SetObstacleWorld(i, arr[i]);
 	}
 }
 
-void ObjectManager::SetObstaclesWorld(int index, const XMMATRIX &world)
+void ObjectManager::SetObstacleWorld(int index, const XMMATRIX &world)
 {
 	//Passing world directly into StoreFloat causes random access violation
 	XMMATRIX w = world;

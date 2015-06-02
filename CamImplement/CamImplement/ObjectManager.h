@@ -103,9 +103,9 @@ public:
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
-	void SetEnemiesWorld(int index, const DirectX::XMMATRIX &world);
+	void SetEnemyWorld(int index, const DirectX::XMMATRIX &world);
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
-	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
+	void SetObstacleWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
 	void SetGUIWorld (const DirectX::XMMATRIX &world);
