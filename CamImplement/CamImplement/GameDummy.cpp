@@ -187,6 +187,18 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
+	int index = 0;
+	while (index < enemyArrSize)
+	{
+		if (enemyArr[index]->IsDead())
+		{
+			delete enemyArr[index];
+			enemyArr[index] = enemyArr[enemyArrSize-1];
+			enemyArrSize--;
+		}
+		else index++;
+	}
+
 	/************************************* Pathfinding *************************************/
 
 	// Allocates 2D bool array used for marking tiles as blocked
@@ -252,7 +264,8 @@ void GameDummy::Update(float deltaTime)
 
 	delete pfMap;
 
-	/************************************* Pathfinding *************************************/
+	/***************************************************************************************/
+	/************************************** Collision **************************************/
 
 	for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
 		player->Intersect(obsArr[obstacleId]);
@@ -267,16 +280,11 @@ void GameDummy::Update(float deltaTime)
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		bool dead = enemyArr[i]->IsDead();
-		if (!dead)
+		enemyArr[i]->Update(deltaTime);
+		player->Intersect(enemyArr[i]);
+		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{
-			enemyArr[i]->Update(deltaTime);
-			player->Intersect(enemyArr[i]);
-			for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
-			{
-				if (i != j)
-					enemyArr[i]->Intersect(enemyArr[j]);
-			}
+			if (i != j) enemyArr[i]->Intersect(enemyArr[j]);
 		}
 	}
 }
