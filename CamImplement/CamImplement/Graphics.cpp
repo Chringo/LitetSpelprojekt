@@ -271,7 +271,7 @@ bool Graphics::Update(float deltaTime)
 	}
 	else if (KEYDOWN(VK_RETURN))
 	{
-		if (gamePaused)
+		if (gamePaused && objManager->GetRenderMenu())
 		{
 			if (objManager->GetMenuState() == 0)
 			{
@@ -285,12 +285,30 @@ bool Graphics::Update(float deltaTime)
 				return false;
 			}
 		}
+		else if (objManager->GetRenderWon())
+		{
+			objManager->SetRenderWon(false);
+			objManager->SetRenderMenu(true);
+		}
+		else if (objManager->GetRenderLost())
+		{
+			objManager->SetRenderLost(false);
+			objManager->SetRenderMenu(true);
+		}
 	}
 
-	if (!game->GetGameState() && !gamePaused)
+	if (game->GetGameState() != gOngoing && !gamePaused)
 	{
+		GameState asfd = game->GetGameState();
 		gamePaused = true;
-		objManager->SetRenderMenu(gamePaused);
+		if (game->GetGameState() == gWon)
+		{
+			objManager->SetRenderWon(gamePaused);
+		}
+		else if (game->GetGameState() == gLost)
+		{
+			objManager->SetRenderLost(gamePaused);
+		}
 	}
 
 	/****************************************************************************************/
@@ -305,7 +323,7 @@ bool Graphics::Update(float deltaTime)
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
-	objManager->Update();// Dumb key events
+	objManager->Update();
 	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 
 	objManager->SetPlayerHit(game->IsPlayerHit());

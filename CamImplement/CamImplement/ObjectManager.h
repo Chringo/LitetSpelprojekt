@@ -75,6 +75,13 @@ private:
 	int					m_objArrowStateSize;
 	int					currentState;
 	DirectX::XMFLOAT2*	m_objArrowPosState;
+	bool renderMenu;
+
+	ObjectInstance*		m_objWon;
+	bool renderWon;
+
+	ObjectInstance*		m_objLost;
+	bool renderLost;
 	//
 
 	ID3D11Buffer*		cbPerObjectBuffer;
@@ -85,11 +92,11 @@ private:
 	void CreateBuffers(ID3D11Device* device);
 
 	bool LoadTextures(ID3D11Device* device);
-	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
+	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj);
 
 	void CreateSamplers(ID3D11Device* device);
 
-	bool renderMenu;
+	
 
 public:
 	ObjectManager();
@@ -115,6 +122,13 @@ public:
 	void IncreaseMenuState();
 	void DecreaseMenuState();
 	int GetMenuState() const;
+	bool GetRenderMenu() const;
+
+	void SetRenderWon(bool render);
+	bool GetRenderWon() const;
+
+	void SetRenderLost(bool render);
+	bool GetRenderLost() const;
 	//
 
 	int GetEnemyCount();

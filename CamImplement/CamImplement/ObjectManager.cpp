@@ -12,6 +12,8 @@ ObjectManager::ObjectManager()
 	m_objTiles = nullptr;
 	m_objMenu = nullptr;
 	m_objArrow = nullptr;
+	m_objWon = nullptr;
+	m_objLost = nullptr;
 	m_objArrowPosState = nullptr;
 	cbPerObjectBuffer = nullptr;
 }
@@ -214,6 +216,28 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 		device->CreateBuffer (&vertexBufferDesc, &vData, &m_objArrow->vertexBuffer);
 		device->CreateBuffer (&indexBufferDesc, &iData, &m_objArrow->indexBuffer);
 	}
+
+	//Menu won buffers
+	if (m_objWon)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objWon->nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objWon->nIndices;
+		vData.pSysMem = m_objWon->input;
+		iData.pSysMem = m_objWon->indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objWon->vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objWon->indexBuffer);
+	}
+
+	//Menu lost buffers
+	if (m_objLost)
+	{
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objLost->nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objLost->nIndices;
+		vData.pSysMem = m_objLost->input;
+		iData.pSysMem = m_objLost->indices;
+		device->CreateBuffer(&vertexBufferDesc, &vData, &m_objLost->vertexBuffer);
+		device->CreateBuffer(&indexBufferDesc, &iData, &m_objLost->indexBuffer);
+	}
 }
 
 void ObjectManager::CreateSamplers(ID3D11Device* device)
@@ -231,9 +255,9 @@ void ObjectManager::CreateSamplers(ID3D11Device* device)
 	device->CreateSamplerState(&sampDesc, &samplerState);
 }
 
-void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr)
+void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj)
 {
-	if (!arr)
+	if (!obj)
 		return;
 
 	UINT stride = sizeof(InputType);
@@ -241,10 +265,10 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	ID3D11ShaderResourceView* srv = nullptr;
 
 	// Set object buffer & textures.
-	deviceContext->IASetVertexBuffers(0, 1, &arr->vertexBuffer, &stride, &offset);
-	deviceContext->IASetIndexBuffer(arr->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+	deviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
+	deviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 
-	srv = m_loader->getTexture(arr->textureIndex);
+	srv = m_loader->getTexture(obj->textureIndex);
 	deviceContext->PSSetShaderResources(0, 1, &srv);
 
 	XMMATRIX world;
@@ -253,14 +277,14 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 
 	bool guiInstance = false;
 
-	if (arr == m_objMenu)
+	if (obj == m_objMenu || obj == m_objWon || obj == m_objLost)
 	{
 		world = XMMatrixScaling(0.7f, 1.15f, 1.0f) * XMMatrixTranslation(-0.08f, 0.0f, 0.0f);
 		view = XMMatrixIdentity();
 		projection = XMMatrixIdentity();
 		guiInstance = true;
 	}
-	else if (arr == m_objArrow)
+	else if (obj == m_objArrow)
 	{
 		world = XMMatrixScaling(0.7f, 1.15f, 1.0f);
 		world *= XMMatrixTranslation(m_objArrowPosState[currentState].x, m_objArrowPosState[currentState].y, 0.0f);
@@ -275,19 +299,19 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	}
 
 	// Draw buffers for each world matrix.
-	for (UINT i = 0; i < arr->world.size(); i++)
+	for (UINT i = 0; i < obj->world.size(); i++)
 	{
 		// Update buffers & textures.
 		
 		if (!guiInstance)
 		{
-			world = XMLoadFloat4x4(&arr->world[i]);
+			world = XMLoadFloat4x4(&obj->world[i]);
 		}
 		XMMATRIX wvp = world * view * projection;
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
 
-		if (arr->hit.size() > 0 && arr->hit.at(i))
+		if (obj->hit.size() > 0 && obj->hit.at(i))
 		{
 			cbPerObject.Hue = HUE_HIT;
 		}
@@ -306,7 +330,7 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
 		// Draw mesh.
-		deviceContext->DrawIndexed(arr->nIndices, 0, 0);
+		deviceContext->DrawIndexed(obj->nIndices, 0, 0);
 	}
 }
 
@@ -315,7 +339,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	renderMenu = false;
 
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Obstacle, Tile, Menu, Arrow };
+	Object obj[] = { Player, Enemy, Obstacle, Tile, Menu, Arrow, Won, Lost };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
@@ -325,6 +349,8 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	InitInstances(Tile, m_objTiles);
 	InitInstances(Menu, m_objMenu);
 	InitInstances(Arrow, m_objArrow);
+	InitInstances(Won, m_objWon);
+	InitInstances(Lost, m_objLost);
 
 	m_objArrowStateSize = 2;
 	m_objArrowPosState = new DirectX::XMFLOAT2[m_objArrowStateSize];
@@ -357,6 +383,10 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 	m_objMenu->world.push_back (mat);
 
 	m_objArrow->world.push_back (mat);
+
+	m_objWon->world.push_back(mat);
+
+	m_objLost->world.push_back(mat);
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
@@ -427,6 +457,16 @@ void ObjectManager::SetRenderMenu(bool render)
 	renderMenu = render;
 }
 
+void ObjectManager::SetRenderWon(bool render)
+{
+	renderWon = render;
+}
+
+void ObjectManager::SetRenderLost(bool render)
+{
+	renderLost = render;
+}
+
 void ObjectManager::IncreaseMenuState()
 {
 	currentState++;
@@ -465,6 +505,20 @@ int ObjectManager::GetTileCount()
 	return m_objTiles->world.size();
 }
 
+bool ObjectManager::GetRenderMenu() const
+{
+	return renderMenu;
+}
+
+bool ObjectManager::GetRenderWon() const
+{
+	return renderWon;
+}
+bool ObjectManager::GetRenderLost() const
+{
+	return renderLost;
+}
+
 void ObjectManager::Update()
 {
 	
@@ -486,6 +540,14 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 	{
 		RenderInstances(deviceContext, m_objArrow);
 		RenderInstances(deviceContext, m_objMenu);
+	}
+	if (renderWon)
+	{
+		RenderInstances(deviceContext, m_objWon);
+	}
+	if (renderLost)
+	{
+		RenderInstances(deviceContext, m_objLost);
 	}
 }
 
@@ -528,6 +590,16 @@ void ObjectManager::ReleaseCOM()
 	{
 		m_objArrow->Delete ();
 		delete m_objArrow;
+	}
+	if (m_objWon)
+	{
+		m_objWon->Delete();
+		delete m_objWon;
+	}
+	if (m_objLost)
+	{
+		m_objLost->Delete();
+		delete m_objLost;
 	}
 
 	cbPerObjectBuffer->Release();

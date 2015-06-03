@@ -9,6 +9,13 @@
 #include "Input.h"
 #include "PathfindingLib.h"
 
+enum GameState
+{
+	gOngoing,
+	gWon,
+	gLost
+};
+
 class GameDummy
 {
 private:
@@ -43,7 +50,7 @@ private:
 	int frames = 0;
 
 	// Determinates if the player or the enemies won and marks the game for termination 
-	bool gameState; 
+	GameState gameState;
 
 public:
 	GameDummy();
@@ -75,7 +82,7 @@ public:
 	bool IsPlayerHit();
 	bool IsEnemyHit(int index);
 
-	bool GetGameState() const;
+	GameState GetGameState() const;
 
 	void ReleaseCOM();
 };

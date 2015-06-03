@@ -32,7 +32,7 @@ GameDummy::~GameDummy()
 
 void GameDummy::NewGame()
 {
-	gameState = true;
+	gameState = gOngoing;
 
 	/************************************* Player *************************************/
 
@@ -204,7 +204,7 @@ void GameDummy::Update(float deltaTime)
 	// player won
 	if (enemyArrSize == 0)
 	{
-		gameState = false;
+		gameState = gWon;
 	}
 
 	/************************************* Pathfinding *************************************/
@@ -286,7 +286,7 @@ void GameDummy::Update(float deltaTime)
 	}
 	else // player lose
 	{
-		gameState = false;
+		gameState = gLost;
 	}
 
 	// Update game objects.
@@ -394,7 +394,7 @@ bool GameDummy::IsEnemyHit(int index)
 	return enemyArr[index]->GetHitFrameCount() || enemyArr[index]->IsDead();
 }
 
-bool GameDummy::GetGameState() const
+GameState GameDummy::GetGameState() const
 {
 	return gameState;
 }
