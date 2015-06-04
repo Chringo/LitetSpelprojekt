@@ -645,4 +645,3 @@ void ObjectManager::ReleaseCOM()
 	cbPerObjectBuffer->Release();
 	samplerState->Release();
 }
-

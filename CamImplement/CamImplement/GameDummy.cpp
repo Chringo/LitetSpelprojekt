@@ -69,7 +69,7 @@ void GameDummy::NewGame()
 	for (int i = 0; i < enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i + 3].worldpos);
+		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos);
 		enemyArr[i]->SetMovementSpeed(8.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
