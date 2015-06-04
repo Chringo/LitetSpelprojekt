@@ -402,6 +402,8 @@ void ObjectManager::SetEnemyHit(int index, bool hit)
 	m_objEnemies->hit[index] = hit;
 }
 
+/***************************************************************************/
+
 void ObjectManager::SetPlayerWorld(const XMMATRIX &world)
 {
 	XMStoreFloat4x4(&m_objPlayer->world[0], world);
@@ -411,46 +413,32 @@ void ObjectManager::SetEnemiesWorld(const XMMATRIX* arr)
 {
 	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
 	{
-		SetEnemyWorld(i, arr[i]);
+		XMMATRIX w = arr[i];
+		XMStoreFloat4x4(&m_objEnemies->world[i], w);
 	}
-}
-
-void ObjectManager::SetEnemyWorld(int index, const XMMATRIX &world)
-{
-	//Passing world directly into StoreFloat causes random access violation
-	XMMATRIX w = world;
-	XMStoreFloat4x4(&m_objEnemies->world[index], w);
 }
 
 void ObjectManager::SetObstaclesWorld(const XMMATRIX* arr)
 {
 	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
 	{
-		SetObstacleWorld(i, arr[i]);
+		//Passing world directly into StoreFloat causes random access violation
+		XMMATRIX w = arr[i];
+		XMStoreFloat4x4(&m_objObstacles->world[i], w);
 	}
-}
-
-void ObjectManager::SetObstacleWorld(int index, const XMMATRIX &world)
-{
-	//Passing world directly into StoreFloat causes random access violation
-	XMMATRIX w = world;
-	XMStoreFloat4x4(&m_objObstacles->world[index], w);
 }
 
 void ObjectManager::SetTilesWorld(const XMMATRIX* arr)
 {
 	for (UINT i = 0; i < m_objTiles->world.size(); i++)
 	{
-		SetTileWorld(i, arr[i]);
+		//Passing world directly into StoreFloat causes random access violation
+		XMMATRIX w = arr[i];
+		XMStoreFloat4x4(&m_objTiles->world[i], w);
 	}
 }
 
-void ObjectManager::SetTileWorld(int index, const XMMATRIX &world)
-{
-	//Passing world directly into StoreFloat causes random access violation
-	XMMATRIX w = world;
-	XMStoreFloat4x4(&m_objTiles->world[index], w);
-}
+/***************************************************************************/
 
 void ObjectManager::SetRenderMenu(bool render)
 {
