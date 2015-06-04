@@ -53,7 +53,7 @@ Map::Map(int randSeed, int exponent, float startValue)
 	}
 
 	// Create noise - algorithm usage
-	DiamondSquare((startValue * 0.5), 0.76789f);
+	DiamondSquare((startValue * 0.5f), 0.76789f);
 
 	// Create Tile-based map
 	CreateTiles();
@@ -246,19 +246,25 @@ void Map::DiamondSquare(float range, float decrease)
 //TODO Set tile type
 void Map::EvaluateTile(TileClass& tile)
 {
-	if (tile.getHeight() < 60)
+	if (tile.getHeight() < 50)
 	{
 		tile.setObstacle(true);
 		tile.setType(1);
 		water++;
 	}
-	else if (tile.getHeight() > 80 && tile.getHeight() < 84)
+	else if (tile.getHeight() > 82 && tile.getHeight() < 84)
 	{
 		tile.setObstacle(true);
 		tile.setType(2);
 		peak++;
 	}
-	else if (tile.getHeight() > 100)
+	else if (tile.getHeight() > 75 && tile.getHeight() < 77)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
+	}
+	else if (tile.getHeight() > 125)
 	{
 		tile.setObstacle(true);
 		tile.setType(2);

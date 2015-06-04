@@ -88,7 +88,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 	/************************************** Map  **************************************/
 
-	map = new Map(1, 5, 60.0f);
+	map = new Map(3, 5, 60.0f);
 	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
 	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
 	{
