@@ -2,6 +2,7 @@ cbuffer cbPerObject : register(b0)
 {
 	float4x4 WVP;
 	float4x4 World;
+	float4x4 ShadowViewProjection;
 	float4 Hue;
 };
 
@@ -19,6 +20,7 @@ struct VS_OUT
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
 	float4 hue : TEXCOORD1;
+	float4 shadowPos : TEXCOORD2;
 };
 
 VS_OUT main( VS_IN input )
@@ -30,6 +32,7 @@ VS_OUT main( VS_IN input )
 	output.normal = mul(input.normal, World);
 	output.tex = input.tex;
 	output.hue = Hue;
+	output.shadowPos = mul(float4(input.pos, 1.f), ShadowViewProjection);
 
 	return output;
 }

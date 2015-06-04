@@ -1,5 +1,7 @@
 Texture2D objTex : register(t0);
+Texture2D gShadowMap : register(t1);
 SamplerState objSamp : register(s0);
+SamplerState pointSampler : register(s1);
 
 #define MAX_NUMBER_OF_LIGHTS 10
 
@@ -40,6 +42,7 @@ struct VS_OUT
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
 	float4 hue : TEXCOORD1;
+	float4 shadowPos : TEXCOORD2;
 };
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -80,6 +83,19 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	float3 finalAmbient = saturate(ambient + dirLight.ambient) * diffuse;
 
+	// Check if pixel is shadowed.
+	float4 shadowMapSamplePosition;
+	float shadowMapValue;
+	float depth;
+
+	shadowMapSamplePosition = input.shadowPos * 0.5f + 0.5f;	// Convert from world to texture space.
+	shadowMapSamplePosition.y = 1 - shadowMapSamplePosition.y;	// This seem to correct upside down texture.
+	shadowMapValue = gShadowMap.Sample(pointSampler, shadowMapSamplePosition.xy);
+	depth = (input.shadowPos.xyz / input.shadowPos.w).z;
+
+	if (shadowMapValue < depth)
+		return float4(0, 0, 0, 1);
+	
 	finalColor = saturate((finalColor + dirColor) * diffuse + finalAmbient);
 
 	return float4(finalColor, diffuse.a);

@@ -93,6 +93,7 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="TileClass.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
@@ -112,6 +113,7 @@
     <ClInclude Include="PathfindingLib.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="TileClass.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>

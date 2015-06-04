@@ -20,6 +20,7 @@ class DirectionalLight
 {
 private:
 	DirLight light;
+	DirectX::XMMATRIX lightViewMatrix;
 
 public:
 	DirectionalLight();

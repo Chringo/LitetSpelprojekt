@@ -229,6 +229,10 @@ void ObjectManager::CreateSamplers(ID3D11Device* device)
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	device->CreateSamplerState(&sampDesc, &samplerState);
+
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+
+	device->CreateSamplerState(&sampDesc, &pointSampler);
 }
 
 void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr)
@@ -248,8 +252,9 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 	deviceContext->PSSetShaderResources(0, 1, &srv);
 
 	XMMATRIX world;
-	DirectX::XMMATRIX view;
-	DirectX::XMMATRIX projection;
+	XMMATRIX view;
+	XMMATRIX projection;
+	XMMATRIX shadowViewProjection = XMLoadFloat4x4(&m_shadowViewProjection);
 
 	bool guiInstance = false;
 
@@ -284,8 +289,11 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 			world = XMLoadFloat4x4(&arr->world[i]);
 		}
 		XMMATRIX wvp = world * view * projection;
+		XMMATRIX swvp = world * shadowViewProjection;
+
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
+		XMStoreFloat4x4(&cbPerObject.ShadowWVP, XMMatrixTranspose(swvp));
 
 		if (arr->hit.size() > 0 && arr->hit.at(i))
 		{
@@ -487,6 +495,50 @@ void ObjectManager::Render(ID3D11DeviceContext* deviceContext)
 		RenderInstances(deviceContext, m_objArrow);
 		RenderInstances(deviceContext, m_objMenu);
 	}
+}
+
+void ObjectManager::RenderInstanceGeometry(ID3D11DeviceContext *deviceContext, ObjectInstance *object, const XMMATRIX &viewProjection)
+{
+	 // Draw geometry only.
+	D3D11_MAPPED_SUBRESOURCE cb;
+	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	// Apply buffers.
+	UINT stride = sizeof(InputType);
+	UINT offset = 0;
+	deviceContext->IASetVertexBuffers(0, 1, &object->vertexBuffer, &stride, &offset);
+
+	// Draw.
+	for each (XMFLOAT4X4 w in object->world)
+	{
+		XMMATRIX world = XMLoadFloat4x4(&w);
+		XMMATRIX wvp = world * viewProjection;
+		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
+		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
+
+		deviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
+		deviceContext->Unmap(cbPerObjectBuffer, 0);
+
+		deviceContext->Draw(object->nVertices, 0);
+	}
+}
+
+void ObjectManager::RenderGeometry(ID3D11DeviceContext *deviceContext, const XMMATRIX &viewProjection)
+{
+	deviceContext->PSSetSamplers(1, 1, &pointSampler);
+
+	// Required to convert calculate distance between light source and pixel.
+	XMStoreFloat4x4(&m_shadowViewProjection, viewProjection);
+
+	RenderInstanceGeometry(deviceContext, m_objPlayer, viewProjection);
+	
+	// [does not cast shadows properly]
+	RenderInstanceGeometry(deviceContext, m_objEnemies, viewProjection);
+	//RenderInstanceGeometry(deviceContext, m_objObstacles, viewProjection);
+	
+	// These have nothing to cast shadows on.
+	//RenderInstanceGeometry(deviceContext, m_objTiles, viewProjection);
 }
 
 void ObjectManager::setViewProjection(const XMMATRIX &view, const XMMATRIX &projection)

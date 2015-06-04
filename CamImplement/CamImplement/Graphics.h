@@ -11,6 +11,7 @@
 #include "PointLight.h"
 #include "GUI.h"
 #include <Windows.h>
+#include "ShadowMap.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -40,7 +41,6 @@ private:
 	Camera*					camera;
 	DirectionalLight*		dirLight;
 	PointLight*				pointLight;
-	GUI*					gui;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
 	ID3D11Buffer*			cbPointLightBuffer;
@@ -56,10 +56,14 @@ private:
 	ID3D11RenderTargetView* rBackbufferRTV;
 	ID3D11DepthStencilView* rDepthStencilView;
 	ID3D11Texture2D*		rDepthStencilBuffer;
+	ID3D11RasterizerState*	rRasterizerState;
+
+	ShadowMap*				shadowMap;
+	DirectX::XMMATRIX		shadowViewProjection;
 
 private:
 	HRESULT CreateDirect3DContext(HWND &wndHandle);
-	void SetViewport(int width, int height);
+	void CreateViewport(int width, int height);
 	HRESULT CreateDepthBuffer(int width, int height);
 	HRESULT CreateShaders();
 	void CreateBuffers();
@@ -74,6 +78,7 @@ public:
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
 
 	bool Update(float deltaTime);
+	void CreateShadowMap();
 	void Render();
 
 	void SwapFBBuffer();

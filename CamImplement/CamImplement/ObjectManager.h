@@ -56,11 +56,13 @@ private:
 	{
 		DirectX::XMFLOAT4X4 WVP;
 		DirectX::XMFLOAT4X4 World;
+		DirectX::XMFLOAT4X4 ShadowWVP;
 		DirectX::XMFLOAT4	Hue;
 	}					cbPerObject;
 
 	DirectX::XMFLOAT4X4 m_view;
 	DirectX::XMFLOAT4X4 m_projection;
+	DirectX::XMFLOAT4X4 m_shadowViewProjection;
 
 	Loader*				m_loader;
 
@@ -79,6 +81,7 @@ private:
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
+	ID3D11SamplerState* pointSampler;
 
 private:
 	void InitInstances(Object obj, ObjectInstance *&object);
@@ -86,7 +89,7 @@ private:
 
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
-
+	void RenderInstanceGeometry(ID3D11DeviceContext* deviceContext, ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
 	void CreateSamplers(ID3D11Device* device);
 
 	bool renderMenu;
@@ -123,6 +126,7 @@ public:
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);
+	void RenderGeometry(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &viewProjection);
 
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
 
