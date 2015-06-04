@@ -29,12 +29,12 @@ void Loader::FindModelFilename(Object object, char** filename)
 		}
 		case Enemy:
 		{
-			*filename = "Meshes/tree01.obj";
+			*filename = "Meshes/dummyMan_UV.obj";
 			break;
 		}
 		case Obstacle:
 		{
-			*filename = "Meshes/groundTile01.obj";
+			*filename = "Meshes/tree01.obj";
 			break;
 		}
 		case Tile:
@@ -242,9 +242,9 @@ void Loader::LoadTextures(ID3D11Device* device)
 	CoInitialize(NULL);
 	WCHAR* filename[TEXTURE_COUNT] = 
 	{ 
+		L"Meshes/Textures/dummyTexture.png", 
 		L"Meshes/Textures/dummyEnemyTexture.png", 
 		L"Meshes/Textures/tree01.png", 
-		L"Meshes/Textures/tree03.png", 
 		L"Meshes/Textures/groundTile01.png", 
 		L"Meshes/Textures/titlescreen.png", 
 		L"Meshes/Textures/arrow.png",
