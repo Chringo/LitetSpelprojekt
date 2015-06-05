@@ -378,6 +378,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	if (FAILED(hr)) { return hr; }
 
 	gamePaused = false;
+	renderMenu = gamePaused;
 
 	game = new GameDummy();
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
@@ -385,10 +386,11 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	pointLight = new PointLight();
 	
 	game->Initialize(wndHandle, hInstance, viewport);
-	objInitialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
-	renderMenu = gamePaused;
+	
+	objInitialize(rDevice);
 	SetTilesWorld(game->GetTileMatrices());
 	SetObstaclesWorld(game->GetObsMatrices());
+	
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	cbPerFrame.dirLight = dirLight->getLight();
 	cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
@@ -398,6 +400,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	if (FAILED(hr = shadowMap->Initialize(rDevice, 8 * 1024, 8 * 1024)))
 		return hr;
 
+	CreateSamplers();
 	CreateCamera();
 	CreateBuffers();
 
@@ -807,7 +810,7 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 	object->indexBuffer = nullptr;
 }
 
-void Graphics::CreateSamplers(ID3D11Device* device)
+void Graphics::CreateSamplers()
 {
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
@@ -819,11 +822,11 @@ void Graphics::CreateSamplers(ID3D11Device* device)
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	device->CreateSamplerState(&sampDesc, &samplerState);
+	rDevice->CreateSamplerState(&sampDesc, &samplerState);
 
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 
-	device->CreateSamplerState(&sampDesc, &pointSampler);
+	rDevice->CreateSamplerState(&sampDesc, &pointSampler);
 }
 
 void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj)
@@ -932,7 +935,7 @@ void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstanc
 	}
 }
 
-void Graphics::objInitialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles)
+void Graphics::objInitialize(ID3D11Device* device)
 {
 	renderMenu = false;
 
@@ -956,7 +959,7 @@ void Graphics::objInitialize(ID3D11Device* device, int nEnemies, int nObstacles,
 	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
 	currentState = 1;
 
-	CreateSamplers(device);
+	
 
 	// Create instances.
 	XMFLOAT4X4 mat;
@@ -965,16 +968,16 @@ void Graphics::objInitialize(ID3D11Device* device, int nEnemies, int nObstacles,
 	m_objPlayer->world.push_back(mat);
 	m_objPlayer->hit.push_back(false);
 
-	for (INT i = 0; i < nEnemies; i++)
+	for (INT i = 0; i < game->GetEnemyArrSize(); i++)
 	{
 		m_objEnemies->world.push_back(mat);
 		m_objEnemies->hit.push_back(false);
 	}
 
-	for (INT i = 0; i < nObstacles; i++)
+	for (INT i = 0; i < game->GetObsArrSize(); i++)
 		m_objObstacles->world.push_back(mat);
 
-	for (INT i = 0; i < nTiles; i++)
+	for (INT i = 0; i < game->GetNrOfTiles(); i++)
 		m_objTiles->world.push_back(mat);
 
 	m_objMenu->world.push_back(mat);

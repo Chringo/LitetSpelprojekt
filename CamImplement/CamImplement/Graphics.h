@@ -160,18 +160,18 @@ private:
 	void CreateViewport(int width, int height);
 	HRESULT CreateDepthBuffer(int width, int height);
 	HRESULT CreateShaders();
+	void CreateSamplers();
 	void CreateBuffers();
 	void CreateCamera();	
 
 	void InitInstances(Object obj, ObjectInstance *&object);
-	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj);
 	void RenderInstanceGeometry(ID3D11DeviceContext* deviceContext, ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
-	void CreateSamplers(ID3D11Device* device);
+	
 
 	/*********************************Object manager**********************************/
 
-	void objInitialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles);
+	void objInitialize(ID3D11Device* device);
 
 	void SetPlayerHit(bool hit);
 	void SetEnemyHit(int index, bool hit);
@@ -190,8 +190,6 @@ private:
 	void SetAnimationState(int index, AnimationState animState);
 
 	void RenderGeometry(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &viewProjection);
-
-	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
 
 public:
 	Graphics();
