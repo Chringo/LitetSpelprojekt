@@ -15,8 +15,8 @@ enum AnimationState
 	WalkStart,
 	WalkLoop,
 	WalkEnd,
-	Block,
-	Dodge
+	AnBlock,
+	AnDodge
 };
 
 #define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)

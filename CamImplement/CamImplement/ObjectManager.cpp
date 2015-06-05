@@ -601,10 +601,10 @@ void ObjectManager::SetAnimationState (int index, AnimationState animState)
 	case WalkEnd:
 
 		break;
-	case Block:
+	case AnBlock:
 
 		break;
-	case Dodge:
+	case AnDodge:
 
 		break;
 	}
