@@ -683,9 +683,6 @@ void Graphics::ReleaseCOM()
 
 int framecount = 0;
 
-// *** FIX THIS ***
-//Current code makes index buffer useless
-
 void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 {
 	// We only need 1 instance of each object.
@@ -959,7 +956,6 @@ void Graphics::objInitialize(ID3D11Device* device, int nEnemies, int nObstacles,
 	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
 	currentState = 1;
 
-	//CreateBuffers(device);
 	CreateSamplers(device);
 
 	// Create instances.
@@ -1126,10 +1122,4 @@ void Graphics::RenderGeometry(ID3D11DeviceContext *deviceContext, const XMMATRIX
 
 	// These have nothing to cast shadows on.
 	//RenderInstanceGeometry(deviceContext, m_objTiles, viewProjection);
-}
-
-void Graphics::setViewProjection(const XMMATRIX &view, const XMMATRIX &projection)
-{
-	XMStoreFloat4x4(&m_view, view);
-	XMStoreFloat4x4(&m_projection, projection);
 }
