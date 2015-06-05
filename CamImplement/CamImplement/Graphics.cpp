@@ -906,7 +906,7 @@ void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstanc
 		deviceContext->Unmap(cbPerObjectBuffer, 0);
 
 
-		if (obj == m_objPlayer)
+		if (obj == m_objPlayer && obj->frameCount > 0)
 		{
 
 			for (int j = 0; j < obj->nVertices; j++)

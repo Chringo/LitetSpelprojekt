@@ -380,8 +380,7 @@ DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 }
 DirectX::XMMATRIX GameDummy::GetMapMatrix() const
 {
-	//return XMMatrixTranslation(0.f, 0.f, 0.f);
-	return XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	return map->setMapPlane();
 }
 int GameDummy::GetNrOfTiles() const
 {

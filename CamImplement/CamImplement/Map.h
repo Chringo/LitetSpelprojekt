@@ -56,6 +56,7 @@ public:
 	// Graphics data
 	void setTileMatrices();
 	DirectX::XMMATRIX* getTileMatrices();
+	DirectX::XMMATRIX setMapPlane();
 	int getNrOfTiles() const;
 };
 #endif

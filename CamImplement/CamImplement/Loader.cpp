@@ -24,7 +24,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 	{
 		case Player:
 		{
-			*filename = "Meshes/guyAnimation.bl";
+			*filename = "Meshes/dummyMan_UV.obj";
 			break;
 		}
 		case Enemy:
