@@ -18,7 +18,6 @@
 #pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
 
-#define MAX_NUMBER_OF_LIGHTS 10
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x1)
 
 class Graphics
