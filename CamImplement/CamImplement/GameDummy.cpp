@@ -256,6 +256,12 @@ void GameDummy::Update(float deltaTime)
 
 	for (int i = 0; i < enemyArrSize; i++)
 	{
+		if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+		{
+			enemyArr[i]->SetAttackDirection(player->GetPosition());
+			enemyArr[i]->PerformAction(Ent::Attack1);
+		}
+		CheckEnemyAttack(i);
 		// Update path if a player or Enemy have moved from a tile to another
 		if (update)
 		{
