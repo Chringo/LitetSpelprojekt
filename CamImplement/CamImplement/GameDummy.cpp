@@ -297,7 +297,7 @@ void GameDummy::Update(float deltaTime)
 			enemyArr[i]->SetAttackDirection(player->GetPosition());
 			enemyArr[i]->PerformAction(Ent::Attack1);
 		}
-		CheckEnemyAttack(i);
+		//CheckEnemyAttack(i);
 
 		enemyArr[i]->Update(deltaTime);
 		player->Intersect(enemyArr[i]);

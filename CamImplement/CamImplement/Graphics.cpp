@@ -924,6 +924,9 @@ void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 	// [does not cast shadows properly]
 	RenderInstanceGeometry(m_objEnemies, viewProjection);
 
+	// [does not cast shadows properly]
+	RenderInstanceGeometry(m_objObstacles, viewProjection);
+
 	// These have nothing to cast shadows on.
 }
 
