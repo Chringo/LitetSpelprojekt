@@ -50,12 +50,19 @@ struct FaceType
 	int nIndex1, nIndex2, nIndex3;
 };
 
+struct FrameType		//For one frame
+{
+	VertexType* vertex;	//Every frame needs x,y,z coords
+};						//so we use our VertexType struct
+
 struct ObjectType
 {
 	VertexType* vertices;
 	TextureCoordType* texCoords;
 	NormalType* normals;
 	FaceType* faces;
+	FrameType* frames;
+	int nFrames;
 
 	void Delete()
 	{
@@ -63,12 +70,13 @@ struct ObjectType
 		delete[] texCoords;
 		delete[] normals;
 		delete[] faces;
+		delete[] frames;
 	}
 };
 
 struct FileCountType
 {
-	int nVertices, nTextures, nNormals, nFaces;
+	int nVertices, nTextures, nNormals, nFaces, nFrames;
 };
 
 class Loader
@@ -100,6 +108,7 @@ public:
 	int getIndexCount(Object index) const;
 	int getTextureCoordCount(Object index) const;
 	int getNormalCount(Object index) const;
+	int getFrameCount(Object index) const;
 
 	void ReleaseCOM();
 };
