@@ -125,6 +125,7 @@ void Entity::PerformAction(Action action)
 	{
 	case Attack1:
 		// Move sword.
+		Attack(1.f);
 		break;
 	case Attack2:
 		// Move sword.
