@@ -3,6 +3,8 @@
 using namespace DirectX;
 using namespace std;
 
+int framecount = 0;
+
 ObjectManager::ObjectManager()
 {
 	m_loader = nullptr;
@@ -36,11 +38,12 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 	// We only need 1 instance of each object.
 	// Apply buffer -> draw multiple times using differente cBuffers.
 
-	float x, y, z;
-	float u, v;
-	float nx, ny, nz;
-	int iV, iT, iN;
-	int nV, nT, nN, nI;
+	float x, y, z;				//per-vertex x, y, z
+	float u, v;					//per-uv u & v coords
+	float nx, ny, nz;			//per-normal x, y, z 
+	int iV, iT, iN;				//vertex indices, tex indices, norm indices
+	int nV, nT, nN, nI, nF;		//number of verts, texcoords, norms, indices, frames
+
 
 	ObjectType *temp = m_loader->getObject(obj);
 
@@ -49,10 +52,12 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 
 	object = new ObjectInstance();
 
+
 	nV = m_loader->getVertexCount(obj);
 	nT = m_loader->getTextureCoordCount(obj);
 	nN = m_loader->getNormalCount(obj);
 	nI = m_loader->getIndexCount(obj);
+	nF = m_loader->getFrameCount(obj);
 
 	object->nIndices = nI;
 	object->nVertices = nI;
@@ -61,7 +66,7 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 
 	for (int j = 0; j < nI / 3; j++)
 	{
-		object->indices[(j * 3)] = (j * 3);
+		object->indices[(j * 3)]	 = (j * 3);
 		object->indices[(j * 3) + 1] = (j * 3) + 1;
 		object->indices[(j * 3) + 2] = (j * 3) + 2;
 
@@ -105,6 +110,48 @@ void ObjectManager::InitInstances(Object obj, ObjectInstance *&object)
 		object->input[(j * 3 + 2)] = InputType(x, y, z, u, v, nx, ny, nz);
 	}
 
+	for (int f = 0; f < nF; f++)
+	{
+		for (int j = 0; j < nI / 3; j++)
+		{
+			iV = temp->faces[j].vIndex1 - 1;
+			object->fx.push_back (temp->frames[f].vertex[iV].x);
+			object->fy.push_back (temp->frames[f].vertex[iV].y);
+			object->fz.push_back (temp->frames[f].vertex[iV].z);
+
+			iV = temp->faces[j].vIndex2 - 1;
+			object->fx.push_back (temp->frames[f].vertex[iV].x);
+			object->fy.push_back (temp->frames[f].vertex[iV].y);
+			object->fz.push_back (temp->frames[f].vertex[iV].z);
+
+			iV = temp->faces[j].vIndex3 - 1;
+			object->fx.push_back (temp->frames[f].vertex[iV].x);
+			object->fy.push_back (temp->frames[f].vertex[iV].y);
+			object->fz.push_back (temp->frames[f].vertex[iV].z);
+		}
+	}
+
+
+	if (object == m_objPlayer)
+	{
+		for (int f = 0; f < nF; f++)
+		{
+			for (int v = 0; v < nV; v++)
+			{	
+				//object->fx.push_back (temp->frames[f].vertex[v].x);
+				//object->fy.push_back (temp->frames[f].vertex[v].y);
+				//object->fz.push_back (temp->frames[f].vertex[v].z);
+
+				//fx = temp->frames[f].vertex[v].x;
+				//fy = temp->frames[f].vertex[v].y;
+				//fz = temp->frames[f].vertex[v].z;
+			}
+		}
+	}
+
+
+
+
 	object->textureIndex = obj;
 	object->vertexBuffer = nullptr;
 	object->indexBuffer = nullptr;
@@ -125,10 +172,10 @@ void ObjectManager::CreateBuffers(ID3D11Device* device)
 
 	//Vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBufferDesc.ByteWidth = 0;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
@@ -334,6 +381,29 @@ void ObjectManager::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectIn
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
 		deviceContext->Unmap(cbPerObjectBuffer, 0);
 
+
+		if (obj == m_objPlayer)
+		{
+
+			for (int j = 0; j < obj->nVertices; j++)
+			{
+				obj->input[j].pos.x = obj->fx.at (j + framecount * (obj->nVertices));
+				obj->input[j].pos.y = obj->fy.at (j + framecount * (obj->nVertices));
+				obj->input[j].pos.z = obj->fz.at (j + framecount * (obj->nVertices));
+			}
+			framecount < 191 ? framecount++ : framecount = 0;
+
+
+			D3D11_MAPPED_SUBRESOURCE vb;
+			ZeroMemory (&vb, sizeof (D3D11_MAPPED_SUBRESOURCE));
+			deviceContext->Map (obj->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+			memcpy (vb.pData, obj->input, sizeof (InputType) * m_objPlayer->nVertices);
+			deviceContext->Unmap (obj->vertexBuffer, 0);
+
+			deviceContext->IASetVertexBuffers (0, 1, &obj->vertexBuffer, &stride, &offset);
+			deviceContext->IASetIndexBuffer (obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+		}
+
 		// Pass data to shaders.
 		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
@@ -386,7 +456,7 @@ void ObjectManager::Initialize(ID3D11Device* device, int nEnemies, int nObstacle
 		m_objObstacles->world.push_back(mat);
 
 	for (INT i = 0; i < nTiles; i++)
-		m_objTiles->world.push_back(mat);
+		m_objTiles->world.push_back (mat);
 
 	m_objMenu->world.push_back (mat);
 
@@ -513,6 +583,31 @@ bool ObjectManager::GetRenderWon() const
 bool ObjectManager::GetRenderLost() const
 {
 	return renderLost;
+}
+
+void ObjectManager::SetAnimationState (int index, AnimationState animState)
+{
+	switch (animState)
+	{
+	case Attack:
+		//From m_objPlayer->fx.at (1) to m_objPlayer->fx.at (40)
+		break;
+	case WalkStart:
+		
+		break;
+	case WalkLoop:
+
+		break;
+	case WalkEnd:
+
+		break;
+	case AnBlock:
+
+		break;
+	case AnDodge:
+
+		break;
+	}
 }
 
 void ObjectManager::Update()

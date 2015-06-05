@@ -24,7 +24,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 	{
 		case Player:
 		{
-			*filename = "Meshes/UVmappedChar.obj";
+			*filename = "Meshes/guyAnimation.bl";
 			break;
 		}
 		case Enemy:
@@ -97,6 +97,12 @@ int Loader::getTextureCoordCount(Object index) const
 	return m_fileCounts[index].nTextures;
 }
 
+int Loader::getFrameCount(Object index) const
+{
+	return m_fileCounts[index].nFrames;
+}
+
+
 bool Loader::ReadFileCounts(char* filename)
 {
 	std::ifstream fin;
@@ -134,6 +140,15 @@ bool Loader::ReadFileCounts(char* filename)
 			}
 		}
 
+		if (input == 'a')
+		{
+			fin.get (input);
+			if (input == ' ')
+			{
+				fin >> m_fileCounts[nObjectsCurrent].nFrames;
+			}
+		}
+
 		while (input != '\n')
 		{
 			fin.get(input);
@@ -151,19 +166,23 @@ bool Loader::LoadDataStructures(char* filename)
 {
 	std::ifstream fin;
 	std::ofstream fout;
-	int vertexIndex, texcoordIndex, normalIndex, faceIndex;
+	int vertexIndex, texcoordIndex, normalIndex, faceIndex, frameIndex, frameCount, frameVertex;
 	char input;
 	char temp;
 
-	m_objects[nObjectsCurrent]->vertices = new VertexType[m_fileCounts[nObjectsCurrent].nVertices];
-	m_objects[nObjectsCurrent]->texCoords = new TextureCoordType[m_fileCounts[nObjectsCurrent].nTextures];
-	m_objects[nObjectsCurrent]->normals = new NormalType[m_fileCounts[nObjectsCurrent].nNormals];
-	m_objects[nObjectsCurrent]->faces = new FaceType[m_fileCounts[nObjectsCurrent].nFaces];
+	m_objects[nObjectsCurrent]->vertices	= new VertexType[m_fileCounts[nObjectsCurrent].nVertices];
+	m_objects[nObjectsCurrent]->texCoords	= new TextureCoordType[m_fileCounts[nObjectsCurrent].nTextures];
+	m_objects[nObjectsCurrent]->normals		= new NormalType[m_fileCounts[nObjectsCurrent].nNormals];
+	m_objects[nObjectsCurrent]->faces		= new FaceType[m_fileCounts[nObjectsCurrent].nFaces];
+	m_objects[nObjectsCurrent]->frames		= new FrameType[m_fileCounts[nObjectsCurrent].nFrames];
 
 	vertexIndex = 0;
 	texcoordIndex = 0;
 	normalIndex = 0;
 	faceIndex = 0;
+	frameIndex = -1;
+	frameCount = 0;
+	frameVertex = 0;
 
 	fin.open(filename);
 	if (fin.fail()) { return false; }
@@ -224,6 +243,34 @@ bool Loader::LoadDataStructures(char* filename)
 			}
 		}
 
+		if (input == 'a')
+		{
+			fin.get (input);
+			if (input == ' ')
+			{
+				fin >> m_objects[nObjectsCurrent]->nFrames;
+					   m_objects[nObjectsCurrent]->frames = new FrameType[m_objects[nObjectsCurrent]->nFrames];
+
+			}
+
+			if (input == 'f')
+			{
+				frameIndex++;
+				m_objects[nObjectsCurrent]->frames[frameIndex].vertex = new VertexType[vertexIndex];
+				frameVertex = 0;
+			}
+
+			if (input == 'v')
+			{
+				fin >> m_objects[nObjectsCurrent]->frames[frameIndex].vertex[frameVertex].x
+					>> m_objects[nObjectsCurrent]->frames[frameIndex].vertex[frameVertex].y
+					>> m_objects[nObjectsCurrent]->frames[frameIndex].vertex[frameVertex].z;
+
+				m_objects[nObjectsCurrent]->frames[frameIndex].vertex[frameVertex].z *= -1.0f;
+				frameVertex++;
+			}
+		}
+
 		while (input != '\n')
 		{
 			fin.get(input);
@@ -270,6 +317,7 @@ void Loader::Initialize(ID3D11Device* device, Object* objects, int nObjects)
 		m_fileCounts[i].nTextures = 0;
 		m_fileCounts[i].nNormals = 0;
 		m_fileCounts[i].nFaces = 0;
+		m_fileCounts[i].nFrames = 0;
 		m_objects[i] = nullptr;
 	}
 

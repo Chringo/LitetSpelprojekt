@@ -9,6 +9,16 @@
 
 #pragma comment (lib, "d3d11.lib")
 
+enum AnimationState
+{
+	Attack,
+	WalkStart,
+	WalkLoop,
+	WalkEnd,
+	AnBlock,
+	AnDodge
+};
+
 #define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
 #define HUE_HIT		DirectX::XMFLOAT4(2.f, 0.5f, 0.5f, 1.f)
 
@@ -16,8 +26,8 @@ struct InputType
 {
 	InputType() {}
 	InputType(float x, float y, float z,
-		float u, float v,
-		float nx, float ny, float nz) : pos(x, y, z), tex(u, v), nor(nx, ny, nz) {}
+			  float u, float v,
+			  float nx, float ny, float nz) : pos(x, y, z), tex(u, v), nor(nx, ny, nz) {}
 
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT2 tex;
@@ -39,6 +49,9 @@ struct ObjectInstance
 	int					nIndices;
 	int					nNormals;
 	int					textureIndex;
+	int					frameCount;
+
+	std::vector<float> fx, fy, fz;
 
 	void Delete()
 	{
@@ -134,6 +147,8 @@ public:
 	int GetEnemyCount();
 	int GetObstacleCount();
 	int GetTileCount();
+
+	void SetAnimationState (int index, AnimationState animState);
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);
