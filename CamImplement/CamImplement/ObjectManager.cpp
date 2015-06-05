@@ -677,10 +677,8 @@ void ObjectManager::RenderGeometry(ID3D11DeviceContext *deviceContext, const XMM
 	XMStoreFloat4x4(&m_shadowViewProjection, viewProjection);
 
 	RenderInstanceGeometry(deviceContext, m_objPlayer, viewProjection);
-	
-	// [does not cast shadows properly]
 	RenderInstanceGeometry(deviceContext, m_objEnemies, viewProjection);
-	//RenderInstanceGeometry(deviceContext, m_objObstacles, viewProjection);
+	RenderInstanceGeometry(deviceContext, m_objObstacles, viewProjection);
 	
 	// These have nothing to cast shadows on.
 	//RenderInstanceGeometry(deviceContext, m_objTiles, viewProjection);

@@ -125,7 +125,6 @@ void Entity::PerformAction(Action action)
 	{
 	case Attack1:
 		// Move sword.
-		Attack(1.f);
 		break;
 	case Attack2:
 		// Move sword.
@@ -388,6 +387,16 @@ void Enemy::Attack(float mod)
 	if (m_HitFrameCount == 0)
 		m_HitFrameCount++;
 	m_Dead = m_HitPoints <= 0.f;
+}
+
+void Enemy::SetAttackDirection(DirectX::XMVECTOR dir)
+{
+	float a = DirectX::XMVectorGetX(dir);
+	float b = DirectX::XMVectorGetZ(dir);
+
+	static float f = 2.4;
+
+	m_Rotation.m128_f32[1] = -atan2(a, b) + f;
 }
 
 void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)

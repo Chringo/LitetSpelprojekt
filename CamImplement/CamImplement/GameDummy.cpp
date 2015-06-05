@@ -292,6 +292,13 @@ void GameDummy::Update(float deltaTime)
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
+		if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+		{
+			enemyArr[i]->SetAttackDirection(player->GetPosition());
+			enemyArr[i]->PerformAction(Ent::Attack1);
+		}
+		CheckEnemyAttack(i);
+
 		enemyArr[i]->Update(deltaTime);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)

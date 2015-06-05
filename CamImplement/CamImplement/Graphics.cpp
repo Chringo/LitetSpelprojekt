@@ -281,7 +281,7 @@ bool Graphics::Update(float deltaTime)
 	{
 		objManager->DecreaseMenuState();
 	}
-	else if (KEYDOWN(VK_ESCAPE) && game->GetGameState())
+	else if (KEYDOWN(VK_ESCAPE))
 	{
 		gamePaused = !gamePaused;
 		objManager->SetRenderMenu(gamePaused);

@@ -124,6 +124,7 @@ namespace Ent
 
 		HRESULT Update(float deltaTime);
 		void Attack(float mod = 1.f) override;
+		void SetAttackDirection(DirectX::XMVECTOR dir);
 
 		void setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ);
 		void updateMoveOrder();
