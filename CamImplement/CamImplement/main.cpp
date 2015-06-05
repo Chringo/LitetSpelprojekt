@@ -6,8 +6,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	const int width = 800;
-	const int height = 600;
+	const int width = 1280;
+	const int height = 720;
 
 	Graphics d3d_Graphics = Graphics();
 	MSG msg = { 0 };
@@ -31,24 +31,32 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		QueryPerformanceCounter((LARGE_INTEGER*)&previousTime);
 		FLOAT secondsPerTick = 1.0f / (FLOAT)tickPerSecond;
 
-		while (WM_QUIT != msg.message)
+		bool quit = false;
+		while (WM_QUIT != msg.message && !quit)
 		{
 			// Update time.
 			QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
-			FLOAT deltaTime = (currentTime - previousTime) * secondsPerTick;
+			FLOAT deltaTime = 0;
 
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			//else
-			//{
-				d3d_Graphics.Update(deltaTime);
+
+			// Suspend while application loses focus.
+			if (wndHandle == GetFocus())
+			{
+				deltaTime = (currentTime - previousTime) * secondsPerTick;
+
+				if (!d3d_Graphics.Update(deltaTime))
+				{
+					quit = true;
+				}
 				d3d_Graphics.Render();
 
 				d3d_Graphics.SwapFBBuffer();
-			//}
+			}
 
 			// Frame over.
 			previousTime = currentTime;

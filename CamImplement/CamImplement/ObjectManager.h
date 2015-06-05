@@ -19,6 +19,9 @@ enum AnimationState
 	Dodge
 };
 
+#define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
+#define HUE_HIT		DirectX::XMFLOAT4(2.f, 0.5f, 0.5f, 1.f)
+
 struct InputType
 {
 	InputType() {}
@@ -37,6 +40,7 @@ struct ObjectInstance
 	ID3D11Buffer*		indexBuffer;
 
 	std::vector<DirectX::XMFLOAT4X4> world;
+	std::vector<bool>	hit;
 
 	InputType*			input;
 	UINT*				indices;
@@ -65,10 +69,13 @@ private:
 	{
 		DirectX::XMFLOAT4X4 WVP;
 		DirectX::XMFLOAT4X4 World;
+		DirectX::XMFLOAT4X4 ShadowWVP;
+		DirectX::XMFLOAT4	Hue;
 	}					cbPerObject;
 
 	DirectX::XMFLOAT4X4 m_view;
 	DirectX::XMFLOAT4X4 m_projection;
+	DirectX::XMFLOAT4X4 m_shadowViewProjection;
 
 	Loader*				m_loader;
 
@@ -76,19 +83,36 @@ private:
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objTiles;
+	
+	// GUI
+	ObjectInstance*		m_objMenu;
+	ObjectInstance*		m_objArrow;
+	int					m_objArrowStateSize;
+	int					currentState;
+	DirectX::XMFLOAT2*	m_objArrowPosState;
+	bool renderMenu;
+
+	ObjectInstance*		m_objWon;
+	bool renderWon;
+
+	ObjectInstance*		m_objLost;
+	bool renderLost;
+	//
 
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
+	ID3D11SamplerState* pointSampler;
 
 private:
 	void InitInstances(Object obj, ObjectInstance *&object);
 	void CreateBuffers(ID3D11Device* device);
 
 	bool LoadTextures(ID3D11Device* device);
-	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr);
-	//void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* arr, int size);
-
+	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj);
+	void RenderInstanceGeometry(ID3D11DeviceContext* deviceContext, ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
 	void CreateSamplers(ID3D11Device* device);
+
+	
 
 public:
 	ObjectManager();
@@ -97,22 +121,44 @@ public:
 
 	void Initialize(ID3D11Device* device, int nEnemies, int nObstacles, int nTiles);
 
+	void SetPlayerHit(bool hit);
+	void SetEnemyHit(int index, bool hit);
+
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
-	void SetEnemiesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
-	void SetObstaclesWorld(int index, const DirectX::XMMATRIX &world);
 	void SetTilesWorld(const DirectX::XMMATRIX* arr);
-	void SetTileWorld(int index, const DirectX::XMMATRIX &world);
+	void SetGUIWorld (const DirectX::XMMATRIX &world);
+
+	// GUI
+	void SetRenderMenu(bool render);
+	void IncreaseMenuState();
+	void DecreaseMenuState();
+	int GetMenuState() const;
+	bool GetRenderMenu() const;
+
+	void SetRenderWon(bool render);
+	bool GetRenderWon() const;
+
+	void SetRenderLost(bool render);
+	bool GetRenderLost() const;
+	//
+
+	int GetEnemyCount();
+	int GetObstacleCount();
+	int GetTileCount();
 
 	void SetAnimationState (int index, AnimationState animState);
 
 	void Update();
 	void Render(ID3D11DeviceContext* deviceContext);
+	void RenderGeometry(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &viewProjection);
 
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
 
 	void ReleaseCOM();
+
+	
 };
 
 #endif

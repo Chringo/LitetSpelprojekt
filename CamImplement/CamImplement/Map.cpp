@@ -29,15 +29,22 @@ Map::Map()
 	// Create Tile-based map
 	CreateTiles();
 }
-Map::Map(int exponent, float startValue)
+Map::Map(int randSeed, int exponent, float startValue)
 {
+	arrOfTiles = nullptr;
+	// Get seed for noise
+	setRandom(randSeed);
 	// Initiate point-map
 	this->chunkSize = pow(2, exponent) + 1;// +1 gives the map a mid-point
 	seed = startValue;
-	ds = new float*[chunkSize, chunkSize];// 33x33, 17x17, etc
+	ds = new float*[chunkSize];// 33x33, 17x17, etc
+	for (int i = 0; i < chunkSize; i++)
+	{
+		ds[i] = new float[chunkSize];
+	}
 	chunkSize--;
 	// Initiate map
-	tiles = new TileClass*[chunkSize, chunkSize];// 32x32, 16x16, etc
+	tiles = new TileClass*[chunkSize];// 32x32, 16x16, etc
 	baseTiles = new BaseTile*[chunkSize];
 	for (int i = 0; i < chunkSize; i++)
 	{
@@ -46,7 +53,7 @@ Map::Map(int exponent, float startValue)
 	}
 
 	// Create noise - algorithm usage
-	DiamondSquare(30.0f, 0.76789f);
+	DiamondSquare((startValue * 0.5f), 0.76789f);
 
 	// Create Tile-based map
 	CreateTiles();
@@ -55,8 +62,8 @@ Map::~Map()
 {
 	for (int h = chunkSize - 1; h > 0; h--)
 	{
-		delete[] tiles[h];
 		delete[] ds[h];// If fatal crash happened, check this one.
+		delete[] tiles[h];
 		delete[] baseTiles[h];
 	}
 	delete ds[0];
@@ -99,6 +106,18 @@ float Map::getRandom()
 	random = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);// Random value between 0.0f -> 1.0f
 	return random;
 }
+int Map::getWater() const
+{
+	return this->water;
+}
+int Map::getPeak() const
+{
+	return this->peak;
+}
+int Map::getObstacles() const
+{
+	return (getWater() + getPeak());
+}
 
 int Map::pow(int base, int exponent)
 {
@@ -123,7 +142,7 @@ void Map::CreateTiles()
 	float avg = 0.0f;
 	float posX = 0.0f;
 	float posZ = 0.0f;
-	DirectX::XMFLOAT3 worldpos = { posX, -1.0f, posZ };
+	DirectX::XMFLOAT3 worldpos = { posX, 0.0f, posZ };
 
 	for (int h = 0; h < chunkSize; h++)
 	{
@@ -225,17 +244,36 @@ void Map::DiamondSquare(float range, float decrease)
 	}//__HEIGHT_MAP_END__//
 }
 //TODO Set tile type
-void Map::EvaluateTile(TileClass tile)
+void Map::EvaluateTile(TileClass& tile)
 {
-	if (tile.getHeight() < 60)
+	if (tile.getHeight() < 50)
 	{
 		tile.setObstacle(true);
 		tile.setType(1);
 		water++;
 	}
-	// Define tile type
-	tile.setType(0);
-
+	else if (tile.getHeight() > 82 && tile.getHeight() < 84)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
+	}
+	else if (tile.getHeight() > 75 && tile.getHeight() < 77)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
+	}
+	else if (tile.getHeight() > 125)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
+	}
+	else
+	{
+		tile.setType(0);
+	}
 }
 bool Map::EvaluateMap()
 {

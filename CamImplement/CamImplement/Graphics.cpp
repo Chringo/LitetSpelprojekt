@@ -1,5 +1,7 @@
 #include "Graphics.h"
 
+using namespace DirectX;
+
 Graphics::Graphics()
 {
 	rSwapChain = nullptr;
@@ -31,6 +33,8 @@ Graphics::~Graphics()
 	delete game;
 	delete camera;
 	delete dirLight;
+	delete pointLight;
+	delete shadowMap;
 }
 
 HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
@@ -72,18 +76,31 @@ HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
 
 		rDevice->CreateRenderTargetView(pBackbuffer, nullptr, &rBackbufferRTV);
 		pBackbuffer->Release();
-
-		rDeviceContext->OMSetRenderTargets(1, &rBackbufferRTV, nullptr);
 	}
 	else
 	{
 		MessageBox(0, L"Couldn't create device context", L"Error", MB_OK);
 	}
 
+	D3D11_RASTERIZER_DESC rd;
+	ZeroMemory(&rd, sizeof(rd));
+	rd.FillMode = D3D11_FILL_SOLID;
+	rd.CullMode = D3D11_CULL_NONE;
+	rd.FrontCounterClockwise = FALSE;
+	rd.DepthBias = 0;
+	rd.DepthBiasClamp = 0.f;
+	rd.SlopeScaledDepthBias = 0.f;
+	rd.DepthClipEnable = TRUE;
+	rd.ScissorEnable = FALSE;
+	rd.MultisampleEnable = FALSE;
+	rd.AntialiasedLineEnable = FALSE;
+	if (FAILED(hr = rDevice->CreateRasterizerState(&rd, &rRasterizerState)))
+		return hr;
+
 	return hr;
 }
 
-void Graphics::SetViewport(int width, int height)
+void Graphics::CreateViewport(int width, int height)
 {
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
@@ -93,8 +110,6 @@ void Graphics::SetViewport(int width, int height)
 	viewport.MaxDepth = 1.0f;
 	viewport.Width = (float)width;
 	viewport.Height = (float)height;
-
-	rDeviceContext->RSSetViewports(1, &viewport);
 }
 
 HRESULT Graphics::CreateDepthBuffer(int width, int height)
@@ -121,7 +136,6 @@ HRESULT Graphics::CreateDepthBuffer(int width, int height)
 	rDevice->CreateDepthStencilView(rDepthStencilBuffer, NULL, &rDepthStencilView);
 	if (FAILED(hr)) { return hr; }
 
-	rDeviceContext->OMSetRenderTargets(1, &rBackbufferRTV, rDepthStencilView);
 	return hr;
 }
 
@@ -194,8 +208,12 @@ void Graphics::CreateBuffers()
 	cbData.pSysMem = &cbPerFrame;
 	cbData.SysMemPitch = 0;
 	cbData.SysMemSlicePitch = 0;
-
 	rDevice->CreateBuffer(&cbFrameDesc, &cbData, &cbPerFrameBuffer);
+
+	//Point light buffer
+	cbFrameDesc.ByteWidth = sizeof(Light) * MAX_NUMBER_OF_LIGHTS;
+	cbData.pSysMem = &cbPointLight;
+	rDevice->CreateBuffer(&cbFrameDesc, &cbData, &cbPointLightBuffer);
 }
 
 void Graphics::CreateCamera()
@@ -213,58 +231,190 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	hr = CreateDirect3DContext(wndHandle);
 	if (FAILED(hr)) { return hr; }
 
-	SetViewport(width, height);
+	CreateViewport(width, height);
 	hr = CreateDepthBuffer(width, height);
 	if (FAILED(hr)) { return hr; }
 
 	hr = CreateShaders();
 	if (FAILED(hr)) { return hr; }
 
+	gamePaused = false;
+
 	objManager = new ObjectManager();
 	game = new GameDummy();
 	camera = new Camera(Perspective, 1.0f, (float)width, (float)height, screenNear, screenFar);
-	//camera = new Camera(Orthographic, 1.0f, 40, 24, 0.1f, 100.f);		(projektionsalternativ..)
 	dirLight = new DirectionalLight();
-
-	game->Initialize(wndHandle, hInstance, viewport);
-	objManager->Initialize(rDevice, game->GetEnemyArrSize(), 0, game->GetNrOfTiles());
-	objManager->SetTilesWorld(game->GetTileMatrices());
-	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
+	pointLight = new PointLight();
 	
+	game->Initialize(wndHandle, hInstance, viewport);
+	objManager->Initialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
+	objManager->SetRenderMenu(gamePaused);
+	objManager->SetTilesWorld(game->GetTileMatrices());
+	objManager->SetObstaclesWorld(game->GetObsMatrices());
+	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	cbPerFrame.dirLight = dirLight->getLight();
+	cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
+	pointLight->Initialize(cbPerFrame.nLights);
+
+	shadowMap = new ShadowMap();
+	if (FAILED(hr = shadowMap->Initialize(rDevice, 8 * 1024, 8 * 1024)))
+		return hr;
 
 	CreateCamera();
 	CreateBuffers();
 
+	// These will remain static. 
+	rDeviceContext->IASetInputLayout(rVertexLayout);
+	rDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	return hr;
 }
 
-void Graphics::Update(float deltaTime)
+bool Graphics::Update(float deltaTime)
 {	
-	game->Update(deltaTime);
+	/********************************** Gamestate handling **********************************/
+	if (KEYDOWN(VK_UP) && gamePaused)
+	{
+		objManager->IncreaseMenuState();
+	}
+	else if (KEYDOWN(VK_DOWN) && gamePaused)
+	{
+		objManager->DecreaseMenuState();
+	}
+	else if (KEYDOWN(VK_ESCAPE) && game->GetGameState())
+	{
+		gamePaused = !gamePaused;
+		objManager->SetRenderMenu(gamePaused);
+	}
+	else if (KEYDOWN(VK_RETURN))
+	{
+		if (gamePaused && objManager->GetRenderMenu())
+		{
+			if (objManager->GetMenuState() == 0)
+			{
+				gamePaused = false;
+				objManager->SetRenderMenu(gamePaused);
+				game->NewGame();
+			}
+			else
+			{
+				// Close the game
+				return false;
+			}
+		}
+		else if (objManager->GetRenderWon())
+		{
+			objManager->SetRenderWon(false);
+			objManager->SetRenderMenu(true);
+		}
+		else if (objManager->GetRenderLost())
+		{
+			objManager->SetRenderLost(false);
+			objManager->SetRenderMenu(true);
+		}
+	}
+
+	if (game->GetGameState() != gOngoing && !gamePaused)
+	{
+		GameState asfd = game->GetGameState();
+		gamePaused = true;
+		if (game->GetGameState() == gWon)
+		{
+			objManager->SetRenderWon(gamePaused);
+		}
+		else if (game->GetGameState() == gLost)
+		{
+			objManager->SetRenderLost(gamePaused);
+		}
+	}
+
+	/****************************************************************************************/
+
+	if (!gamePaused)
+	{
+		game->Update(deltaTime);
+	}
 
 	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(deltaTime);
 
 	objManager->SetPlayerWorld(game->GetPlayerMatrix());
 	objManager->SetEnemiesWorld(game->GetEnemyMatrices());
-	objManager->Update();
-	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
+	objManager->Update();// Dumb key events
+
+	objManager->SetPlayerHit(game->IsPlayerHit());
+	for (int i = 0; i < objManager->GetEnemyCount(); i++)
+	{
+		objManager->SetEnemyHit(i, game->IsEnemyHit(i));
+	}
+
+	pointLight->setPosition(0, game->GetPlayerPosition());
+	pointLight->setColor(0, game->GetPlayerAction());
+	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
+	cbPointLight.light[0] = pointLight->getLight(0);
+
+	for (int i = 1; i < cbPerFrame.nLights; i++)
+	{
+		//Enemy array is not aligned with point light array, thus index (i) in light is index (i-1) in enemy
+		pointLight->setPosition(i, game->GetEnemyPosition(i - 1));
+		pointLight->setColor(i, game->GetEnemyAction(i - 1));
+		pointLight->setRangeByHitPoints(i, game->GetEnemyHitPoints(i - 1));
+		cbPointLight.light[i] = pointLight->getLight(i);
+	}
+
+	D3D11_MAPPED_SUBRESOURCE cb;
+	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	rDeviceContext->Map(cbPointLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+	memcpy(cb.pData, &cbPointLight, (sizeof(Light) * MAX_NUMBER_OF_LIGHTS));
+	rDeviceContext->Unmap(cbPointLightBuffer, 0);
+
+	return true;
+}
+
+void Graphics::CreateShadowMap()
+{
+	// Unbind depth texture from pipeline.
+	ID3D11ShaderResourceView *nullSrv[1] = { nullptr };
+	rDeviceContext->PSSetShaderResources(1, 1, nullSrv);
+
+	// Set render target to depth view only.
+	shadowMap->Apply(rDeviceContext);
+
+	// Render scene depth from light point of view.
+	XMFLOAT3 dir = dirLight->getLight().dir;
+	XMVECTOR lightDir = XMLoadFloat3(&dir);
+	shadowViewProjection = shadowMap->CreateViewProjection(game->GetPlayerPosition(), lightDir, 10.f);
+
+	// Dont use pixel shader. We only need SV_POSITION.
+	rDeviceContext->VSSetShader(rVS, nullptr, 0);
+	rDeviceContext->PSSetShader(nullptr, nullptr, 0);
+
+	// Draw geometry. All we need.
+	objManager->RenderGeometry(rDeviceContext, shadowViewProjection);
 }
 
 void Graphics::Render()
 {
+	// Create shadow map.
+	CreateShadowMap();
+	
+	// Draw scene using shadow map data.
 	float col[4] = { 0, 0, 0, 0 };
 	rDeviceContext->ClearRenderTargetView(rBackbufferRTV, col);
 	rDeviceContext->ClearDepthStencilView(rDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	rDeviceContext->IASetInputLayout(rVertexLayout);
-	rDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	rDeviceContext->OMSetRenderTargets(1, &rBackbufferRTV, rDepthStencilView);
+	rDeviceContext->RSSetViewports(1, &viewport);
+	rDeviceContext->RSSetState(rRasterizerState);
 
 	rDeviceContext->VSSetShader(rVS, nullptr, 0);
 	rDeviceContext->PSSetShader(rPS, nullptr, 0);
-	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
 
+	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
+	rDeviceContext->PSSetConstantBuffers(1, 1, &cbPointLightBuffer);
+	rDeviceContext->PSSetShaderResources(1, 1, shadowMap->GetDepthAsTexture());
+
+	objManager->setViewProjection(camera->GetView(), camera->GetProjection());
 	objManager->Render(rDeviceContext);
 }
 
@@ -279,6 +429,7 @@ void Graphics::ReleaseCOM()
 	objManager->ReleaseCOM();
 
 	if (cbPerFrameBuffer) { cbPerFrameBuffer->Release(); }
+	if (cbPointLightBuffer){ cbPointLightBuffer->Release(); }
 	if (rVertexLayout) { rVertexLayout->Release(); }
 	if (rVS) { rVS->Release(); }
 	if (rPS) { rPS->Release(); }

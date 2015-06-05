@@ -29,7 +29,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 		}
 		case Enemy:
 		{
-			*filename = "Meshes/tree01.obj";
+			*filename = "Meshes/dummyMan_UV.obj";
 			break;
 		}
 		case Obstacle:
@@ -42,12 +42,29 @@ void Loader::FindModelFilename(Object object, char** filename)
 			*filename = "Meshes/groundTile01.obj";
 			break;
 		}
+		case Menu:
+		{
+			*filename = "Meshes/menu.obj";
+			break;
+		}
+		case Arrow:
+		{
+			*filename = "Meshes/menuArrow.obj";
+			break;
+		}
+		case Won:
+		{
+			*filename = "Meshes/menu.obj";
+			break;
+		}
+		case Lost:
+		{
+			*filename = "Meshes/menu.obj";
+			break;
+		}
 		default:
 			break;
 	}
-
-	//filename = "dummyTexture.png";
-	//LoadTextures(device, filename);
 }
 
 ObjectType* Loader::getObject(Object obj) const
@@ -270,8 +287,17 @@ bool Loader::LoadDataStructures(char* filename)
 void Loader::LoadTextures(ID3D11Device* device)
 {
 	CoInitialize(NULL);
-
-	WCHAR* filename[TEXTURE_COUNT] = { L"Meshes/Textures/dummyEnemyTexture.png", L"Meshes/Textures/dummyEnemyTexture.png", L"Meshes/Textures/tree01.png", L"Meshes/Textures/groundTile.png" };
+	WCHAR* filename[TEXTURE_COUNT] = 
+	{ 
+		L"Meshes/Textures/dummyTexture.png", 
+		L"Meshes/Textures/dummyEnemyTexture.png", 
+		L"Meshes/Textures/tree01.png", 
+		L"Meshes/Textures/groundTile01.png", 
+		L"Meshes/Textures/titlescreen.png", 
+		L"Meshes/Textures/arrow.png",
+		L"Meshes/Textures/won.png",
+		L"Meshes/Textures/lost.png"
+	};
 	m_textures = new ID3D11ShaderResourceView*[TEXTURE_COUNT];
 
 	for (int i = 0; i < TEXTURE_COUNT; i++)

@@ -138,13 +138,13 @@ void LinkedList<T>::insertLast(const T& value)
 		{
 			iterator = iterator->next;
 		}
-		iterator->next = new Node(value);
+		iterator->next = new Node(value, nullptr);
 	}
 }
 template<typename T>
 void LinkedList<T>::insertAt(int pos, const T& value)
 {
-	if(pos < 0 ||pos >= nrOfNodes)
+	if(pos < 0 ||pos >= size())
 	{
 		throw string ("Out of bonds!");
 	}
@@ -211,15 +211,15 @@ T LinkedList<T>::removeLast()
 		throw std::string("List is empty!");
 	}
 
-	T value = -1;
-	if (nrOfNodes == 1)
+	T value;
+	if (size() == 1)
 	{
 		value = removeFirst();
 	}
 	else
 	{
 		Node* iterator = first;
-		for (int i = 0; i < nrOfNodes-2; i++)
+		for (int i = 0; i < size()-2; i++)
 		{
 			iterator = iterator->next;
 		}
@@ -228,7 +228,6 @@ T LinkedList<T>::removeLast()
 		value = temp->value;
 		delete temp;
 	}
-	nrOfNodes--;
 	return value;
 }
 template<typename T>
@@ -238,13 +237,13 @@ T LinkedList<T>::removeAt(int pos)
 	{
 		throw std::string("List is empty!");
 	}
-	if(pos < 0 ||pos >= nrOfNodes)
+	if(pos < 0 ||pos >= size())
 	{
 		throw std::string ("Out of bonds!");
 	}
 
 	T value;
-	if (nrOfNodes == 1)
+	if (pos == 0)
 	{
 		value = removeFirst();
 	}
@@ -252,14 +251,14 @@ T LinkedList<T>::removeAt(int pos)
 	{
 		Node* iterator(first);
 		int counter = 0;
-		while (counter < pos-1)
+		while (counter != pos-1)
 		{
 			iterator = iterator->next;
 			counter ++;
 		}
 		Node* temp(iterator->next);
 		iterator->next = temp->next;
-		T value = temp->value;
+		value = temp->value;
 		delete temp;
 	}
 	return value;

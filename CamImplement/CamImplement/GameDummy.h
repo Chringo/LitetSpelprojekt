@@ -7,7 +7,14 @@
 #include "Map.h"
 #include "Entity.h"
 #include "Input.h"
-#include "LinkedList.h"
+#include "PathfindingLib.h"
+
+enum GameState
+{
+	gOngoing,
+	gWon,
+	gLost
+};
 
 class GameDummy
 {
@@ -15,14 +22,26 @@ private:
 	Map* map;
 	DirectX::XMMATRIX* tileMatrixArr;
 
-	// Testing bed for pathfinding - TO BE REMOVED LATER
-	LinkedList<DirectX::XMFLOAT3> path;
-	// 
+	unsigned int obsArrSize;
+	Ent::Obstacle** obsArr;
+	DirectX::XMMATRIX* obsMatrixArr;
 
-	Collision::Player* player;
-	
-	int enemyArrSize;
-	Collision::Enemy** enemyArr;
+	//- Attack data ------
+	bool* hitData[2];
+	void CheckPlayerAttack();
+	void CheckEnemyAttack(int index);
+	//--------------------
+
+	Ent::Player* player;
+	// Stores the last tile coords of the player necessary for updating path of enemies
+	int lastX;
+	int lastZ;
+
+	unsigned int enemyArrSize;
+	// Stores the last tile coords of the enemies (necessary for updating path of enemies)
+	PF::Pathfinding::Coordinate* lastEnemyCoord;
+	// The array of enemies
+	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 
 	POINT clientSize;
@@ -30,9 +49,14 @@ private:
 	float elapsedTime = 0.f;
 	int frames = 0;
 
+	// Determinates if the player or the enemies won and marks the game for termination 
+	GameState gameState;
+
 public:
 	GameDummy();
 	~GameDummy();
+
+	void NewGame();
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport);
 
@@ -40,12 +64,25 @@ public:
 
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
+	Ent::Action GetPlayerAction();
+	float GetPlayerHitPoints();
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
+	DirectX::XMVECTOR GetEnemyPosition(int index);
+	Ent::Action GetEnemyAction(int index);
+	float GetEnemyHitPoints(int index);
+
+	DirectX::XMMATRIX* GetObsMatrices();
+	int GetObsArrSize() const;
 
 	DirectX::XMMATRIX* GetTileMatrices();
 	int GetNrOfTiles() const;
+
+	bool IsPlayerHit();
+	bool IsEnemyHit(int index);
+
+	GameState GetGameState() const;
 
 	void ReleaseCOM();
 };
