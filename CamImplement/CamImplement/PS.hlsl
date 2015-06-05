@@ -3,7 +3,7 @@ Texture2D gShadowMap : register(t1);
 SamplerState objSamp : register(s0);
 SamplerState pointSampler : register(s1);
 
-#define MAX_NUMBER_OF_LIGHTS 10
+#define MAX_NUMBER_OF_LIGHTS 30
 
 struct DirectionalLight
 {
