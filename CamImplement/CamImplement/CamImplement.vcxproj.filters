@@ -110,10 +110,14 @@
     <ClInclude Include="GUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMap.h">
+=======
+    <ClInclude Include="DefinedLights.h">
+>>>>>>> statecolors
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
