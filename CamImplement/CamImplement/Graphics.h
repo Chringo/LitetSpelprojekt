@@ -4,7 +4,6 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-//#include "ObjectManager.h"
 #include "Camera.h"
 #include "GameDummy.h"
 #include "DirectionalLight.h"
@@ -91,6 +90,14 @@ private:
 		Light light[MAX_NUMBER_OF_LIGHTS];
 	} cbPointLight;
 
+	struct constBufferPerObject
+	{
+		DirectX::XMFLOAT4X4 WVP;
+		DirectX::XMFLOAT4X4 World;
+		DirectX::XMFLOAT4X4 ShadowWVP;
+		DirectX::XMFLOAT4	Hue;
+	}					cbPerObject;
+
 	GameDummy*				game;
 	Camera*					camera;
 	DirectionalLight*		dirLight;
@@ -114,28 +121,8 @@ private:
 
 	ShadowMap*				shadowMap;
 	DirectX::XMMATRIX		shadowViewProjection;
-
 	
-
-private:
-	HRESULT CreateDirect3DContext(HWND &wndHandle);
-	void CreateViewport(int width, int height);
-	HRESULT CreateDepthBuffer(int width, int height);
-	HRESULT CreateShaders();
-	void CreateBuffers();
-	void CreateCamera();
 	bool gamePaused;
-
-	/*********************************Object manager**********************************/
-
-private:
-	struct constBufferPerObject
-	{
-		DirectX::XMFLOAT4X4 WVP;
-		DirectX::XMFLOAT4X4 World;
-		DirectX::XMFLOAT4X4 ShadowWVP;
-		DirectX::XMFLOAT4	Hue;
-	}					cbPerObject;
 
 	DirectX::XMFLOAT4X4 m_view;
 	DirectX::XMFLOAT4X4 m_projection;
@@ -166,31 +153,21 @@ private:
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
 	ID3D11SamplerState* pointSampler;
+	
 
 private:
-	void InitInstances(Object obj, ObjectInstance *&object);
-	void CreateBuffers(ID3D11Device* device);
+	HRESULT CreateDirect3DContext(HWND &wndHandle);
+	void CreateViewport(int width, int height);
+	HRESULT CreateDepthBuffer(int width, int height);
+	HRESULT CreateShaders();
+	void CreateBuffers();
+	void CreateCamera();	
 
+	void InitInstances(Object obj, ObjectInstance *&object);
 	bool LoadTextures(ID3D11Device* device);
 	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj);
 	void RenderInstanceGeometry(ID3D11DeviceContext* deviceContext, ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
 	void CreateSamplers(ID3D11Device* device);
-
-	/***************************************************************************************/
-
-public:
-	Graphics();
-	Graphics(const Graphics &obj);
-	~Graphics();
-
-	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
-
-	bool Update(float deltaTime);
-	void CreateShadowMap();
-	void Render();
-
-	void SwapFBBuffer();
-	void ReleaseCOM();
 
 	/*********************************Object manager**********************************/
 
@@ -215,6 +192,20 @@ public:
 	void RenderGeometry(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &viewProjection);
 
 	void setViewProjection(const DirectX::XMMATRIX &view, const DirectX::XMMATRIX &projection);
+
+public:
+	Graphics();
+	Graphics(const Graphics &obj);
+	~Graphics();
+
+	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
+
+	bool Update(float deltaTime);
+	void CreateShadowMap();
+	void Render();
+
+	void SwapFBBuffer();
+	void ReleaseCOM();
 };
 
 

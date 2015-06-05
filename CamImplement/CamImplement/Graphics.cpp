@@ -551,7 +551,8 @@ void Graphics::Render()
 	rDeviceContext->PSSetConstantBuffers(1, 1, &cbPointLightBuffer);
 	rDeviceContext->PSSetShaderResources(1, 1, shadowMap->GetDepthAsTexture());
 
-	setViewProjection(camera->GetView(), camera->GetProjection());
+	XMStoreFloat4x4(&m_view, camera->GetView());
+	XMStoreFloat4x4(&m_projection, camera->GetProjection());
 	
 	//
 	rDeviceContext->PSSetSamplers(0, 1, &samplerState);
