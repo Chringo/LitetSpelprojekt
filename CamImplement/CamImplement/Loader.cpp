@@ -24,12 +24,12 @@ void Loader::FindModelFilename(Object object, char** filename)
 	{
 		case Player:
 		{
-			*filename = "Meshes/guyAnimation.bl";
+			*filename = "Meshes/animatedPlayer.bl";
 			break;
 		}
 		case Enemy:
 		{
-			*filename = "Meshes/dummyMan_UV.obj";
+			*filename = "Meshes/animatedEnemy.bl";
 			break;
 		}
 		case Obstacle:
