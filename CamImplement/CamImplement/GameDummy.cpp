@@ -378,7 +378,11 @@ DirectX::XMMATRIX* GameDummy::GetTileMatrices()
 	tileMatrixArr = map->getTileMatrices();
 	return tileMatrixArr;
 }
-
+DirectX::XMMATRIX GameDummy::GetMapMatrix() const
+{
+	//return XMMatrixTranslation(0.f, 0.f, 0.f);
+	return XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 1.f));
+}
 int GameDummy::GetNrOfTiles() const
 {
 	return map->getNrOfTiles();

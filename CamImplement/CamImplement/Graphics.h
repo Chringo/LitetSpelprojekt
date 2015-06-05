@@ -133,6 +133,7 @@ private:
 	ObjectInstance*		m_objPlayer;
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
+	ObjectInstance*		m_objMap;
 	ObjectInstance*		m_objTiles;
 
 	// GUI
@@ -177,9 +178,9 @@ private:
 	void SetEnemyHit(int index, bool hit);
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
+	void SetMapWorld(const DirectX::XMMATRIX &world);
 	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
-	void SetTilesWorld(const DirectX::XMMATRIX* arr);
 	void SetGUIWorld(const DirectX::XMMATRIX &world);
 
 	// GUI
