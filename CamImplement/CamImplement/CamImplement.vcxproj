@@ -100,6 +100,7 @@
   <ItemGroup>
     <ClInclude Include="ArrayQueue.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DefinedLights.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="GameDummy.h" />
