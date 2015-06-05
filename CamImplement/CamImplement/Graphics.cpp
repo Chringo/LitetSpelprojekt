@@ -385,7 +385,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	pointLight = new PointLight();
 	
 	game->Initialize(wndHandle, hInstance, viewport);
-	objInitialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), game->GetNrOfTiles());
+	objInitialize(rDevice, game->GetEnemyArrSize(), game->GetObsArrSize(), 1);
 	renderMenu = gamePaused;
 	SetMapWorld(game->GetMapMatrix());
 	SetObstaclesWorld(game->GetObsMatrices());
