@@ -858,13 +858,13 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 		if (obj == m_objPlayer)
 		{
 
-			for (int j = 0; j < obj->nVertices; j++)
-			{
-				obj->input[j].pos.x = obj->fx.at(j + framecount * (obj->nVertices));
-				obj->input[j].pos.y = obj->fy.at(j + framecount * (obj->nVertices));
-				obj->input[j].pos.z = obj->fz.at(j + framecount * (obj->nVertices));
-			}
-			framecount < 191 ? framecount++ : framecount = 0;
+			//for (int j = 0; j < obj->nVertices; j++)
+			//{
+			//	obj->input[j].pos.x = obj->fx.at(j + framecount * (obj->nVertices));
+			//	obj->input[j].pos.y = obj->fy.at(j + framecount * (obj->nVertices));
+			//	obj->input[j].pos.z = obj->fz.at(j + framecount * (obj->nVertices));
+			//}
+			//framecount < 191 ? framecount++ : framecount = 0;
 
 
 			D3D11_MAPPED_SUBRESOURCE vb;
