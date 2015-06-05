@@ -24,7 +24,7 @@ Graphics::Graphics()
 	m_objPlayer = nullptr;
 	m_objEnemies = nullptr;
 	m_objObstacles = nullptr;
-	m_objTiles = nullptr;
+	m_objMap = nullptr;
 	m_objMenu = nullptr;
 	m_objArrow = nullptr;
 	m_objWon = nullptr;
@@ -300,14 +300,14 @@ void Graphics::CreateBuffers()
 	}
 
 	//Map buffers
-	if (m_objTiles)
+	if (m_objMap)
 	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objTiles->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objTiles->nIndices;
-		vData.pSysMem = m_objTiles->input;
-		iData.pSysMem = m_objTiles->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objTiles->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objTiles->indexBuffer);
+		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objMap->nVertices;
+		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objMap->nIndices;
+		vData.pSysMem = m_objMap->input;
+		iData.pSysMem = m_objMap->indices;
+		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objMap->vertexBuffer);
+		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objMap->indexBuffer);
 	}
 
 	//Menu buffers
@@ -388,7 +388,8 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	game->Initialize(wndHandle, hInstance, viewport);
 	
 	objInitialize(rDevice);
-	SetTilesWorld(game->GetTileMatrices());
+	SetMapWorld(game->GetMapMatrix());
+
 	SetObstaclesWorld(game->GetObsMatrices());
 	
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
@@ -567,7 +568,7 @@ void Graphics::Render()
 	RenderInstances(rDeviceContext, m_objPlayer);
 	RenderInstances(rDeviceContext, m_objEnemies);
 	RenderInstances(rDeviceContext, m_objObstacles);
-	RenderInstances(rDeviceContext, m_objTiles);
+	RenderInstances(rDeviceContext, m_objMap);
 	if (renderMenu)
 	{
 		RenderInstances(rDeviceContext, m_objArrow);
@@ -606,10 +607,10 @@ void Graphics::ReleaseCOM()
 		m_objEnemies->Delete();
 		delete m_objEnemies;
 	}
-	if (m_objTiles)
+	if (m_objMap)
 	{
-		m_objTiles->Delete();
-		delete m_objTiles;
+		m_objMap->Delete();
+		delete m_objMap;
 	}
 	if (m_objObstacles)
 	{
@@ -947,7 +948,7 @@ void Graphics::objInitialize(ID3D11Device* device)
 	InitInstances(Player, m_objPlayer);
 	InitInstances(Enemy, m_objEnemies);
 	InitInstances(Obstacle, m_objObstacles);
-	InitInstances(objMap, m_objTiles);
+	InitInstances(objMap, m_objMap);
 	InitInstances(Menu, m_objMenu);
 	InitInstances(Arrow, m_objArrow);
 	InitInstances(Won, m_objWon);
@@ -977,8 +978,12 @@ void Graphics::objInitialize(ID3D11Device* device)
 	for (INT i = 0; i < game->GetObsArrSize(); i++)
 		m_objObstacles->world.push_back(mat);
 
+<<<<<<< HEAD
 	for (INT i = 0; i < game->GetNrOfTiles(); i++)
 		m_objTiles->world.push_back(mat);
+=======
+	m_objMap->world.push_back(mat);
+>>>>>>> 1a3b818aef3af6623c53e547a424362290a6ec13
 
 	m_objMenu->world.push_back(mat);
 
@@ -1028,14 +1033,9 @@ void Graphics::SetObstaclesWorld(const XMMATRIX* arr)
 	}
 }
 
-void Graphics::SetTilesWorld(const XMMATRIX* arr)
+void Graphics::SetMapWorld(const XMMATRIX &world)
 {
-	for (UINT i = 0; i < m_objTiles->world.size(); i++)
-	{
-		//Passing world directly into StoreFloat causes random access violation
-		XMMATRIX w = arr[i];
-		XMStoreFloat4x4(&m_objTiles->world[i], w);
-	}
+	XMStoreFloat4x4(&m_objMap->world[0], world);
 }
 
 /***************************************************************************/
@@ -1124,5 +1124,5 @@ void Graphics::RenderGeometry(ID3D11DeviceContext *deviceContext, const XMMATRIX
 	//RenderInstanceGeometry(deviceContext, m_objObstacles, viewProjection);
 
 	// These have nothing to cast shadows on.
-	//RenderInstanceGeometry(deviceContext, m_objTiles, viewProjection);
+	//RenderInstanceGeometry(deviceContext, m_objMap, viewProjection);
 }
