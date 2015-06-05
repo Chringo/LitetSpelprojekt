@@ -91,7 +91,6 @@
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
-    <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="TileClass.cpp" />
@@ -110,7 +109,6 @@
     <ClInclude Include="Loader.h" />
     <ClInclude Include="LQueue.h" />
     <ClInclude Include="Map.h" />
-    <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="PathfindingLib.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />

@@ -4,7 +4,6 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include "ObjectManager.h"
 #include "Camera.h"
 #include "GameDummy.h"
 #include "DirectionalLight.h"
@@ -12,6 +11,8 @@
 #include "GUI.h"
 #include <Windows.h>
 #include "ShadowMap.h"
+#include <vector>
+#include "Loader.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
@@ -19,6 +20,59 @@
 #pragma comment (lib, "dxguid.lib")
 
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x1)
+
+enum AnimationState
+{
+	Attack,
+	WalkStart,
+	WalkLoop,
+	WalkEnd,
+	AnBlock,
+	AnDodge
+};
+
+#define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
+#define HUE_HIT		DirectX::XMFLOAT4(2.f, 0.5f, 0.5f, 1.f)
+
+struct InputType
+{
+	InputType() {}
+	InputType(float x, float y, float z,
+		float u, float v,
+		float nx, float ny, float nz) : pos(x, y, z), tex(u, v), nor(nx, ny, nz) {}
+
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT2 tex;
+	DirectX::XMFLOAT3 nor;
+};
+
+struct ObjectInstance
+{
+	ID3D11Buffer*		vertexBuffer;
+	ID3D11Buffer*		indexBuffer;
+
+	std::vector<DirectX::XMFLOAT4X4> world;
+	std::vector<bool>	hit;
+
+	InputType*			input;
+	UINT*				indices;
+
+	int					nVertices;
+	int					nIndices;
+	int					nNormals;
+	int					textureIndex;
+	int					frameCount;
+
+	std::vector<float> fx, fy, fz;
+
+	void Delete()
+	{
+		if (vertexBuffer) { vertexBuffer->Release(); }
+		if (indexBuffer) { indexBuffer->Release(); }
+		delete[] input;
+		delete[] indices;
+	}
+};
 
 class Graphics
 {
@@ -35,11 +89,19 @@ private:
 		Light light[MAX_NUMBER_OF_LIGHTS];
 	} cbPointLight;
 
-	ObjectManager*			objManager;
+	struct constBufferPerObject
+	{
+		DirectX::XMFLOAT4X4 WVP;
+		DirectX::XMFLOAT4X4 World;
+		DirectX::XMFLOAT4X4 ShadowWVP;
+		DirectX::XMFLOAT4	Hue;
+	}					cbPerObject;
+
 	GameDummy*				game;
 	Camera*					camera;
 	DirectionalLight*		dirLight;
 	PointLight*				pointLight;
+	Loader*					m_loader;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
 	ID3D11Buffer*			cbPointLightBuffer;
@@ -59,6 +121,40 @@ private:
 
 	ShadowMap*				shadowMap;
 	DirectX::XMMATRIX		shadowViewProjection;
+	
+	bool gamePaused;
+
+	DirectX::XMFLOAT4X4 m_view;
+	DirectX::XMFLOAT4X4 m_projection;
+	DirectX::XMFLOAT4X4 m_shadowViewProjection;
+
+	ObjectInstance*		m_objPlayer;
+	ObjectInstance*		m_objEnemies;
+	ObjectInstance*		m_objObstacles;
+	ObjectInstance*		m_objMap;
+	ObjectInstance*		m_objTiles;
+
+	// GUI
+	ObjectInstance*		m_objMenu;
+	ObjectInstance*		m_objArrow;
+	int					m_objArrowStateSize;
+	int					currentState;
+	DirectX::XMFLOAT2*	m_objArrowPosState;
+	bool renderMenu;
+
+	ObjectInstance*		m_objWon;
+	bool renderWon;
+
+	ObjectInstance*		m_objLost;
+	bool renderLost;
+	//
+
+	ID3D11Buffer*		cbPerObjectBuffer;
+	ID3D11SamplerState* samplerState;
+	ID3D11SamplerState* pointSampler;
+
+	int framecount = 0;
+	
 
 private:
 	HRESULT CreateDirect3DContext(HWND &wndHandle);
@@ -67,21 +163,41 @@ private:
 	HRESULT CreateShaders();
 	void CreateBuffers();
 	void CreateCamera();
-	bool gamePaused;
+	void CreateSamplers();
+	void CreateShadowMap();	
+
+	void InitInstances(Object obj, ObjectInstance *&object);
+
+	void RenderInstances(ObjectInstance* obj);
+	void RenderInstanceGeometry(ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
+	void RenderGeometry(const DirectX::XMMATRIX &viewProjection);
+
+	void SetPlayerWorld(const DirectX::XMMATRIX &world);
+	void SetMapWorld(const DirectX::XMMATRIX &world);
+	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
+	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
+	void SetGUIWorld(const DirectX::XMMATRIX &world);
+
+	void SetPlayerHit(bool hit);
+	void SetEnemyHit(int index, bool hit);
+	void IncreaseMenuState();
+	void DecreaseMenuState();
+	void SetAnimationState(int index, AnimationState animState);
 
 public:
 	Graphics();
-	Graphics(const Graphics &obj);
 	~Graphics();
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
 
 	bool Update(float deltaTime);
-	void CreateShadowMap();
+	
 	void Render();
 
 	void SwapFBBuffer();
 	void ReleaseCOM();
 };
+
+
 
 #endif

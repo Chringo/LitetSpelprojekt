@@ -77,6 +77,7 @@ public:
 	int GetObsArrSize() const;
 
 	DirectX::XMMATRIX* GetTileMatrices();
+	DirectX::XMMATRIX GetMapMatrix() const;
 	int GetNrOfTiles() const;
 
 	bool IsPlayerHit();

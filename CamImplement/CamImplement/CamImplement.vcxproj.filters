@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+<<<<<<< HEAD
     <FxCompile Include="PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -110,6 +111,45 @@
     <ClInclude Include="TileClass.h">
       <Filter>Headers</Filter>
     </ClInclude>
+=======
+    <FxCompile Include="PS.hlsl" />
+    <FxCompile Include="VS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="GameDummy.cpp" />
+    <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="Loader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
+    <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="TileClass.cpp" />
+    <ClCompile Include="WICTextureLoader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArrayQueue.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="DefinedLights.h" />
+    <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="GameDummy.h" />
+    <ClInclude Include="Graphics.h" />
+    <ClInclude Include="GUI.h" />
+    <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="Loader.h" />
+    <ClInclude Include="LQueue.h" />
+    <ClInclude Include="Map.h" />
+    <ClInclude Include="PathfindingLib.h" />
+    <ClInclude Include="PointLight.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="TileClass.h" />
+    <ClInclude Include="WICTextureLoader.h" />
+>>>>>>> structure
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CamImplement.rc" />
@@ -117,6 +157,7 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
+<<<<<<< HEAD
   <ItemGroup>
     <Filter Include="Headers">
       <UniqueIdentifier>{be30eb5f-aac0-4484-a466-eea34ff24df7}</UniqueIdentifier>
@@ -128,4 +169,6 @@
       <UniqueIdentifier>{95a0ccca-f974-4060-996f-80f5caba5c7f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+=======
+>>>>>>> structure
 </Project>

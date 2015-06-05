@@ -37,7 +37,7 @@ void Loader::FindModelFilename(Object object, char** filename)
 			*filename = "Meshes/tree01.obj";
 			break;
 		}
-		case Tile:
+		case objMap:
 		{
 			*filename = "Meshes/groundTile01.obj";
 			break;
