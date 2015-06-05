@@ -182,6 +182,21 @@ DirectX::XMMATRIX* Map::getTileMatrices()
 	}
 	return arrOfTiles;
 }
+DirectX::XMMATRIX Map::setMapPlane()
+{
+	//TODO - replace this lameass-cheapstick.
+	int center = (int)(chunkSize * 0.5f * TILESIZE);
+	float scale = TILESIZE * chunkSize * 0.25f;
+	DirectX::XMMATRIX asdf = DirectX::XMMatrixTranslationFromVector(DirectX::XMVectorSet(2.f, -0.1f, 2.f, 1.f)) * (DirectX::XMMatrixScaling(32.f, 1.f, 32.f));
+	DirectX::XMMATRIX asdf2 = DirectX::XMMATRIX(
+		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
+		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
+		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
+		DirectX::XMVectorSet(2.f, 0.f, 2.f, 0.f));
+	asdf = asdf - asdf2;
+
+	return asdf;
+}
 //TODO Make sure average is okey once visual graphics is at hand
 void Map::DiamondSquare(float range, float decrease)
 {

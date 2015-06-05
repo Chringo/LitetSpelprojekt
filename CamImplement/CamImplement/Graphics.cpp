@@ -855,7 +855,7 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 		rDeviceContext->Unmap(cbPerObjectBuffer, 0);
 
 
-		if (obj == m_objPlayer)
+		if (obj == m_objPlayer && framecount > 0)
 		{
 
 			//for (int j = 0; j < obj->nVertices; j++)
