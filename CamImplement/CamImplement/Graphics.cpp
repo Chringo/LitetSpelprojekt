@@ -2,6 +2,8 @@
 
 using namespace DirectX;
 
+/*********************************************Con/Destructor*********************************************/
+
 Graphics::Graphics()
 {
 	rSwapChain = nullptr;
@@ -33,11 +35,6 @@ Graphics::Graphics()
 	cbPerObjectBuffer = nullptr;
 }
 
-Graphics::Graphics(const Graphics &obj)
-{
-
-}
-
 Graphics::~Graphics()
 {
 	delete game;
@@ -48,6 +45,12 @@ Graphics::~Graphics()
 
 	delete[] m_objArrowPosState;
 }
+
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/*************************************************Create*************************************************/
 
 HRESULT Graphics::CreateDirect3DContext(HWND &wndHandle)
 {
@@ -363,6 +366,53 @@ void Graphics::CreateCamera()
 	camera->Update(0.1f);
 }
 
+void Graphics::CreateSamplers()
+{
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	rDevice->CreateSamplerState(&sampDesc, &samplerState);
+
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+
+	rDevice->CreateSamplerState(&sampDesc, &pointSampler);
+}
+
+void Graphics::CreateShadowMap()
+{
+	// Unbind depth texture from pipeline.
+	ID3D11ShaderResourceView *nullSrv[1] = { nullptr };
+	rDeviceContext->PSSetShaderResources(1, 1, nullSrv);
+
+	// Set render target to depth view only.
+	shadowMap->Apply(rDeviceContext);
+
+	// Render scene depth from light point of view.
+	XMFLOAT3 dir = dirLight->getLight().dir;
+	XMVECTOR lightDir = XMLoadFloat3(&dir);
+	shadowViewProjection = shadowMap->CreateViewProjection(game->GetPlayerPosition(), lightDir, 10.f);
+
+	// Dont use pixel shader. We only need SV_POSITION.
+	rDeviceContext->VSSetShader(rVS, nullptr, 0);
+	rDeviceContext->PSSetShader(nullptr, nullptr, 0);
+
+	// Draw geometry. All we need.
+	RenderGeometry(shadowViewProjection);
+}
+
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/***********************************************Initialize***********************************************/
+
 HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen)
 {
 	HRESULT hr;
@@ -387,9 +437,52 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	
 	game->Initialize(wndHandle, hInstance, viewport);
 	
-	objInitialize(rDevice);
-	SetMapWorld(game->GetMapMatrix());
+	m_loader = new Loader();
+	Object obj[] = { Player, Enemy, Obstacle, objMap, Menu, Arrow, Won, Lost };
+	m_loader->Initialize(rDevice, obj, (sizeof(obj) / sizeof(Object)));
 
+	// Create meshes & buffers.
+	InitInstances(Player, m_objPlayer);
+	InitInstances(Enemy, m_objEnemies);
+	InitInstances(Obstacle, m_objObstacles);
+	InitInstances(objMap, m_objMap);
+	InitInstances(Menu, m_objMenu);
+	InitInstances(Arrow, m_objArrow);
+	InitInstances(Won, m_objWon);
+	InitInstances(Lost, m_objLost);
+
+	m_objArrowStateSize = 2;
+	m_objArrowPosState = new DirectX::XMFLOAT2[m_objArrowStateSize];
+	m_objArrowPosState[0] = DirectX::XMFLOAT2(0.5f, -0.7f);
+	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
+	currentState = 1;
+
+	// Create instances.
+	XMFLOAT4X4 mat;
+	XMStoreFloat4x4(&mat, XMMatrixIdentity());
+
+	m_objPlayer->world.push_back(mat);
+	m_objPlayer->hit.push_back(false);
+
+	for (INT i = 0; i < game->GetEnemyArrSize(); i++)
+	{
+		m_objEnemies->world.push_back(mat);
+		m_objEnemies->hit.push_back(false);
+	}
+
+	for (INT i = 0; i < game->GetObsArrSize(); i++)
+		m_objObstacles->world.push_back(mat);
+
+	m_objMap->world.push_back(mat);
+	m_objMenu->world.push_back(mat);
+	m_objArrow->world.push_back(mat);
+	m_objWon->world.push_back(mat);
+	m_objLost->world.push_back(mat);
+
+	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
+	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
+
+	SetMapWorld(game->GetMapMatrix());
 	SetObstaclesWorld(game->GetObsMatrices());
 	
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
@@ -411,281 +504,6 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 
 	return hr;
 }
-
-bool Graphics::Update(float deltaTime)
-{	
-	/********************************** Gamestate handling **********************************/
-	if (KEYDOWN(VK_UP) && gamePaused)
-	{
-		IncreaseMenuState();
-	}
-	else if (KEYDOWN(VK_DOWN) && gamePaused)
-	{
-		DecreaseMenuState();
-	}
-	else if (KEYDOWN(VK_ESCAPE) && game->GetGameState())
-	{
-		gamePaused = !gamePaused;
-		renderMenu = gamePaused;
-	}
-	else if (KEYDOWN(VK_RETURN))
-	{
-		if (gamePaused && renderMenu)
-		{
-			if (currentState == 0)
-			{
-				gamePaused = false;
-				renderMenu = gamePaused;
-				game->NewGame();
-			}
-			else
-			{
-				// Close the game
-				return false;
-			}
-		}
-		else if (renderWon)
-		{
-			renderWon = false;
-			renderMenu = true;
-		}
-		else if (renderLost)
-		{
-			renderLost = false;
-			renderMenu = true;
-		}
-	}
-
-	if (game->GetGameState() != gOngoing && !gamePaused)
-	{
-		GameState asfd = game->GetGameState();
-		gamePaused = true;
-		if (game->GetGameState() == gWon)
-		{
-			renderWon = gamePaused;
-		}
-		else if (game->GetGameState() == gLost)
-		{
-			renderLost = gamePaused;
-		}
-	}
-
-	/****************************************************************************************/
-
-	if (!gamePaused)
-	{
-		game->Update(deltaTime);
-	}
-
-	camera->SetFocus(game->GetPlayerPosition());
-	camera->Update(deltaTime);
-
-	SetPlayerWorld(game->GetPlayerMatrix());
-	SetEnemiesWorld(game->GetEnemyMatrices());
-
-	SetPlayerHit(game->IsPlayerHit());
-	for (int i = 0; i < game->GetEnemyArrSize(); i++)
-	{
-		SetEnemyHit(i, game->IsEnemyHit(i));
-	}
-
-	pointLight->setPosition(0, game->GetPlayerPosition());
-	pointLight->setColor(0, game->GetPlayerAction());
-	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
-	cbPointLight.light[0] = pointLight->getLight(0);
-
-	for (int i = 1; i < cbPerFrame.nLights; i++)
-	{
-		//Enemy array is not aligned with point light array, thus index (i) in light is index (i-1) in enemy
-		pointLight->setPosition(i, game->GetEnemyPosition(i - 1));
-		pointLight->setColor(i, game->GetEnemyAction(i - 1));
-		pointLight->setRangeByHitPoints(i, game->GetEnemyHitPoints(i - 1));
-		cbPointLight.light[i] = pointLight->getLight(i);
-	}
-
-	D3D11_MAPPED_SUBRESOURCE cb;
-	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	rDeviceContext->Map(cbPointLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
-	memcpy(cb.pData, &cbPointLight, (sizeof(Light) * MAX_NUMBER_OF_LIGHTS));
-	rDeviceContext->Unmap(cbPointLightBuffer, 0);
-
-	return true;
-}
-
-void Graphics::CreateShadowMap()
-{
-	// Unbind depth texture from pipeline.
-	ID3D11ShaderResourceView *nullSrv[1] = { nullptr };
-	rDeviceContext->PSSetShaderResources(1, 1, nullSrv);
-
-	// Set render target to depth view only.
-	shadowMap->Apply(rDeviceContext);
-
-	// Render scene depth from light point of view.
-	XMFLOAT3 dir = dirLight->getLight().dir;
-	XMVECTOR lightDir = XMLoadFloat3(&dir);
-	shadowViewProjection = shadowMap->CreateViewProjection(game->GetPlayerPosition(), lightDir, 10.f);
-
-	// Dont use pixel shader. We only need SV_POSITION.
-	rDeviceContext->VSSetShader(rVS, nullptr, 0);
-	rDeviceContext->PSSetShader(nullptr, nullptr, 0);
-
-	// Draw geometry. All we need.
-	RenderGeometry(rDeviceContext, shadowViewProjection);
-}
-
-void Graphics::Render()
-{
-	// Create shadow map.
-	CreateShadowMap();
-	
-	// Draw scene using shadow map data.
-	float col[4] = { 0, 0, 0, 0 };
-	rDeviceContext->ClearRenderTargetView(rBackbufferRTV, col);
-	rDeviceContext->ClearDepthStencilView(rDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	rDeviceContext->OMSetRenderTargets(1, &rBackbufferRTV, rDepthStencilView);
-	rDeviceContext->RSSetViewports(1, &viewport);
-	rDeviceContext->RSSetState(rRasterizerState);
-
-	rDeviceContext->VSSetShader(rVS, nullptr, 0);
-	rDeviceContext->PSSetShader(rPS, nullptr, 0);
-
-	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
-	rDeviceContext->PSSetConstantBuffers(1, 1, &cbPointLightBuffer);
-	rDeviceContext->PSSetShaderResources(1, 1, shadowMap->GetDepthAsTexture());
-
-	XMStoreFloat4x4(&m_view, camera->GetView());
-	XMStoreFloat4x4(&m_projection, camera->GetProjection());
-	
-	//
-	rDeviceContext->PSSetSamplers(0, 1, &samplerState);
-
-
-	//IMPORTANT: If you put two planes in the same matrix pos,
-	//the one that is called first (Arrow vs Menu for example)
-	//gets rendered over the other one.
-	RenderInstances(rDeviceContext, m_objPlayer);
-	RenderInstances(rDeviceContext, m_objEnemies);
-	RenderInstances(rDeviceContext, m_objObstacles);
-	RenderInstances(rDeviceContext, m_objMap);
-	if (renderMenu)
-	{
-		RenderInstances(rDeviceContext, m_objArrow);
-		RenderInstances(rDeviceContext, m_objMenu);
-	}
-	if (renderWon)
-	{
-		RenderInstances(rDeviceContext, m_objWon);
-	}
-	if (renderLost)
-	{
-		RenderInstances(rDeviceContext, m_objLost);
-	}
-}
-
-void Graphics::SwapFBBuffer()
-{
-	rSwapChain->Present(0, 0);
-}
-
-void Graphics::ReleaseCOM()
-{
-	game->ReleaseCOM();
-	
-	//
-
-	m_loader->ReleaseCOM();
-
-	if (m_objPlayer)
-	{
-		m_objPlayer->Delete();
-		delete m_objPlayer;
-	}
-	if (m_objEnemies)
-	{
-		m_objEnemies->Delete();
-		delete m_objEnemies;
-	}
-	if (m_objMap)
-	{
-		m_objMap->Delete();
-		delete m_objMap;
-	}
-	if (m_objObstacles)
-	{
-		m_objObstacles->Delete();
-		delete m_objObstacles;
-	}
-	if (m_objMenu)
-	{
-		m_objMenu->Delete();
-		delete m_objMenu;
-	}
-	if (m_objArrow)
-	{
-		m_objArrow->Delete();
-		delete m_objArrow;
-	}
-	if (m_objWon)
-	{
-		m_objWon->Delete();
-		delete m_objWon;
-	}
-	if (m_objLost)
-	{
-		m_objLost->Delete();
-		delete m_objLost;
-	}
-
-	cbPerObjectBuffer->Release();
-	samplerState->Release();
-
-	//
-
-	if (cbPerFrameBuffer) { cbPerFrameBuffer->Release(); }
-	if (cbPointLightBuffer){ cbPointLightBuffer->Release(); }
-	if (rVertexLayout) { rVertexLayout->Release(); }
-	if (rVS) { rVS->Release(); }
-	if (rPS) { rPS->Release(); }
-
-	rDepthStencilView->Release();
-	rDepthStencilBuffer->Release();
-	rBackbufferRTV->Release();
-	rSwapChain->Release();
-	rDevice->Release();
-	rDeviceContext->Release();
-}
-
-
-
-
-
-
-
-
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-/****************************************************/
-
-int framecount = 0;
 
 void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 {
@@ -811,26 +629,157 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 	object->indexBuffer = nullptr;
 }
 
-void Graphics::CreateSamplers()
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/*************************************************Basics*************************************************/
+
+void Graphics::SetPlayerHit(bool hit)
 {
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	rDevice->CreateSamplerState(&sampDesc, &samplerState);
-
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-
-	rDevice->CreateSamplerState(&sampDesc, &pointSampler);
+	m_objPlayer->hit[0] = hit;
 }
 
-void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj)
+void Graphics::SetEnemyHit(int index, bool hit)
+{
+	m_objEnemies->hit[index] = hit;
+}
+
+void Graphics::IncreaseMenuState()
+{
+	currentState++;
+	if (currentState > m_objArrowStateSize - 1)
+	{
+		currentState = 0;
+	}
+}
+
+void Graphics::DecreaseMenuState()
+{
+	currentState--;
+	if (currentState < 0)
+	{
+		currentState = m_objArrowStateSize - 1;
+	}
+}
+
+void Graphics::SetAnimationState(int index, AnimationState animState)
+{
+	switch (animState)
+	{
+	case Attack:
+		//From m_objPlayer->fx.at (1) to m_objPlayer->fx.at (40)
+		break;
+	case WalkStart:
+
+		break;
+	case WalkLoop:
+
+		break;
+	case WalkEnd:
+
+		break;
+	case AnBlock:
+
+		break;
+	case AnDodge:
+
+		break;
+	}
+}
+
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/*************************************************Worlds*************************************************/
+
+void Graphics::SetPlayerWorld(const XMMATRIX &world)
+{
+	XMStoreFloat4x4(&m_objPlayer->world[0], world);
+}
+
+void Graphics::SetEnemiesWorld(const XMMATRIX* arr)
+{
+	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
+	{
+		XMMATRIX w = arr[i];
+		XMStoreFloat4x4(&m_objEnemies->world[i], w);
+	}
+}
+
+void Graphics::SetObstaclesWorld(const XMMATRIX* arr)
+{
+	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
+	{
+		//Passing world directly into StoreFloat causes random access violation
+		XMMATRIX w = arr[i];
+		XMStoreFloat4x4(&m_objObstacles->world[i], w);
+	}
+}
+
+void Graphics::SetMapWorld(const XMMATRIX &world)
+{
+	XMStoreFloat4x4(&m_objMap->world[0], world);
+}
+
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/*************************************************Render*************************************************/
+
+void Graphics::Render()
+{
+	// Create shadow map.
+	CreateShadowMap();
+
+	// Draw scene using shadow map data.
+	float col[4] = { 0, 0, 0, 0 };
+	rDeviceContext->ClearRenderTargetView(rBackbufferRTV, col);
+	rDeviceContext->ClearDepthStencilView(rDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	rDeviceContext->OMSetRenderTargets(1, &rBackbufferRTV, rDepthStencilView);
+	rDeviceContext->RSSetViewports(1, &viewport);
+	rDeviceContext->RSSetState(rRasterizerState);
+
+	rDeviceContext->VSSetShader(rVS, nullptr, 0);
+	rDeviceContext->PSSetShader(rPS, nullptr, 0);
+
+	rDeviceContext->PSSetConstantBuffers(0, 1, &cbPerFrameBuffer);
+	rDeviceContext->PSSetConstantBuffers(1, 1, &cbPointLightBuffer);
+	rDeviceContext->PSSetShaderResources(1, 1, shadowMap->GetDepthAsTexture());
+
+	XMStoreFloat4x4(&m_view, camera->GetView());
+	XMStoreFloat4x4(&m_projection, camera->GetProjection());
+
+	//
+	rDeviceContext->PSSetSamplers(0, 1, &samplerState);
+
+
+	//IMPORTANT: If you put two planes in the same matrix pos,
+	//the one that is called first (Arrow vs Menu for example)
+	//gets rendered over the other one.
+	RenderInstances(m_objPlayer);
+	RenderInstances(m_objEnemies);
+	RenderInstances(m_objObstacles);
+	RenderInstances(m_objMap);
+	if (renderMenu)
+	{
+		RenderInstances(m_objArrow);
+		RenderInstances(m_objMenu);
+	}
+	if (renderWon)
+	{
+		RenderInstances(m_objWon);
+	}
+	if (renderLost)
+	{
+		RenderInstances(m_objLost);
+	}
+}
+
+void Graphics::RenderInstances(ObjectInstance* obj)
 {
 	if (!obj)
 		return;
@@ -840,11 +789,11 @@ void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstanc
 	ID3D11ShaderResourceView* srv = nullptr;
 
 	// Set object buffer & textures.
-	deviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
-	deviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+	rDeviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
+	rDeviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 
 	srv = m_loader->getTexture(obj->textureIndex);
-	deviceContext->PSSetShaderResources(0, 1, &srv);
+	rDeviceContext->PSSetShaderResources(0, 1, &srv);
 
 	XMMATRIX world;
 	XMMATRIX view;
@@ -901,12 +850,12 @@ void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstanc
 
 		D3D11_MAPPED_SUBRESOURCE cb;
 		ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-		deviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+		rDeviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
-		deviceContext->Unmap(cbPerObjectBuffer, 0);
+		rDeviceContext->Unmap(cbPerObjectBuffer, 0);
 
 
-		if (obj == m_objPlayer && obj->frameCount > 0)
+		if (obj == m_objPlayer && framecount > 0)
 		{
 
 			for (int j = 0; j < obj->nVertices; j++)
@@ -920,165 +869,23 @@ void Graphics::RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstanc
 
 			D3D11_MAPPED_SUBRESOURCE vb;
 			ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-			deviceContext->Map(obj->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+			rDeviceContext->Map(obj->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
 			memcpy(vb.pData, obj->input, sizeof(InputType) * m_objPlayer->nVertices);
-			deviceContext->Unmap(obj->vertexBuffer, 0);
+			rDeviceContext->Unmap(obj->vertexBuffer, 0);
 
-			deviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
-			deviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+			rDeviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
+			rDeviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 		}
 
 		// Pass data to shaders.
-		deviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+		rDeviceContext->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
 		// Draw mesh.
-		deviceContext->DrawIndexed(obj->nIndices, 0, 0);
+		rDeviceContext->DrawIndexed(obj->nIndices, 0, 0);
 	}
 }
 
-void Graphics::objInitialize(ID3D11Device* device)
-{
-	renderMenu = false;
-
-	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Obstacle, objMap, Menu, Arrow, Won, Lost };
-	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
-
-	// Create meshes & buffers.
-	InitInstances(Player, m_objPlayer);
-	InitInstances(Enemy, m_objEnemies);
-	InitInstances(Obstacle, m_objObstacles);
-	InitInstances(objMap, m_objMap);
-	InitInstances(Menu, m_objMenu);
-	InitInstances(Arrow, m_objArrow);
-	InitInstances(Won, m_objWon);
-	InitInstances(Lost, m_objLost);
-
-	m_objArrowStateSize = 2;
-	m_objArrowPosState = new DirectX::XMFLOAT2[m_objArrowStateSize];
-	m_objArrowPosState[0] = DirectX::XMFLOAT2(0.5f, -0.7f);
-	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
-	currentState = 1;
-
-	
-
-	// Create instances.
-	XMFLOAT4X4 mat;
-	XMStoreFloat4x4(&mat, XMMatrixIdentity());
-
-	m_objPlayer->world.push_back(mat);
-	m_objPlayer->hit.push_back(false);
-
-	for (INT i = 0; i < game->GetEnemyArrSize(); i++)
-	{
-		m_objEnemies->world.push_back(mat);
-		m_objEnemies->hit.push_back(false);
-	}
-
-	for (INT i = 0; i < game->GetObsArrSize(); i++)
-		m_objObstacles->world.push_back(mat);
-
-	m_objMap->world.push_back(mat);
-
-	m_objMenu->world.push_back(mat);
-
-	m_objArrow->world.push_back(mat);
-
-	m_objWon->world.push_back(mat);
-
-	m_objLost->world.push_back(mat);
-
-	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
-	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
-}
-
-void Graphics::SetPlayerHit(bool hit)
-{
-	m_objPlayer->hit[0] = hit;
-}
-
-void Graphics::SetEnemyHit(int index, bool hit)
-{
-	m_objEnemies->hit[index] = hit;
-}
-
-/***************************************************************************/
-
-void Graphics::SetPlayerWorld(const XMMATRIX &world)
-{
-	XMStoreFloat4x4(&m_objPlayer->world[0], world);
-}
-
-void Graphics::SetEnemiesWorld(const XMMATRIX* arr)
-{
-	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
-	{
-		XMMATRIX w = arr[i];
-		XMStoreFloat4x4(&m_objEnemies->world[i], w);
-	}
-}
-
-void Graphics::SetObstaclesWorld(const XMMATRIX* arr)
-{
-	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
-	{
-		//Passing world directly into StoreFloat causes random access violation
-		XMMATRIX w = arr[i];
-		XMStoreFloat4x4(&m_objObstacles->world[i], w);
-	}
-}
-
-void Graphics::SetMapWorld(const XMMATRIX &world)
-{
-	XMStoreFloat4x4(&m_objMap->world[0], world);
-}
-
-/***************************************************************************/
-
-void Graphics::IncreaseMenuState()
-{
-	currentState++;
-	if (currentState > m_objArrowStateSize - 1)
-	{
-		currentState = 0;
-	}
-}
-
-void Graphics::DecreaseMenuState()
-{
-	currentState--;
-	if (currentState < 0)
-	{
-		currentState = m_objArrowStateSize - 1;
-	}
-}
-
-void Graphics::SetAnimationState(int index, AnimationState animState)
-{
-	switch (animState)
-	{
-	case Attack:
-		//From m_objPlayer->fx.at (1) to m_objPlayer->fx.at (40)
-		break;
-	case WalkStart:
-
-		break;
-	case WalkLoop:
-
-		break;
-	case WalkEnd:
-
-		break;
-	case AnBlock:
-
-		break;
-	case AnDodge:
-
-		break;
-	}
-}
-
-void Graphics::RenderInstanceGeometry(ID3D11DeviceContext *deviceContext, ObjectInstance *object, const XMMATRIX &viewProjection)
+void Graphics::RenderInstanceGeometry(ObjectInstance *object, const XMMATRIX &viewProjection)
 {
 	// Draw geometry only.
 	D3D11_MAPPED_SUBRESOURCE cb;
@@ -1087,7 +894,7 @@ void Graphics::RenderInstanceGeometry(ID3D11DeviceContext *deviceContext, Object
 	// Apply buffers.
 	UINT stride = sizeof(InputType);
 	UINT offset = 0;
-	deviceContext->IASetVertexBuffers(0, 1, &object->vertexBuffer, &stride, &offset);
+	rDeviceContext->IASetVertexBuffers(0, 1, &object->vertexBuffer, &stride, &offset);
 
 	// Draw.
 	for each (XMFLOAT4X4 w in object->world)
@@ -1097,27 +904,204 @@ void Graphics::RenderInstanceGeometry(ID3D11DeviceContext *deviceContext, Object
 		XMStoreFloat4x4(&cbPerObject.World, XMMatrixTranspose(world));
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
 
-		deviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+		rDeviceContext->Map(cbPerObjectBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
-		deviceContext->Unmap(cbPerObjectBuffer, 0);
+		rDeviceContext->Unmap(cbPerObjectBuffer, 0);
 
-		deviceContext->Draw(object->nVertices, 0);
+		rDeviceContext->Draw(object->nVertices, 0);
 	}
 }
 
-void Graphics::RenderGeometry(ID3D11DeviceContext *deviceContext, const XMMATRIX &viewProjection)
+void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 {
-	deviceContext->PSSetSamplers(1, 1, &pointSampler);
+	rDeviceContext->PSSetSamplers(1, 1, &pointSampler);
 
 	// Required to convert calculate distance between light source and pixel.
 	XMStoreFloat4x4(&m_shadowViewProjection, viewProjection);
 
-	RenderInstanceGeometry(deviceContext, m_objPlayer, viewProjection);
+	RenderInstanceGeometry(m_objPlayer, viewProjection);
 
 	// [does not cast shadows properly]
-	RenderInstanceGeometry(deviceContext, m_objEnemies, viewProjection);
-	//RenderInstanceGeometry(deviceContext, m_objObstacles, viewProjection);
+	RenderInstanceGeometry(m_objEnemies, viewProjection);
 
 	// These have nothing to cast shadows on.
-	//RenderInstanceGeometry(deviceContext, m_objMap, viewProjection);
+}
+
+/********************************************************************************************************/
+
+/********************************************************************************************************/
+
+/*************************************************Stuff *************************************************/
+
+bool Graphics::Update(float deltaTime)
+{
+	/********************************** Gamestate handling **********************************/
+	if (KEYDOWN(VK_UP) && gamePaused)
+	{
+		IncreaseMenuState();
+	}
+	else if (KEYDOWN(VK_DOWN) && gamePaused)
+	{
+		DecreaseMenuState();
+	}
+	else if (KEYDOWN(VK_ESCAPE) && game->GetGameState())
+	{
+		gamePaused = !gamePaused;
+		renderMenu = gamePaused;
+	}
+	else if (KEYDOWN(VK_RETURN))
+	{
+		if (gamePaused && renderMenu)
+		{
+			if (currentState == 0)
+			{
+				gamePaused = false;
+				renderMenu = gamePaused;
+				game->NewGame();
+			}
+			else
+			{
+				// Close the game
+				return false;
+			}
+		}
+		else if (renderWon)
+		{
+			renderWon = false;
+			renderMenu = true;
+		}
+		else if (renderLost)
+		{
+			renderLost = false;
+			renderMenu = true;
+		}
+	}
+
+	if (game->GetGameState() != gOngoing && !gamePaused)
+	{
+		GameState asfd = game->GetGameState();
+		gamePaused = true;
+		if (game->GetGameState() == gWon)
+		{
+			renderWon = gamePaused;
+		}
+		else if (game->GetGameState() == gLost)
+		{
+			renderLost = gamePaused;
+		}
+	}
+
+	/****************************************************************************************/
+
+	if (!gamePaused)
+	{
+		game->Update(deltaTime);
+	}
+
+	camera->SetFocus(game->GetPlayerPosition());
+	camera->Update(deltaTime);
+
+	SetPlayerWorld(game->GetPlayerMatrix());
+	SetEnemiesWorld(game->GetEnemyMatrices());
+
+	SetPlayerHit(game->IsPlayerHit());
+	for (int i = 0; i < game->GetEnemyArrSize(); i++)
+	{
+		SetEnemyHit(i, game->IsEnemyHit(i));
+	}
+
+	pointLight->setPosition(0, game->GetPlayerPosition());
+	pointLight->setColor(0, game->GetPlayerAction());
+	pointLight->setRangeByHitPoints(0, game->GetPlayerHitPoints());
+	cbPointLight.light[0] = pointLight->getLight(0);
+
+	for (int i = 1; i < cbPerFrame.nLights; i++)
+	{
+		//Enemy array is not aligned with point light array, thus index (i) in light is index (i-1) in enemy
+		pointLight->setPosition(i, game->GetEnemyPosition(i - 1));
+		pointLight->setColor(i, game->GetEnemyAction(i - 1));
+		pointLight->setRangeByHitPoints(i, game->GetEnemyHitPoints(i - 1));
+		cbPointLight.light[i] = pointLight->getLight(i);
+	}
+
+	D3D11_MAPPED_SUBRESOURCE cb;
+	ZeroMemory(&cb, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	rDeviceContext->Map(cbPointLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &cb);
+	memcpy(cb.pData, &cbPointLight, (sizeof(Light) * MAX_NUMBER_OF_LIGHTS));
+	rDeviceContext->Unmap(cbPointLightBuffer, 0);
+
+	return true;
+}
+
+void Graphics::SwapFBBuffer()
+{
+	rSwapChain->Present(0, 0);
+}
+
+void Graphics::ReleaseCOM()
+{
+	game->ReleaseCOM();
+
+	//
+
+	m_loader->ReleaseCOM();
+
+	if (m_objPlayer)
+	{
+		m_objPlayer->Delete();
+		delete m_objPlayer;
+	}
+	if (m_objEnemies)
+	{
+		m_objEnemies->Delete();
+		delete m_objEnemies;
+	}
+	if (m_objMap)
+	{
+		m_objMap->Delete();
+		delete m_objMap;
+	}
+	if (m_objObstacles)
+	{
+		m_objObstacles->Delete();
+		delete m_objObstacles;
+	}
+	if (m_objMenu)
+	{
+		m_objMenu->Delete();
+		delete m_objMenu;
+	}
+	if (m_objArrow)
+	{
+		m_objArrow->Delete();
+		delete m_objArrow;
+	}
+	if (m_objWon)
+	{
+		m_objWon->Delete();
+		delete m_objWon;
+	}
+	if (m_objLost)
+	{
+		m_objLost->Delete();
+		delete m_objLost;
+	}
+
+	cbPerObjectBuffer->Release();
+	samplerState->Release();
+
+	//
+
+	if (cbPerFrameBuffer) { cbPerFrameBuffer->Release(); }
+	if (cbPointLightBuffer){ cbPointLightBuffer->Release(); }
+	if (rVertexLayout) { rVertexLayout->Release(); }
+	if (rVS) { rVS->Release(); }
+	if (rPS) { rPS->Release(); }
+
+	rDepthStencilView->Release();
+	rDepthStencilBuffer->Release();
+	rBackbufferRTV->Release();
+	rSwapChain->Release();
+	rDevice->Release();
+	rDeviceContext->Release();
 }

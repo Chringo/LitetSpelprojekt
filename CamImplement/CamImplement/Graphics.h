@@ -102,6 +102,7 @@ private:
 	Camera*					camera;
 	DirectionalLight*		dirLight;
 	PointLight*				pointLight;
+	Loader*					m_loader;
 
 	ID3D11Buffer*			cbPerFrameBuffer;
 	ID3D11Buffer*			cbPointLightBuffer;
@@ -128,8 +129,6 @@ private:
 	DirectX::XMFLOAT4X4 m_projection;
 	DirectX::XMFLOAT4X4 m_shadowViewProjection;
 
-	Loader*				m_loader;
-
 	ObjectInstance*		m_objPlayer;
 	ObjectInstance*		m_objEnemies;
 	ObjectInstance*		m_objObstacles;
@@ -154,6 +153,8 @@ private:
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
 	ID3D11SamplerState* pointSampler;
+
+	int framecount = 0;
 	
 
 private:
@@ -161,21 +162,16 @@ private:
 	void CreateViewport(int width, int height);
 	HRESULT CreateDepthBuffer(int width, int height);
 	HRESULT CreateShaders();
-	void CreateSamplers();
 	void CreateBuffers();
-	void CreateCamera();	
+	void CreateCamera();
+	void CreateSamplers();
+	void CreateShadowMap();	
 
 	void InitInstances(Object obj, ObjectInstance *&object);
-	void RenderInstances(ID3D11DeviceContext* deviceContext, ObjectInstance* obj);
-	void RenderInstanceGeometry(ID3D11DeviceContext* deviceContext, ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
-	
 
-	/*********************************Object manager**********************************/
-
-	void objInitialize(ID3D11Device* device);
-
-	void SetPlayerHit(bool hit);
-	void SetEnemyHit(int index, bool hit);
+	void RenderInstances(ObjectInstance* obj);
+	void RenderInstanceGeometry(ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
+	void RenderGeometry(const DirectX::XMMATRIX &viewProjection);
 
 	void SetPlayerWorld(const DirectX::XMMATRIX &world);
 	void SetMapWorld(const DirectX::XMMATRIX &world);
@@ -183,24 +179,20 @@ private:
 	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
 	void SetGUIWorld(const DirectX::XMMATRIX &world);
 
-	// GUI
+	void SetPlayerHit(bool hit);
+	void SetEnemyHit(int index, bool hit);
 	void IncreaseMenuState();
 	void DecreaseMenuState();
-	//
-
 	void SetAnimationState(int index, AnimationState animState);
-
-	void RenderGeometry(ID3D11DeviceContext* deviceContext, const DirectX::XMMATRIX &viewProjection);
 
 public:
 	Graphics();
-	Graphics(const Graphics &obj);
 	~Graphics();
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, int height, float screenNear, float screenFar, bool fullscreen);
 
 	bool Update(float deltaTime);
-	void CreateShadowMap();
+	
 	void Render();
 
 	void SwapFBBuffer();
