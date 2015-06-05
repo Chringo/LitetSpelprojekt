@@ -299,7 +299,7 @@ void Graphics::CreateBuffers()
 		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objObstacles->indexBuffer);
 	}
 
-	//Tile buffers
+	//Map buffers
 	if (m_objTiles)
 	{
 		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objTiles->nVertices;
@@ -937,14 +937,14 @@ void Graphics::objInitialize(ID3D11Device* device, int nEnemies, int nObstacles,
 	renderMenu = false;
 
 	m_loader = new Loader();
-	Object obj[] = { Player, Enemy, Obstacle, Tile, Menu, Arrow, Won, Lost };
+	Object obj[] = { Player, Enemy, Obstacle, objMap, Menu, Arrow, Won, Lost };
 	m_loader->Initialize(device, obj, (sizeof(obj) / sizeof(Object)));
 
 	// Create meshes & buffers.
 	InitInstances(Player, m_objPlayer);
 	InitInstances(Enemy, m_objEnemies);
 	InitInstances(Obstacle, m_objObstacles);
-	InitInstances(Tile, m_objTiles);
+	InitInstances(objMap, m_objTiles);
 	InitInstances(Menu, m_objMenu);
 	InitInstances(Arrow, m_objArrow);
 	InitInstances(Won, m_objWon);

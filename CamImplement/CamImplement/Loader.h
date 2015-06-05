@@ -17,7 +17,7 @@ enum Object
 	Player,
 	Enemy,
 	Obstacle,
-	Tile,
+	objMap,
 	Menu,
 	Arrow,
 	Won,
