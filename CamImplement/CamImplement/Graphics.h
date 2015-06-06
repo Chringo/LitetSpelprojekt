@@ -31,9 +31,6 @@ enum AnimationState
 	AnDodge
 };
 
-#define HUE_DEFAULT	DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
-#define HUE_HIT		DirectX::XMFLOAT4(2.f, 0.5f, 0.5f, 1.f)
-
 struct InputType
 {
 	InputType() {}

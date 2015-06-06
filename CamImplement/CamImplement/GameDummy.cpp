@@ -49,6 +49,7 @@ void GameDummy::NewGame()
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
+	DirectX::XMFLOAT4 colorBlue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
 
 	if (enemyArr != nullptr)
 	{
@@ -69,7 +70,15 @@ void GameDummy::NewGame()
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, SCALE_SMALL * (i + 1));
+		if (i == 2)
+		{
+			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, colorBlue, SCALE_SMALL);
+		}
+		else
+		{
+			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, SCALE_SMALL);
+		}
+		
 		enemyArr[i]->SetMovementSpeed(8.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
@@ -323,6 +332,11 @@ XMVECTOR GameDummy::GetPlayerPosition()
 	return player->GetPosition();
 }
 
+XMFLOAT4 GameDummy::GetPlayerColor() const
+{
+	return player->GetColor();
+}
+
 Ent::Action GameDummy::GetPlayerAction()
 {
 	return player->GetCurrentAction();
@@ -353,6 +367,11 @@ DirectX::XMMATRIX* GameDummy::GetEnemyMatrices()
 DirectX::XMVECTOR GameDummy::GetEnemyPosition(int index)
 {
 	return enemyArr[index]->GetPosition();
+}
+
+DirectX::XMFLOAT4 GameDummy::GetEnemyColor(int index) const
+{
+	return enemyArr[index]->GetColor();
 }
 
 Ent::Action GameDummy::GetEnemyAction(int index)

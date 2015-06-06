@@ -763,13 +763,18 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 		XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixTranspose(wvp));
 		XMStoreFloat4x4(&cbPerObject.ShadowWVP, XMMatrixTranspose(swvp));
 
-		if (obj->hit.size() > 0 && obj->hit.at(i))
+		
+		if (obj == m_objPlayer)
 		{
-			cbPerObject.Hue = HUE_HIT;
+			cbPerObject.Hue = game->GetPlayerColor();
+		}
+		else if (obj == m_objEnemies)
+		{
+			cbPerObject.Hue = game->GetEnemyColor(i);
 		}
 		else
 		{
-			cbPerObject.Hue = HUE_DEFAULT;
+			cbPerObject.Hue = DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 		}
 
 		D3D11_MAPPED_SUBRESOURCE cb;

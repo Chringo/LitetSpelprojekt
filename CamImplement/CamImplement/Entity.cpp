@@ -10,9 +10,10 @@ using namespace Ent;
 
 // Entity
 
-Entity::Entity(XMVECTOR position, float moveSpeed, float scale, float mass, float radius)
+Entity::Entity(XMVECTOR position, XMFLOAT4 color, float moveSpeed, float scale, float mass, float radius)
 {
 	m_Position = position;
+	Color = color;
 	m_Speed = moveSpeed;
 	m_Mass = mass;
 	m_Radius = radius;
@@ -198,6 +199,11 @@ bool Entity::IsDead()
 	return m_Dead;
 }
 
+DirectX::XMFLOAT4 Entity::GetColor() const
+{
+	return Color;
+}
+
 int Entity::getXTileSpace(const float TILESIZE, const float TILEAMOUNT)
 {
 	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE, TILEAMOUNT);
@@ -222,7 +228,23 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE, const float 
 // Player
 
 Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
-	: Entity(position, 2.f, scale, 1.f, 1.f)	
+	: Entity(position, DEFAULT_COLOR, 2.f, scale, 1.f, 1.f)
+{
+	Entity::m_Position = position;
+	Entity::m_Rotation = rotation;
+
+	m_Controls[Attack1] = VK_LBUTTON;
+	m_Controls[Attack2] = VK_RBUTTON;
+	m_Controls[Block] = VK_CONTROL;
+	m_Controls[Dodge] = VK_SPACE;
+	m_Controls[MoveUp] = 'W';
+	m_Controls[MoveDown] = 'S';
+	m_Controls[MoveRight] = 'D';
+	m_Controls[MoveLeft] = 'A';
+}
+
+Player::Player(XMVECTOR position, XMVECTOR rotation, XMFLOAT4 color, float scale)
+	: Entity(position, color, 2.f, scale, 1.f, 1.f)
 {
 	Entity::m_Position = position;
 	Entity::m_Rotation = rotation;
@@ -319,8 +341,8 @@ void Player::Attack(float mod)
 
 // Enemy
 
-Enemy::Enemy(float x, float z, float scale)
-	: Entity(XMVectorSet(x, 0.f, z, 1.f), 1.f, scale, 1.f, 1.5f)
+Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
+	: Entity(XMVectorSet(x, 0.f, z, 1.f), color, 1.f, scale, 1.f, 1.5f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -329,9 +351,15 @@ Enemy::Enemy(float x, float z, float scale)
 }
 
 Enemy::Enemy(XMFLOAT3 position, float scale)
-	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), 1.f, scale, 1.f, 1.5f)
+	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), DEFAULT_COLOR, 1.f, scale, 1.f, 1.5f)
 {
-	Enemy(position.x, position.z, scale);
+	Enemy(position.x, position.z, DEFAULT_COLOR, scale);
+}
+
+Enemy::Enemy(XMFLOAT3 position, DirectX::XMFLOAT4 color, float scale)
+	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), color, 1.f, scale, 1.f, 1.5f)
+{
+	Enemy(position.x, position.z, color, scale);
 }
 
 Enemy::~Enemy(){}

@@ -10,7 +10,7 @@
 #include "PathfindingLib.h"
 
 #define SCALE_SMALL		0.5f
-#define SCALE_MEDIUM	1.f
+#define SCALE_MEDIUM	0.90f
 #define SCALE_LARGE		1.5f
 
 enum GameState
@@ -69,12 +69,15 @@ public:
 
 	DirectX::XMMATRIX GetPlayerMatrix();
 	DirectX::XMVECTOR GetPlayerPosition();
+	DirectX::XMFLOAT4 GetPlayerColor() const;
 	Ent::Action GetPlayerAction();
+
 	float GetPlayerHitPoints();
 
 	int GetEnemyArrSize();
 	DirectX::XMMATRIX* GetEnemyMatrices();
 	DirectX::XMVECTOR GetEnemyPosition(int index);
+	DirectX::XMFLOAT4 GetEnemyColor(int index) const;
 	Ent::Action GetEnemyAction(int index);
 	float GetEnemyHitPoints(int index);
 

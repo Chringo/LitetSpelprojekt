@@ -10,6 +10,7 @@
 #include "LQueue.h"
 
 #define KEYDOWN(vkey)	(GetAsyncKeyState(vkey) & 0x8000)
+#define DEFAULT_COLOR DirectX::XMFLOAT4(1.f, 1.f, 1.f, 1.f)
 
 namespace Ent
 {
@@ -32,7 +33,7 @@ namespace Ent
 	class Entity
 	{
 	public:
-		Entity(DirectX::XMVECTOR position, float moveSpeed, float scale, float mass, float radius);
+		Entity(DirectX::XMVECTOR position, DirectX::XMFLOAT4 color, float moveSpeed, float scale, float mass, float radius);
 		virtual ~Entity();
 
 		virtual HRESULT Update(float deltaTime);
@@ -61,6 +62,8 @@ namespace Ent
 		bool IsDead();
 		virtual void Attack(float mod) = 0;
 
+		DirectX::XMFLOAT4 GetColor() const;
+
 		int getXTileSpace(const float TILESIZE, const float TILEAMOUNT);
 		int getZTileSpace(const float TILESIZE, const float TILEAMOUNT);
 
@@ -87,14 +90,14 @@ namespace Ent
 	private:
 		float m_Mass = 1.f;
 		float m_Radius = 1.f;
+		DirectX::XMFLOAT4 Color;
 	};
 
 	class Player : public Entity
 	{
 	public:
-		Player(DirectX::XMVECTOR position,
-			DirectX::XMVECTOR rotation,
-			float scale);
+		Player(DirectX::XMVECTOR position, DirectX::XMVECTOR rotation, float scale);
+		Player( DirectX::XMVECTOR position, DirectX::XMVECTOR rotation, DirectX::XMFLOAT4 color, float scale );
 		virtual ~Player();
 
 		HRESULT Update(float deltaTime) override;
@@ -117,8 +120,9 @@ namespace Ent
 	class Enemy : public Entity
 	{
 	public:
-		Enemy(float x, float z, float scale);
+		Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale);
 		Enemy(DirectX::XMFLOAT3 position, float scale);
+		Enemy(DirectX::XMFLOAT3 position, DirectX::XMFLOAT4 color, float scale);
 
 		virtual ~Enemy();
 
