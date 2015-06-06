@@ -381,6 +381,9 @@ void Graphics::CreateSamplers()
 	rDevice->CreateSamplerState(&sampDesc, &samplerState);
 
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 
 	rDevice->CreateSamplerState(&sampDesc, &pointSampler);
 }
@@ -397,7 +400,7 @@ void Graphics::CreateShadowMap()
 	// Render scene depth from light point of view.
 	XMFLOAT3 dir = dirLight->getLight().dir;
 	XMVECTOR lightDir = XMLoadFloat3(&dir);
-	shadowViewProjection = shadowMap->CreateViewProjection(game->GetPlayerPosition(), lightDir, 10.f);
+	shadowViewProjection = shadowMap->CreateViewProjection(game->GetPlayerPosition(), lightDir, 30.f);
 
 	// Dont use pixel shader. We only need SV_POSITION.
 	rDeviceContext->VSSetShader(rVS, nullptr, 0);
@@ -491,7 +494,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	pointLight->Initialize(cbPerFrame.nLights);
 
 	shadowMap = new ShadowMap();
-	if (FAILED(hr = shadowMap->Initialize(rDevice, 8 * 1024, 8 * 1024)))
+	if (FAILED(hr = shadowMap->Initialize(rDevice, SHADOW_QUALITY * 1024, SHADOW_QUALITY * 1024)))
 		return hr;
 
 	CreateSamplers();

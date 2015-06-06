@@ -9,6 +9,9 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+// Determines texture size used by depth buffer in multiples of 1024.
+#define SHADOW_QUALITY		4
+
 class ShadowMap
 {
 	public:

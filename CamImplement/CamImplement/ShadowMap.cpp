@@ -106,12 +106,12 @@ DirectX::XMMATRIX ShadowMap::CreateViewProjection(DirectX::XMVECTOR focus, Direc
 	XMStoreFloat3(&f, focus);
 
 	XMMATRIX view = XMMatrixLookAtLH(
-		focus - (-lightDirection * distance),
+		focus - (-XMVector3Normalize(lightDirection) * distance),
 		focus,
 		XMVectorSet(0.f, 1.f, 0.f, 0.f));
 
-	XMMATRIX projection = XMMatrixOrthographicLH(80, 80, 0.1f, 100.f);	// Tweak values.
-
+	XMMATRIX projection = XMMatrixOrthographicLH(200, 200, 0.1f, 100);	// Tweak values.
+	
 	return view * projection;
 }
 
