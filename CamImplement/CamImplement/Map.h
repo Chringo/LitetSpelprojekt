@@ -17,7 +17,7 @@ private:
 	
 	// Diamond-Square
 	float** ds;
-	float offset;
+	float disp;// aggressiveness of the displacement
 	void DiamondSquare(float range, float decrease);
 
 	// Evaluation
@@ -29,9 +29,6 @@ private:
 	// Calcs
 	int pow(int base, int exponent);
 	float averageOfSquare(int height, int width, int index);
-
-	// Graphics data
-	DirectX::XMMATRIX* arrOfTiles;
 
 public:
 	const float TILESIZE = 4.0f;
@@ -48,6 +45,7 @@ public:
 	float getOffset() const;
 	void setRandom(int value);
 	float getRandom();
+
 	int getWater() const;
 	int getPeak() const;
 	int getObstacles() const;
@@ -56,7 +54,6 @@ public:
 
 	// Graphics data
 	void setTileMatrices();
-	DirectX::XMMATRIX* getTileMatrices();
 	DirectX::XMMATRIX setMapPlane() const;
 	int getNrOfTiles() const;
 };

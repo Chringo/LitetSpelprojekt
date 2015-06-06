@@ -2,7 +2,6 @@
 
 Map::Map()
 {
-	arrOfTiles = nullptr;
 	// Get seed for noise
 	setRandom(1);
 	// Initiate point-map
@@ -31,7 +30,6 @@ Map::Map()
 }
 Map::Map(int randSeed, int exponent, float startValue)
 {
-	arrOfTiles = nullptr;
 	// Get seed for noise
 	setRandom(randSeed);
 	// Initiate point-map
@@ -70,7 +68,6 @@ Map::~Map()
 	delete[] tiles;
 	delete[] ds;
 	delete[] baseTiles;
-	delete[] arrOfTiles;
 }
 
 void Map::setSeed(float seed)
@@ -89,13 +86,13 @@ int Map::getChunkSize() const
 {
 	return this->chunkSize;
 }
-void Map::setOffset(float offset)
+void Map::setOffset(float disp)
 {
-	this->offset = offset;
+	this->disp = disp;
 }
 float Map::getOffset() const
 {
-	return this->offset;
+	return this->disp;
 }
 void Map::setRandom(int value)
 {
@@ -179,21 +176,6 @@ int Map::getNrOfTiles() const
 {
 	return (chunkSize * chunkSize);
 }
-DirectX::XMMATRIX* Map::getTileMatrices()
-{
-	int count = 0;
-	//TODO http://stackoverflow.com/questions/20104815/warning-c4316-object-allocated-on-the-heap-may-not-be-aligned-16
-	arrOfTiles = new DirectX::XMMATRIX[getNrOfTiles()];
-	for (int h = 0; h < chunkSize; h++)
-	{
-		for (int w = 0; w < chunkSize; w++)
-		{
-			arrOfTiles[count] = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&tiles[h][w].getWorldPos()));
-			count++;
-		}
-	}
-	return arrOfTiles;
-}
 DirectX::XMMATRIX Map::setMapPlane() const
 {
 	//TODO - Should be dynamic
@@ -218,9 +200,9 @@ void Map::DiamondSquare(float range, float decrease)
 	ds[chunkSize][0] = seed + (seed * getRandom() * startOffset);// Bot left
 	ds[chunkSize][chunkSize] = seed + (seed * getRandom() * startOffset);// Bot right
 
-	offset = range;// the range (-off -> +off) for the average offset
+	disp = range;// the range (-disp -> +disp) for the average displacement
 	float avg;
-	for (int i = chunkSize; i >= 2; i /= 2, offset *= decrease)// decrease the variation of the offset
+	for (int i = chunkSize; i >= 2; i /= 2, disp *= decrease)// decrease the variation of the offset
 	{
 		int halfI = i / 2;
 		// generate new square values
@@ -236,7 +218,7 @@ void Map::DiamondSquare(float range, float decrease)
 				avg /= 4.0;
 
 				// center is average plus random offset
-				ds[h + halfI][w + halfI] = avg + (getRandom() * 2 * offset) - offset;
+				ds[h + halfI][w + halfI] = avg + (getRandom() * 2 * disp) - disp;
 			}
 		}//__SQUARE_END__//
 
@@ -252,7 +234,7 @@ void Map::DiamondSquare(float range, float decrease)
 				avg /= 4.0;
 
 				// new value = average plus random offset
-				avg = avg + (getRandom() * 2 * offset) - offset;
+				avg = avg + (getRandom() * 2 * disp) - disp;
 				// update value
 				ds[h][w] = avg;
 
