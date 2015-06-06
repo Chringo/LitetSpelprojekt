@@ -72,11 +72,11 @@ void GameDummy::NewGame()
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 		if (i == 2)
 		{
-			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, colorBlue, SCALE_SMALL);
+			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[1][i * 10 + 3].worldpos, colorBlue, SCALE_LARGE);
 		}
 		else
 		{
-			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, SCALE_SMALL);
+			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[1][i * 10 + 3].worldpos, SCALE_SMALL);
 		}
 		
 		enemyArr[i]->SetMovementSpeed(8.f);
