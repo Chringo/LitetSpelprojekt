@@ -49,7 +49,21 @@ void GameDummy::NewGame()
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
-	DirectX::XMFLOAT4 colorBlue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
+	DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
+	DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
+	DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
+
+	Ent::Enemy regular = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, SCALE_MEDIUM);
+	regular.SetMovementSpeed(7.f);
+
+	Ent::Enemy runner = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, green, SCALE_SMALL);
+	runner.SetMovementSpeed(12.f);
+
+	Ent::Enemy elite = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, yellow, SCALE_MEDIUM);
+	elite.SetMovementSpeed(8.f);
+
+	Ent::Enemy giant = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, blue, SCALE_LARGE);
+	giant.SetMovementSpeed(6.f);
 
 	if (enemyArr != nullptr)
 	{
@@ -70,16 +84,22 @@ void GameDummy::NewGame()
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-		if (i == 2)
+
+		if (i == 0)
 		{
-			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[1][i * 10 + 3].worldpos, colorBlue, SCALE_LARGE);
+			enemyArr[i] = new Ent::Enemy(runner);
+		}
+		else if (i == 1)
+		{
+			enemyArr[i] = new Ent::Enemy(elite);
 		}
 		else
 		{
-			enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[1][i * 10 + 3].worldpos, SCALE_SMALL);
+			enemyArr[i] = new Ent::Enemy(giant);
 		}
-		
-		enemyArr[i]->SetMovementSpeed(8.f);
+
+		enemyArr[i]->SetPosition(map->getBaseTiles()[1][i * 10 + 3].worldpos);
+
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
 		hitData[1][i] = false;

@@ -73,6 +73,11 @@ void Entity::SetPosition(float x, float y, float z)
 	m_Position = XMVectorSet(x, y, z, 1.f);
 }
 
+void Entity::SetPosition(DirectX::XMFLOAT3 position)
+{
+	m_Position = XMVectorSet(position.x, position.y, position.z, 1.0f);
+}
+
 void Entity::SetScale(float uniformScale)
 {
 	m_Scale = XMVectorSet(uniformScale, uniformScale, uniformScale, 1.f);

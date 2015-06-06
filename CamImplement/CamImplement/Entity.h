@@ -43,6 +43,7 @@ namespace Ent
 		DirectX::XMVECTOR GetPosition();
 		DirectX::XMVECTOR GetAttackPosition();
 		void SetPosition(float x, float y, float z);
+		void SetPosition(DirectX::XMFLOAT3 position);
 		void SetScale(float uniformScale);
 		void SetRotation(float x, float y, float z);
 
