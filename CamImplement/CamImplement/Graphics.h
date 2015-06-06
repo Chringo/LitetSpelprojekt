@@ -161,6 +161,8 @@ private:
 	void CreateViewport(int width, int height);
 	HRESULT CreateDepthBuffer(int width, int height);
 	HRESULT CreateShaders();
+	void CreateEntityBuffer(D3D11_BUFFER_DESC vb, D3D11_BUFFER_DESC ib,
+		D3D11_SUBRESOURCE_DATA vData, D3D11_SUBRESOURCE_DATA iData, ObjectInstance* obj);
 	void CreateBuffers();
 	void CreateCamera();
 	void CreateSamplers();
@@ -172,11 +174,8 @@ private:
 	void RenderInstanceGeometry(ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
 	void RenderGeometry(const DirectX::XMMATRIX &viewProjection);
 
-	void SetPlayerWorld(const DirectX::XMMATRIX &world);
-	void SetMapWorld(const DirectX::XMMATRIX &world);
-	void SetEnemiesWorld(const DirectX::XMMATRIX* arr);
-	void SetObstaclesWorld(const DirectX::XMMATRIX* arr);
-	void SetGUIWorld(const DirectX::XMMATRIX &world);
+	void SetWorld(const DirectX::XMMATRIX &world, ObjectInstance* obj);
+	void SetWorlds(const DirectX::XMMATRIX* arr, ObjectInstance* obj);
 
 	void SetPlayerHit(bool hit);
 	void SetEnemyHit(int index, bool hit);

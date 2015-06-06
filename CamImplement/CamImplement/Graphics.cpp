@@ -208,6 +208,20 @@ HRESULT Graphics::CreateShaders()
 	return hr;
 }
 
+void Graphics::CreateEntityBuffer(D3D11_BUFFER_DESC vb, D3D11_BUFFER_DESC ib,
+	D3D11_SUBRESOURCE_DATA vData, D3D11_SUBRESOURCE_DATA iData, ObjectInstance* obj)
+{
+	if (obj)
+	{
+		vb.ByteWidth = sizeof(InputType) * obj->nVertices;
+		ib.ByteWidth = sizeof(UINT) * obj->nIndices;
+		vData.pSysMem = obj->input;
+		iData.pSysMem = obj->indices;
+		rDevice->CreateBuffer(&vb, &vData, &obj->vertexBuffer);
+		rDevice->CreateBuffer(&ib, &iData, &obj->indexBuffer);
+	}
+}
+
 void Graphics::CreateBuffers()
 {
 	//Constant buffer
@@ -269,93 +283,14 @@ void Graphics::CreateBuffers()
 	iData.SysMemPitch = 0;
 	iData.SysMemSlicePitch = 0;
 
-	//Player buffers
-	if (m_objPlayer)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objPlayer->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objPlayer->nIndices;
-		vData.pSysMem = m_objPlayer->input;
-		iData.pSysMem = m_objPlayer->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objPlayer->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objPlayer->indexBuffer);
-	}
-
-	//Enemy buffer
-	if (m_objEnemies)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objEnemies->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objEnemies->nIndices;
-		vData.pSysMem = m_objEnemies->input;
-		iData.pSysMem = m_objEnemies->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objEnemies->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objEnemies->indexBuffer);
-	}
-
-	//Obstacle buffers
-	if (m_objObstacles)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objObstacles->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objObstacles->nIndices;
-		vData.pSysMem = m_objObstacles->input;
-		iData.pSysMem = m_objObstacles->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objObstacles->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objObstacles->indexBuffer);
-	}
-
-	//Map buffers
-	if (m_objMap)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objMap->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objMap->nIndices;
-		vData.pSysMem = m_objMap->input;
-		iData.pSysMem = m_objMap->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objMap->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objMap->indexBuffer);
-	}
-
-	//Menu buffers
-	if (m_objMenu)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objMenu->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objMenu->nIndices;
-		vData.pSysMem = m_objMenu->input;
-		iData.pSysMem = m_objMenu->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objMenu->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objMenu->indexBuffer);
-	}
-
-	//Menu Arrow buffers
-	if (m_objArrow)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objArrow->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objArrow->nIndices;
-		vData.pSysMem = m_objArrow->input;
-		iData.pSysMem = m_objArrow->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objArrow->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objArrow->indexBuffer);
-	}
-
-	//Menu won buffers
-	if (m_objWon)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objWon->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objWon->nIndices;
-		vData.pSysMem = m_objWon->input;
-		iData.pSysMem = m_objWon->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objWon->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objWon->indexBuffer);
-	}
-
-	//Menu lost buffers
-	if (m_objLost)
-	{
-		vertexBufferDesc.ByteWidth = sizeof(InputType) * m_objLost->nVertices;
-		indexBufferDesc.ByteWidth = sizeof(UINT) * m_objLost->nIndices;
-		vData.pSysMem = m_objLost->input;
-		iData.pSysMem = m_objLost->indices;
-		rDevice->CreateBuffer(&vertexBufferDesc, &vData, &m_objLost->vertexBuffer);
-		rDevice->CreateBuffer(&indexBufferDesc, &iData, &m_objLost->indexBuffer);
-	}
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objPlayer);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objEnemies);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objObstacles);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objMap);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objMenu);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objArrow);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objWon);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objLost);
 }
 
 void Graphics::CreateCamera()
@@ -485,8 +420,8 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
 
-	SetMapWorld(game->GetMapMatrix());
-	SetObstaclesWorld(game->GetObsMatrices());
+	SetWorld(game->GetMapMatrix(), m_objMap);
+	SetWorlds(game->GetObsMatrices(), m_objObstacles);
 	
 	dirLight->Initialize(DIRLIGHT_DEFAULT_DIRECTION, DIRLIGHT_DEFAULT_AMBIENT, DIRLIGHT_DEFAULT_DIFFUSE);
 	cbPerFrame.dirLight = dirLight->getLight();
@@ -697,33 +632,19 @@ void Graphics::SetAnimationState(int index, AnimationState animState)
 
 /*************************************************Worlds*************************************************/
 
-void Graphics::SetPlayerWorld(const XMMATRIX &world)
+void Graphics::SetWorld(const XMMATRIX &world, ObjectInstance* obj)
 {
-	XMStoreFloat4x4(&m_objPlayer->world[0], world);
+	XMStoreFloat4x4(&obj->world[0], world);
 }
 
-void Graphics::SetEnemiesWorld(const XMMATRIX* arr)
+void Graphics::SetWorlds(const DirectX::XMMATRIX* arr, ObjectInstance* obj)
 {
-	for (UINT i = 0; i < m_objEnemies->world.size(); i++)
-	{
-		XMMATRIX w = arr[i];
-		XMStoreFloat4x4(&m_objEnemies->world[i], w);
-	}
-}
-
-void Graphics::SetObstaclesWorld(const XMMATRIX* arr)
-{
-	for (UINT i = 0; i < m_objObstacles->world.size(); i++)
+	for (UINT i = 0; i < obj->world.size(); i++)
 	{
 		//Passing world directly into StoreFloat causes random access violation
 		XMMATRIX w = arr[i];
-		XMStoreFloat4x4(&m_objObstacles->world[i], w);
+		XMStoreFloat4x4(&obj->world[i], w);
 	}
-}
-
-void Graphics::SetMapWorld(const XMMATRIX &world)
-{
-	XMStoreFloat4x4(&m_objMap->world[0], world);
 }
 
 /********************************************************************************************************/
@@ -1007,8 +928,8 @@ bool Graphics::Update(float deltaTime)
 	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(deltaTime);
 
-	SetPlayerWorld(game->GetPlayerMatrix());
-	SetEnemiesWorld(game->GetEnemyMatrices());
+	SetWorld(game->GetPlayerMatrix(), m_objPlayer);
+	SetWorlds(game->GetEnemyMatrices(), m_objEnemies);
 
 	SetPlayerHit(game->IsPlayerHit());
 	for (int i = 0; i < game->GetEnemyArrSize(); i++)
