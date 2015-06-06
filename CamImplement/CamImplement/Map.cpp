@@ -136,6 +136,18 @@ int Map::pow(int base, int exponent)
 	}
 	return b;
 }
+float Map::averageOfSquare(int height, int width, int index)
+{
+	float average =
+		// calculate average of existing corners
+		ds[height][width] +// top left
+		ds[height + index][width] +// top right
+		ds[height][width + index] +// bot left
+		ds[height + index][width + index];// bot right
+	average /= 4.0;
+
+	return average;
+}
 
 void Map::CreateTiles()
 {
@@ -182,20 +194,19 @@ DirectX::XMMATRIX* Map::getTileMatrices()
 	}
 	return arrOfTiles;
 }
-DirectX::XMMATRIX Map::setMapPlane()
+DirectX::XMMATRIX Map::setMapPlane() const
 {
-	//TODO - replace this lameass-cheapstick.
-	int center = (int)(chunkSize * 0.5f * TILESIZE);
+	//TODO - Should be dynamic
+	float center = (chunkSize * 0.5f * TILESIZE) - 2.f;//First point is -2 off origo
 	float scale = TILESIZE * chunkSize * 0.25f;
-	DirectX::XMMATRIX asdf = DirectX::XMMatrixTranslationFromVector(DirectX::XMVectorSet(2.f, 0.1f, 2.f, 1.f)) * (DirectX::XMMatrixScaling(32.f, 1.f, 32.f));
-	DirectX::XMMATRIX asdf2 = DirectX::XMMATRIX(
-		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
-		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
-		DirectX::XMVectorSet(0.f, 0.f, 0.f, 0.f),
-		DirectX::XMVectorSet(2.f, 0.f, 2.f, 0.f));
-	asdf = asdf - asdf2;
+	//DirectX::XMMATRIX mat = DirectX::XMMatrixTranslationFromVector(DirectX::XMVectorSet(2.f, 0.1f, 2.f, 1.f)) * (DirectX::XMMatrixScaling(32.f, 1.f, 32.f));
+	DirectX::XMMATRIX mat = DirectX::XMMATRIX(
+		DirectX::XMVectorSet(scale, 0.f, 0.f, 0.f),
+		DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f),
+		DirectX::XMVectorSet(0.f, 0.f, scale, 0.f),
+		DirectX::XMVectorSet(center, 0.1f, center, 1.f));
 
-	return asdf;
+	return mat;
 }
 //TODO Make sure average is okey once visual graphics is at hand
 void Map::DiamondSquare(float range, float decrease)

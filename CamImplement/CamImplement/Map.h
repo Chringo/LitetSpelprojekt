@@ -28,6 +28,7 @@ private:
 
 	// Calcs
 	int pow(int base, int exponent);
+	float averageOfSquare(int height, int width, int index);
 
 	// Graphics data
 	DirectX::XMMATRIX* arrOfTiles;
@@ -56,7 +57,7 @@ public:
 	// Graphics data
 	void setTileMatrices();
 	DirectX::XMMATRIX* getTileMatrices();
-	DirectX::XMMATRIX setMapPlane();
+	DirectX::XMMATRIX setMapPlane() const;
 	int getNrOfTiles() const;
 };
 #endif
