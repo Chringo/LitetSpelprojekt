@@ -24,7 +24,6 @@ class GameDummy
 {
 private:
 	Map* map;
-	DirectX::XMMATRIX* tileMatrixArr;
 
 	unsigned int obsArrSize;
 	Ent::Obstacle** obsArr;
@@ -84,7 +83,6 @@ public:
 	DirectX::XMMATRIX* GetObsMatrices();
 	int GetObsArrSize() const;
 
-	DirectX::XMMATRIX* GetTileMatrices();
 	DirectX::XMMATRIX GetMapMatrix() const;
 	int GetNrOfTiles() const;
 

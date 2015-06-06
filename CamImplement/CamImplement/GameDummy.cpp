@@ -24,7 +24,7 @@ GameDummy::~GameDummy()
 	}
 	delete[] enemyArr;
 
-	delete[] map;
+	delete map;
 
 	delete[] hitData[0];
 	delete[] hitData[1];
@@ -98,11 +98,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	/************************************** Map  **************************************/
 
 	map = new Map(3, 5, 60.0f);
-	tileMatrixArr = new XMMATRIX[GetNrOfTiles()];
-	for (size_t i = 0; i < (size_t)GetNrOfTiles(); i++)
-	{
-		tileMatrixArr[i] = XMMatrixIdentity();
-	}
+
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
 	worldBounds = new Ent::Obstacle(62, 62, 1.f, 63, 63);
@@ -404,11 +400,6 @@ int GameDummy::GetObsArrSize() const
 }
 ///
 
-DirectX::XMMATRIX* GameDummy::GetTileMatrices()
-{
-	tileMatrixArr = map->getTileMatrices();
-	return tileMatrixArr;
-}
 DirectX::XMMATRIX GameDummy::GetMapMatrix() const
 {
 	return map->setMapPlane();
