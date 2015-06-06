@@ -65,8 +65,8 @@ void Camera::SetDistance(float distance)
 
 void Camera::SetRotation(DirectX::XMVECTOR rotation)
 {
-	XMVECTOR look = XMVectorSet(0.f, 0.f, 1.f, 0.f);
-	XMVECTOR up = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	XMVECTOR look = XMVectorSet(0.f, -0.4f, 1.f, -1.f);
+	XMVECTOR up = XMVectorSet(0.f, 1.f, 1.f, 0.f);
 
 	m_Look = XMVector3Rotate(look, XMQuaternionRotationRollPitchYawFromVector(rotation));
 	m_Up = XMVector3Rotate(up, XMQuaternionRotationRollPitchYawFromVector(rotation));

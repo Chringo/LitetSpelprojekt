@@ -38,8 +38,9 @@ class Camera
 		DirectX::XMMATRIX m_Projection = DirectX::XMMatrixIdentity();
 
 		FLOAT m_Distance = 10;
-		DirectX::XMVECTOR m_Up = DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f);
-		DirectX::XMVECTOR m_Look = DirectX::XMVectorSet(0.f, 0.f, 1.f, 0.f);
+		DirectX::XMVECTOR m_Up;
+		DirectX::XMVECTOR m_Look;
+		
 		DirectX::XMVECTOR m_Position = DirectX::XMVectorZero();
 
 		DirectX::BoundingFrustum m_Frustum;
