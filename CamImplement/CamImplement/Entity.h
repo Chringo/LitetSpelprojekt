@@ -59,8 +59,8 @@ namespace Ent
 		bool IsDead();
 		virtual void Attack(float mod) = 0;
 
-		int getXTileSpace(const float TILESIZE);
-		int getZTileSpace(const float TILESIZE);
+		int getXTileSpace(const float TILESIZE, const float TILEAMOUNT);
+		int getZTileSpace(const float TILESIZE, const float TILEAMOUNT);
 
 	protected:
 		
@@ -80,7 +80,7 @@ namespace Ent
 		int m_HitFrameCount = 0;
 		bool m_Dead = false;
 
-		int floatToIntSpace(float floatCoord, const float TILESIZE);
+		int floatToIntSpace(float floatCoord, const float TILESIZE, const float TILEAMOUNT);
 
 	private:
 		float m_Mass = 1.f;

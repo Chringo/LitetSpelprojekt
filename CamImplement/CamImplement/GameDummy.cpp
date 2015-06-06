@@ -220,7 +220,8 @@ void GameDummy::Update(float deltaTime)
 		}
 	}
 
-	float ts = map->TILESIZE;
+	const float ts = map->TILESIZE;
+	const int cs = map->getChunkSize();
 
 	for (int i = 0; i < obsArrSize; i++)
 	{
@@ -234,8 +235,8 @@ void GameDummy::Update(float deltaTime)
 	// Block and update if an Enemy moves
 	for (int i = 0; i < enemyArrSize; i++)
 	{
-		disable[enemyArr[i]->getXTileSpace(ts)][enemyArr[i]->getZTileSpace(ts)] = true;
-		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts), enemyArr[i]->getZTileSpace(ts));
+		disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
+		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
 		if (c != lastEnemyCoord[i])
 		{
 			lastEnemyCoord[i] = c;
@@ -244,10 +245,10 @@ void GameDummy::Update(float deltaTime)
 	}
 
 	// Update if player moves
-	if (lastX != player->getXTileSpace(ts) || lastZ != player->getZTileSpace(ts))
+	if (lastX != player->getXTileSpace(ts, cs) || lastZ != player->getZTileSpace(ts, cs))
 	{
-		lastX = player->getXTileSpace(ts);
-		lastZ = player->getZTileSpace(ts);
+		lastX = player->getXTileSpace(ts, cs);
+		lastZ = player->getZTileSpace(ts, cs);
 		update = true;
 	}
 

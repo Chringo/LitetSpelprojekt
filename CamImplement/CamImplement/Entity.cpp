@@ -177,16 +177,16 @@ bool Entity::IsDead()
 	return m_Dead;
 }
 
-int Entity::getXTileSpace(const float TILESIZE)
+int Entity::getXTileSpace(const float TILESIZE, const float TILEAMOUNT)
 {
-	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE);
+	return floatToIntSpace(GetPosition().m128_f32[0], TILESIZE, TILEAMOUNT);
 }
-int Entity::getZTileSpace(const float TILESIZE)
+int Entity::getZTileSpace(const float TILESIZE, const float TILEAMOUNT)
 {
-	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE);
+	return floatToIntSpace(GetPosition().m128_f32[2], TILESIZE, TILEAMOUNT);
 }
 
-int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
+int Entity::floatToIntSpace(float floatCoord, const float TILESIZE, const float TILEAMOUNT)
 {
 	int counter = 0;
 	while (floatCoord - TILESIZE > -TILESIZE)
@@ -194,6 +194,7 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE)
 		counter++;
 		floatCoord -= TILESIZE;
 	}
+	if (counter > TILEAMOUNT - 1) counter = TILEAMOUNT - 1;
 	return counter;
 }
 
@@ -405,13 +406,13 @@ void Enemy::setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ)
 	path = LinkedList<DirectX::XMFLOAT3>();
 
 	// Converting the Enemy float space to int/Tile space and setting as start for A*
-	int xs = getXTileSpace(map->TILESIZE);
-	int zs = getZTileSpace(map->TILESIZE);
+	int xs = getXTileSpace(map->TILESIZE, map->getChunkSize());
+	int zs = getZTileSpace(map->TILESIZE, map->getChunkSize());
 	PF::Pathfinding::Coordinate start = PF::Pathfinding::Coordinate(xs, zs);
 
 	// Converting the Player float space to int/Tile space and setting as goal for A*
-	int xg = floatToIntSpace(goalX, map->TILESIZE);
-	int zg = floatToIntSpace(goalZ, map->TILESIZE);
+	int xg = floatToIntSpace(goalX, map->TILESIZE, map->getChunkSize());
+	int zg = floatToIntSpace(goalZ, map->TILESIZE, map->getChunkSize());
 	PF::Pathfinding::Coordinate goal = PF::Pathfinding::Coordinate(xg, zg);
 
 	if (start != goal)
