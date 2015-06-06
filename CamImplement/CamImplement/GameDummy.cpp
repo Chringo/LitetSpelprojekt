@@ -41,7 +41,7 @@ void GameDummy::NewGame()
 		delete player;
 	}
 
-	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
 	player->SetMovementSpeed(9.f);
 
 	lastX = -1;
@@ -69,7 +69,7 @@ void GameDummy::NewGame()
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos);
+		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos, SCALE_SMALL * (i + 1));
 		enemyArr[i]->SetMovementSpeed(8.f);
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
@@ -304,6 +304,7 @@ void GameDummy::Update(float deltaTime)
 		//CheckEnemyAttack(i);
 
 		enemyArr[i]->Update(deltaTime);
+		enemyArr[i]->Intersect(worldBounds);
 		player->Intersect(enemyArr[i]);
 		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
 		{

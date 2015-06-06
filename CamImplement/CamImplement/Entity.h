@@ -32,8 +32,7 @@ namespace Ent
 	class Entity
 	{
 	public:
-		Entity(DirectX::XMVECTOR position, float moveSpeed, float mass, float radius);
-		Entity(float xPosition, float zPosition, float moveSpeed, float mass, float radius);
+		Entity(DirectX::XMVECTOR position, float moveSpeed, float scale, float mass, float radius);
 		virtual ~Entity();
 
 		virtual HRESULT Update(float deltaTime);
@@ -42,6 +41,9 @@ namespace Ent
 		DirectX::XMMATRIX GetTransform();
 		DirectX::XMVECTOR GetPosition();
 		DirectX::XMVECTOR GetAttackPosition();
+		void SetPosition(float x, float y, float z);
+		void SetScale(float uniformScale);
+		void SetRotation(float x, float y, float z);
 
 		// Collision
 		bool Intersect(Entity *entity);
@@ -63,12 +65,12 @@ namespace Ent
 		int getZTileSpace(const float TILESIZE, const float TILEAMOUNT);
 
 	protected:
-		
 		// Movement data.
 		float m_Friction = 0.5f;
 		float m_Speed = 1.f;
 		DirectX::XMVECTOR m_Position = DirectX::XMVectorZero();
 		DirectX::XMVECTOR m_Rotation = DirectX::XMVectorZero();
+		DirectX::XMVECTOR m_Scale = DirectX::XMVectorSet(1.f, 1.f, 1.f, 1.f);
 		DirectX::XMVECTOR m_Move = DirectX::XMVectorZero();
 		DirectX::XMVECTOR m_Force = DirectX::XMVectorZero();
 
@@ -91,7 +93,8 @@ namespace Ent
 	{
 	public:
 		Player(DirectX::XMVECTOR position,
-			DirectX::XMVECTOR rotation);
+			DirectX::XMVECTOR rotation,
+			float scale);
 		virtual ~Player();
 
 		HRESULT Update(float deltaTime) override;
@@ -114,8 +117,8 @@ namespace Ent
 	class Enemy : public Entity
 	{
 	public:
-		Enemy(float x, float z);
-		Enemy(DirectX::XMFLOAT3 position);
+		Enemy(float x, float z, float scale);
+		Enemy(DirectX::XMFLOAT3 position, float scale);
 
 		virtual ~Enemy();
 

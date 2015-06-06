@@ -9,6 +9,10 @@
 #include "Input.h"
 #include "PathfindingLib.h"
 
+#define SCALE_SMALL		0.5f
+#define SCALE_MEDIUM	1.f
+#define SCALE_LARGE		1.5f
+
 enum GameState
 {
 	gOngoing,

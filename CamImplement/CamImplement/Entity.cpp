@@ -10,17 +10,17 @@ using namespace Ent;
 
 // Entity
 
-Entity::Entity(XMVECTOR position, float moveSpeed, float mass, float radius)
+Entity::Entity(XMVECTOR position, float moveSpeed, float scale, float mass, float radius)
 {
 	m_Position = position;
 	m_Speed = moveSpeed;
 	m_Mass = mass;
 	m_Radius = radius;
-}
 
-Entity::Entity(float xPosition, float zPosition, float moveSpeed, float mass, float radius)
-	: Entity(XMVectorSet(xPosition, 0.f, zPosition, 1.f), moveSpeed, mass, radius)
-{}
+	// Uniform scaling only.
+	m_Scale = XMVectorSet(scale, scale, scale, 1.f);
+	m_Radius *= scale;
+}
 
 Entity::~Entity(){}
 
@@ -49,7 +49,8 @@ void Entity::SetMovementSpeed(float speed)
 
 DirectX::XMMATRIX Entity::GetTransform()
 {
-	return XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
+	return XMMatrixScalingFromVector(m_Scale)
+		* XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(m_Rotation))
 		* XMMatrixTranslationFromVector(m_Position);
 }
 
@@ -64,6 +65,21 @@ DirectX::XMVECTOR Entity::GetAttackPosition()
 	atkPos *= m_AttackRange;
 	atkPos += m_Position;
 	return atkPos;
+}
+
+void Entity::SetPosition(float x, float y, float z)
+{
+	m_Position = XMVectorSet(x, y, z, 1.f);
+}
+
+void Entity::SetScale(float uniformScale)
+{
+	m_Scale = XMVectorSet(uniformScale, uniformScale, uniformScale, 1.f);
+}
+
+void Entity::SetRotation(float x, float y, float z)
+{
+	m_Rotation = XMVectorSet(x, y, z, 1.f);
 }
 
 bool Entity::Intersect(Entity *entity)
@@ -205,8 +221,8 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE, const float 
 
 // Player
 
-Player::Player(XMVECTOR position, XMVECTOR rotation)
-	: Entity(position.m128_f32[0], position.m128_f32[2], 2.f, 1.f, 1.f)	
+Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
+	: Entity(position, 2.f, scale, 1.f, 1.f)	
 {
 	Entity::m_Position = position;
 	Entity::m_Rotation = rotation;
@@ -303,8 +319,8 @@ void Player::Attack(float mod)
 
 // Enemy
 
-Enemy::Enemy(float x, float z)
-	: Entity(x, z, 1.f, 1.f, 1.5f)
+Enemy::Enemy(float x, float z, float scale)
+	: Entity(XMVectorSet(x, 0.f, z, 1.f), 1.f, scale, 1.f, 1.5f)
 {
 	Entity::m_Position = XMVectorSet(x, 0.f, z, 1.f);
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
@@ -312,10 +328,10 @@ Enemy::Enemy(float x, float z)
 	path = LinkedList<DirectX::XMFLOAT3>();
 }
 
-Enemy::Enemy(XMFLOAT3 position)
-	: Entity(position.x, position.z, 1.f, 1.f, 1.5f)
+Enemy::Enemy(XMFLOAT3 position, float scale)
+	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), 1.f, scale, 1.f, 1.5f)
 {
-	Enemy(position.x, position.z);
+	Enemy(position.x, position.z, scale);
 }
 
 Enemy::~Enemy(){}
