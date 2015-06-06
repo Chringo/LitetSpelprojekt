@@ -96,7 +96,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	}
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
-	worldBounds = new Ent::Obstacle(64, 64, 1.f, 65, 65);
+	worldBounds = new Ent::Obstacle(62, 62, 1.f, 63, 63);
 
 	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
