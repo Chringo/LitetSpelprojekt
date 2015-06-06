@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-<<<<<<< HEAD
     <FxCompile Include="PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -11,164 +10,121 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DirectionalLight.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Entity.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameDummy.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GUI.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Loader.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Map.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShadowMap.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TileClass.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TileClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ArrayQueue.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DefinedLights.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectionalLight.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Entity.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameDummy.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GUI.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LinkedList.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Loader.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LQueue.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Map.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PathfindingLib.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PointLight.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMap.h">
-      <Filter>Headers</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
-      <Filter>Headers</Filter>
+      <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="TileClass.h">
-      <Filter>Headers</Filter>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
-=======
-    <FxCompile Include="PS.hlsl" />
-    <FxCompile Include="VS.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DirectionalLight.cpp" />
-    <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="GameDummy.cpp" />
-    <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="GUI.cpp" />
-    <ClCompile Include="Loader.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Map.cpp" />
-    <ClCompile Include="PointLight.cpp" />
-    <ClCompile Include="ShadowMap.cpp" />
-    <ClCompile Include="TileClass.cpp" />
-    <ClCompile Include="WICTextureLoader.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ArrayQueue.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="DefinedLights.h" />
-    <ClInclude Include="DirectionalLight.h" />
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="GameDummy.h" />
-    <ClInclude Include="Graphics.h" />
-    <ClInclude Include="GUI.h" />
-    <ClInclude Include="LinkedList.h" />
-    <ClInclude Include="Loader.h" />
-    <ClInclude Include="LQueue.h" />
-    <ClInclude Include="Map.h" />
-    <ClInclude Include="PathfindingLib.h" />
-    <ClInclude Include="PointLight.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="ShadowMap.h" />
-    <ClInclude Include="TileClass.h" />
-    <ClInclude Include="WICTextureLoader.h" />
->>>>>>> structure
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="CamImplement.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
-<<<<<<< HEAD
   <ItemGroup>
-    <Filter Include="Headers">
-      <UniqueIdentifier>{be30eb5f-aac0-4484-a466-eea34ff24df7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source files">
-      <UniqueIdentifier>{d2f5abfe-f6fd-476c-855e-3f7e512ddd11}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
-      <UniqueIdentifier>{95a0ccca-f974-4060-996f-80f5caba5c7f}</UniqueIdentifier>
+      <UniqueIdentifier>{7a6d1113-e764-4e39-8883-d8415c971821}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{1776831e-2028-4b27-b39d-5fd72a149dee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8424382b-123d-48c9-a0a3-62772c4df320}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{5925251d-13cf-4b65-9d2e-d9fd697ef148}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-=======
->>>>>>> structure
+  <ItemGroup>
+    <ResourceCompile Include="CamImplement.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

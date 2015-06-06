@@ -395,7 +395,7 @@ void Enemy::SetAttackDirection(DirectX::XMVECTOR dir)
 	float a = DirectX::XMVectorGetX(dir);
 	float b = DirectX::XMVectorGetZ(dir);
 
-	static float f = 2.4;
+	static float f = 2.4f;// Will be removed as soon as meshes have been corrected
 
 	m_Rotation.m128_f32[1] = -atan2(a, b) + f;
 }

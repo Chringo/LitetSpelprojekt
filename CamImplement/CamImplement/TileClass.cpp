@@ -99,5 +99,7 @@ int TileClass::getType() const
 		return 1;
 	case Stone:
 		return 2;
+	default:
+		return 0;
 	}
 }

@@ -66,7 +66,7 @@ void GameDummy::NewGame()
 	hitData[0] = new bool[enemyArrSize];
 	hitData[1] = new bool[enemyArrSize];
 	enemyArr = new Ent::Enemy*[enemyArrSize];
-	for (int i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 		enemyArr[i] = new Ent::Enemy(map->getBaseTiles()[0][i * 10 + 3].worldpos);
@@ -127,7 +127,7 @@ void GameDummy::CheckPlayerAttack()
 	if ((action == Ent::Attack1 && frame == 40)
 		|| (action == Ent::Attack2 && frame == 60))
 	{
-		for (int i = 0; i < enemyArrSize; i++)
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 		{
 			hitData[0][i] = false;
 		}
@@ -138,7 +138,7 @@ void GameDummy::CheckPlayerAttack()
 
 	XMVECTOR atkPos = player->GetAttackPosition();
 	float d = 0.f;
-	for (int i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		d = XMVector3Length(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
 		if (d < 5.f && !hitData[0][i])
@@ -189,8 +189,8 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
-	int index = 0;
-	while (index < enemyArrSize)
+	size_t index = 0;
+	while (index < (size_t)enemyArrSize)
 	{
 		if (enemyArr[index]->IsDead())
 		{
@@ -223,7 +223,7 @@ void GameDummy::Update(float deltaTime)
 	const float ts = map->TILESIZE;
 	const int cs = map->getChunkSize();
 
-	for (int i = 0; i < obsArrSize; i++)
+	for (size_t i = 0; i < (size_t)obsArrSize; i++)
 	{
 		int x = obsArr[i]->getXTileSpace(ts);
 		int z = obsArr[i]->getZTileSpace(ts);
@@ -233,7 +233,7 @@ void GameDummy::Update(float deltaTime)
 	bool update = false;
 
 	// Block and update if an Enemy moves
-	for (int i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
 		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
@@ -255,7 +255,7 @@ void GameDummy::Update(float deltaTime)
 	// Makes handling of A* easier. Deallocates the 2D bool array
 	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
 
-	for (int i = 0; i < enemyArrSize; i++)
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		// Update path if a player or Enemy have moved from a tile to another
 		if (update)

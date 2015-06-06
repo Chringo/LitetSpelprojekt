@@ -111,7 +111,9 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="PathfindingLib.h" />
     <ClInclude Include="PointLight.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="resource.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="TileClass.h" />
     <ClInclude Include="WICTextureLoader.h" />
@@ -129,7 +131,9 @@
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="CamImplement.rc" />
+    <ResourceCompile Include="CamImplement.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

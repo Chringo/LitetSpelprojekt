@@ -292,7 +292,7 @@ void Loader::LoadTextures(ID3D11Device* device)
 		L"Meshes/Textures/dummyTexture.png", 
 		L"Meshes/Textures/dummyEnemyTexture.png", 
 		L"Meshes/Textures/tree01.png", 
-		L"Meshes/Textures/groundTile.png", 
+		L"Meshes/Textures/backgroundTile.png", 
 		L"Meshes/Textures/titlescreen.png", 
 		L"Meshes/Textures/arrow.png",
 		L"Meshes/Textures/won.png",
