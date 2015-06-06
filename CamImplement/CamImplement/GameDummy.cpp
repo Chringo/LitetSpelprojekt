@@ -96,6 +96,8 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	}
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
+	worldBounds = new Ent::Obstacle(64, 64, 1.f, 65, 65);
+
 	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
 	obsArr = new Ent::Obstacle*[obsArrSize];
@@ -278,6 +280,7 @@ void GameDummy::Update(float deltaTime)
 
 	for (UINT obstacleId = 0; obstacleId < obsArrSize; obstacleId++)
 		player->Intersect(obsArr[obstacleId]);
+	player->Intersect(worldBounds);
 
 	if (!player->IsDead())
 	{

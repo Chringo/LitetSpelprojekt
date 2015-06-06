@@ -95,16 +95,21 @@ bool Entity::Intersect(Obstacle *obstacle)
 	XMStoreFloat3(&s.Center, m_Position);
 	s.Radius = m_Radius;
 
-	bool r = false;
-
-	// Built-in quick discard.
-	if (r = obstacle->GetBoundingBox().Intersects(s))
+	ContainmentType containment = obstacle->GetBoundingBox().Contains(s);
+	switch (containment)
 	{
-		m_Position -= m_Move;
-		m_Position -= m_Force;
+		case DISJOINT:
+			break;
+		case CONTAINS:
+			break;
+		case INTERSECTS:
+			// Undo movement.
+			m_Position -= m_Move;
+			m_Position -= m_Force;
+			break;
 	}
 
-	return r;
+	return containment == INTERSECTS;
 }
 
 void Entity::Push(DirectX::XMVECTOR force)

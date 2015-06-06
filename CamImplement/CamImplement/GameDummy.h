@@ -25,6 +25,7 @@ private:
 	unsigned int obsArrSize;
 	Ent::Obstacle** obsArr;
 	DirectX::XMMATRIX* obsMatrixArr;
+	Ent::Obstacle* worldBounds;
 
 	//- Attack data ------
 	bool* hitData[2];
