@@ -49,21 +49,16 @@ void GameDummy::NewGame()
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
-	DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
-	DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
-	DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
+	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
+	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
+	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
 
-	Ent::Enemy regular = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, SCALE_MEDIUM);
-	regular.SetMovementSpeed(7.f);
+	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
 
-	Ent::Enemy runner = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, green, SCALE_SMALL);
-	runner.SetMovementSpeed(12.f);
-
-	Ent::Enemy elite = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, yellow, SCALE_MEDIUM);
-	elite.SetMovementSpeed(8.f);
-
-	Ent::Enemy giant = Ent::Enemy(map->getBaseTiles()[0][0].worldpos, blue, SCALE_LARGE);
-	giant.SetMovementSpeed(6.f);
+	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f);
+	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, green);
+	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, yellow);
+	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, blue);
 
 	if (enemyArr != nullptr)
 	{
@@ -85,18 +80,9 @@ void GameDummy::NewGame()
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 
-		if (i == 0)
-		{
-			enemyArr[i] = new Ent::Enemy(runner);
-		}
-		else if (i == 1)
-		{
-			enemyArr[i] = new Ent::Enemy(elite);
-		}
-		else
-		{
-			enemyArr[i] = new Ent::Enemy(giant);
-		}
+		if (i == 0) enemyArr[i] = new Ent::Enemy(runner);
+		else if (i == 1) enemyArr[i] = new Ent::Enemy(elite);
+		else enemyArr[i] = new Ent::Enemy(giant);
 
 		enemyArr[i]->SetPosition(map->getBaseTiles()[1][i * 10 + 3].worldpos);
 
@@ -148,20 +134,14 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 void GameDummy::CheckPlayerAttack()
 {
-	Ent::Action action = player->GetCurrentAction();
-	int frame = player->GetCurrentActionFrame();
-
-	if ((action == Ent::Attack1 && frame == 40)
-		|| (action == Ent::Attack2 && frame == 60))
+	if (player->GetAttackValue() > 0)
 	{
 		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 		{
 			hitData[0][i] = false;
 		}
 	}
-	if ((action != Ent::Attack1 && action != Ent::Attack2)
-		|| (frame <= 20 || frame >= 40))
-		return;
+	else return;
 
 	XMVECTOR atkPos = player->GetAttackPosition();
 	float d = 0.f;
@@ -171,7 +151,7 @@ void GameDummy::CheckPlayerAttack()
 		if (d < 5.f && !hitData[0][i])
 		{
 			hitData[0][i] = true;
-			action == Ent::Attack1 ? enemyArr[i]->Attack() : enemyArr[i]->Attack(1.5f);
+			enemyArr[i]->DecreaseHealth(player->GetAttackValue());
 		}
 	}
 }
@@ -181,19 +161,16 @@ void GameDummy::CheckEnemyAttack(int index)
 	Ent::Action action = enemyArr[index]->GetCurrentAction();
 	int frame = enemyArr[index]->GetCurrentActionFrame();
 
-	if ((action == Ent::Attack1 && frame == 40)
-		|| (action == Ent::Attack2 && frame == 60))
+	if (enemyArr[index]->GetAttackValue() > 0)
 		hitData[1][index] = false;
-	if ((action != Ent::Attack1 && action != Ent::Attack2)
-		|| (frame <= 20 || frame >= 40))
-		return;
+	else return;
 
 	XMVECTOR atkPos = enemyArr[index]->GetAttackPosition();
 	float d = XMVector3LengthEst(player->GetPosition() - atkPos).m128_f32[0];
 	if (d < 5.f && !hitData[1][index])
 	{
 		hitData[1][index] = true;
-		action == Ent::Attack1 ? player->Attack() : player->Attack(1.5f);
+		player->DecreaseHealth(enemyArr[index]->GetAttackValue());
 	}
 }
 

@@ -8,7 +8,8 @@ using namespace DirectX;
 using namespace std;
 using namespace Ent;
 
-// Entity
+/**********************************************************************************/
+/************************************* Entity *************************************/
 
 Entity::Entity(XMVECTOR position, XMFLOAT4 color, float moveSpeed, float scale, float mass, float radius)
 {
@@ -184,6 +185,26 @@ Action Entity::GetCurrentAction()
 	return m_CurrentAction;
 }
 
+float Entity::GetAttackValue()
+{
+	float attackValue = 0.0f;
+	if (m_CurrentAction == Ent::Attack1 && m_CurrentActionFrame == 40)
+	{
+		attackValue = 40.0f;
+	}
+	else if(m_CurrentAction == Ent::Attack2 && m_CurrentActionFrame == 60)
+	{
+		attackValue = 60.0f;
+	}
+	return attackValue;
+}
+
+void Entity::DecreaseHealth(float damage)
+{
+	m_HitPoints -= damage;
+	m_Dead = m_HitPoints <= 0.f;
+}
+
 int Entity::GetCurrentActionFrame()
 {
 	return m_CurrentActionFrame;
@@ -230,7 +251,8 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE, const float 
 	return counter;
 }
 
-// Player
+/**********************************************************************************/
+/************************************* Player *************************************/
 
 Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
 	: Entity(position, DEFAULT_COLOR, 2.f, scale, 1.f, 1.f)
@@ -332,19 +354,17 @@ void Player::SetInputKey(Action action, int key)
 	m_Controls[(int)action] = key;
 }
 
-void Player::Attack(float mod)
+void Player::DecreaseHealth(float damage)
 {
-	if (m_CurrentAction == Dodge)
-		return;
+	if (m_CurrentAction == Dodge) return;
+	if (m_CurrentAction == Block) damage /= 8;
 
-	if (m_HitFrameCount == 0)
-		m_HitFrameCount++;
-
-	m_CurrentAction == Block ? m_HitPoints -= 10.f * mod : m_HitPoints -= 20.f * mod;
+	m_HitPoints -= damage;
 	m_Dead = m_HitPoints <= 0.f;
 }
 
-// Enemy
+/**********************************************************************************/
+/************************************* Enemy  *************************************/
 
 Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
 	: Entity(XMVectorSet(x, 0.f, z, 1.f), color, 1.f, scale, 1.f, 1.5f)
@@ -355,16 +375,18 @@ Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
 	path = LinkedList<DirectX::XMFLOAT3>();
 }
 
-Enemy::Enemy(XMFLOAT3 position, float scale)
-	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), DEFAULT_COLOR, 1.f, scale, 1.f, 1.5f)
+Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints)
+	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), DEFAULT_COLOR, moveSpeed, scale, 1.f, 1.5f)
 {
 	Enemy(position.x, position.z, DEFAULT_COLOR, scale);
+	m_HitPoints = healthPoints;
 }
 
-Enemy::Enemy(XMFLOAT3 position, DirectX::XMFLOAT4 color, float scale)
-	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), color, 1.f, scale, 1.f, 1.5f)
+Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, DirectX::XMFLOAT4 color)
+	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), color, moveSpeed, scale, 1.f, 1.5f)
 {
 	Enemy(position.x, position.z, color, scale);
+	m_HitPoints = healthPoints;
 }
 
 Enemy::~Enemy(){}
@@ -435,13 +457,6 @@ Action Enemy::dequeueAction()
 		action = orders.Dequeue();
 	}
 	return action;
-}
-void Enemy::Attack(float mod)
-{
-	m_HitPoints -= 50.f * mod;
-	if (m_HitFrameCount == 0)
-		m_HitFrameCount++;
-	m_Dead = m_HitPoints <= 0.f;
 }
 
 void Enemy::SetAttackDirection(DirectX::XMVECTOR dir)
@@ -516,6 +531,9 @@ void Enemy::updateMoveOrder()
 		}
 	}
 }
+
+/**********************************************************************************/
+/************************************ Obstacle ************************************/
 
 Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
 {

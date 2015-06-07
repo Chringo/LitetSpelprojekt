@@ -56,12 +56,13 @@ namespace Ent
 		void SetMovementSpeed(float speed);
 		void PerformAction(Action action);
 		Action GetCurrentAction();
+		float GetAttackValue();
+		virtual void DecreaseHealth(float damage);
 		int GetCurrentActionFrame();
 		float GetHitPoints();
 
 		int GetHitFrameCount();
 		bool IsDead();
-		virtual void Attack(float mod) = 0;
 
 		DirectX::XMFLOAT4 GetColor() const;
 
@@ -103,7 +104,7 @@ namespace Ent
 
 		HRESULT Update(float deltaTime) override;
 
-		void Attack(float mod = 1.f) override;
+		void DecreaseHealth(float damage) override;
 
 		void SetAttackDirection(POINT clientCursorNDC);
 		void SetInputKey(Action action, int key);
@@ -122,8 +123,8 @@ namespace Ent
 	{
 	public:
 		Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale);
-		Enemy(DirectX::XMFLOAT3 position, float scale);
-		Enemy(DirectX::XMFLOAT3 position, DirectX::XMFLOAT4 color, float scale);
+		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints);
+		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, DirectX::XMFLOAT4 color);
 
 		virtual ~Enemy();
 
@@ -131,7 +132,6 @@ namespace Ent
 		Action dequeueAction();
 
 		HRESULT Update(float deltaTime);
-		void Attack(float mod = 1.f) override;
 		void SetAttackDirection(DirectX::XMVECTOR dir);
 
 		void setPathfinding(Map* map, PF::Map* pfMap, float goalX, float goalZ);
