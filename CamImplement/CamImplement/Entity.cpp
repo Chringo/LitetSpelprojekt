@@ -196,7 +196,7 @@ float Entity::GetAttackValue()
 	{
 		attackValue = 60.0f;
 	}
-	return attackValue;
+	return attackValue * m_AttackStrength;
 }
 
 void Entity::DecreaseHealth(float damage)
@@ -375,18 +375,20 @@ Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
 	path = LinkedList<DirectX::XMFLOAT3>();
 }
 
-Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints)
+Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength)
 	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), DEFAULT_COLOR, moveSpeed, scale, 1.f, 1.5f)
 {
 	Enemy(position.x, position.z, DEFAULT_COLOR, scale);
 	m_HitPoints = healthPoints;
+	m_AttackStrength = attackStrength;
 }
 
-Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, DirectX::XMFLOAT4 color)
+Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength, DirectX::XMFLOAT4 color)
 	: Entity(XMVectorSet(position.x, position.y, position.z, 1.f), color, moveSpeed, scale, 1.f, 1.5f)
 {
 	Enemy(position.x, position.z, color, scale);
 	m_HitPoints = healthPoints;
+	m_AttackStrength = attackStrength;
 }
 
 Enemy::~Enemy(){}

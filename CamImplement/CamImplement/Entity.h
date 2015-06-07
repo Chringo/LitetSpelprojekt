@@ -82,6 +82,7 @@ namespace Ent
 		// Combat data.
 		float m_AttackRange = 5.f;
 		float m_HitPoints = 100.f;
+		float m_AttackStrength = 1.0f;
 		Action m_CurrentAction = Idle;
 		int m_CurrentActionFrame = 0;
 		int m_HitFrameCount = 0;
@@ -123,8 +124,8 @@ namespace Ent
 	{
 	public:
 		Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale);
-		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints);
-		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, DirectX::XMFLOAT4 color);
+		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength);
+		Enemy(DirectX::XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength, DirectX::XMFLOAT4 color);
 
 		virtual ~Enemy();
 
