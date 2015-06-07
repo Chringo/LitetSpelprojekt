@@ -90,8 +90,6 @@ public:
 	bool IsEnemyHit(int index);
 
 	GameState GetGameState() const;
-
-	void ReleaseCOM();
 };
 
 #endif
