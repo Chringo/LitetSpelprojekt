@@ -107,7 +107,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
-	worldBounds = new Ent::Obstacle(62, 62, 1.f, 63, 63);
+	worldBounds = new Ent::Obstacle(62.f, 62.f, 63.f, 63.f, 0.f);
 
 	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
@@ -120,7 +120,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		{
 			if (map->getBaseTiles()[h][w].obstacle)
 			{
-				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 5.f, 2.f, 2.f);
+				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 2.f, 2.f, map->getRandom());
 				obsMatrixArr[index] = XMMatrixIdentity();
 				index++;
 			}
