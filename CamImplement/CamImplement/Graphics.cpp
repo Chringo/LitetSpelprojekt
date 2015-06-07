@@ -972,10 +972,6 @@ void Graphics::SwapFBBuffer()
 
 void Graphics::ReleaseCOM()
 {
-	game->ReleaseCOM();
-
-	//
-
 	m_loader->ReleaseCOM();
 
 	if (m_objPlayer)

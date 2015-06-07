@@ -17,7 +17,8 @@ enum GameState
 {
 	gOngoing,
 	gWon,
-	gLost
+	gLost,
+	gNextLevel
 };
 
 class GameDummy
