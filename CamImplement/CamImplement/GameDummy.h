@@ -17,7 +17,8 @@ enum GameState
 {
 	gOngoing,
 	gWon,
-	gLost
+	gLost,
+	gNextLevel
 };
 
 class GameDummy
@@ -90,8 +91,6 @@ public:
 	bool IsEnemyHit(int index);
 
 	GameState GetGameState() const;
-
-	void ReleaseCOM();
 	
 	int GetPlayerFrame () const;
 	int GetEnemyFrame (int index) const;
