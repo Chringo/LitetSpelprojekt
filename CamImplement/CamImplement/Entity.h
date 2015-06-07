@@ -69,6 +69,9 @@ namespace Ent
 		int getXTileSpace(const float TILESIZE, const float TILEAMOUNT);
 		int getZTileSpace(const float TILESIZE, const float TILEAMOUNT);
 
+		// Animation
+		int GetFrame ();
+
 	protected:
 		// Movement data.
 		float m_Friction = 0.5f;
@@ -87,6 +90,10 @@ namespace Ent
 		int m_CurrentActionFrame = 0;
 		int m_HitFrameCount = 0;
 		bool m_Dead = false;
+
+		// Animation data.
+		int m_currentFrame = 0;
+		int m_totalFrames;
 
 		int floatToIntSpace(float floatCoord, const float TILESIZE, const float TILEAMOUNT);
 

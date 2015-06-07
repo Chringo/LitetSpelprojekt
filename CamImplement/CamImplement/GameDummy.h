@@ -92,6 +92,9 @@ public:
 	GameState GetGameState() const;
 
 	void ReleaseCOM();
+	
+	int GetPlayerFrame () const;
+	int GetEnemyFrame (int index) const;
 };
 
 #endif

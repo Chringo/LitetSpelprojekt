@@ -422,3 +422,16 @@ GameState GameDummy::GetGameState() const
 }
 
 void GameDummy::ReleaseCOM(){}
+
+
+
+
+
+int GameDummy::GetPlayerFrame () const
+{
+	return player->GetFrame ();
+}
+int GameDummy::GetEnemyFrame (int index) const
+{
+	return enemyArr[index]->GetFrame ();
+}

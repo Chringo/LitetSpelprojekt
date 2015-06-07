@@ -58,7 +58,7 @@ struct ObjectInstance
 	int					nIndices;
 	int					nNormals;
 	int					textureIndex;
-	int					frameCount;
+	int					nFrames;
 
 	std::vector<float> fx, fy, fz;
 

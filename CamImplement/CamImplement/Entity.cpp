@@ -41,6 +41,16 @@ HRESULT Entity::Update(float deltaTime)
 	if (m_HitFrameCount > 0)
 		m_HitFrameCount < 20 ? m_HitFrameCount++ : m_HitFrameCount = 0;
 
+	m_currentFrame++;
+	if (m_currentFrame == m_totalFrames)
+	{
+		m_currentFrame = 0;
+	}
+	if (m_currentFrame >= m_totalFrames)
+	{
+		int asdf = 0;
+	}
+
 	return S_OK;
 }
 
@@ -251,6 +261,11 @@ int Entity::floatToIntSpace(float floatCoord, const float TILESIZE, const float 
 	return counter;
 }
 
+int Entity::GetFrame ()
+{
+	return m_currentFrame;
+}
+
 /**********************************************************************************/
 /************************************* Player *************************************/
 
@@ -268,6 +283,8 @@ Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
 	m_Controls[MoveDown] = 'S';
 	m_Controls[MoveRight] = 'D';
 	m_Controls[MoveLeft] = 'A';
+
+	m_totalFrames = 191;
 }
 
 Player::Player(XMVECTOR position, XMVECTOR rotation, XMFLOAT4 color, float scale)
@@ -284,6 +301,8 @@ Player::Player(XMVECTOR position, XMVECTOR rotation, XMFLOAT4 color, float scale
 	m_Controls[MoveDown] = 'S';
 	m_Controls[MoveRight] = 'D';
 	m_Controls[MoveLeft] = 'A';
+
+	m_totalFrames = 191;
 }
 
 Player::~Player(){}
@@ -373,6 +392,8 @@ Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 	orders = LQueue<Action>();
 	path = LinkedList<DirectX::XMFLOAT3>();
+
+	m_totalFrames = 134;
 }
 
 Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength)
@@ -381,6 +402,8 @@ Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints
 	Enemy(position.x, position.z, DEFAULT_COLOR, scale);
 	m_HitPoints = healthPoints;
 	m_AttackStrength = attackStrength;
+
+	m_totalFrames = 134;
 }
 
 Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength, DirectX::XMFLOAT4 color)
@@ -389,6 +412,8 @@ Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints
 	Enemy(position.x, position.z, color, scale);
 	m_HitPoints = healthPoints;
 	m_AttackStrength = attackStrength;
+
+	m_totalFrames = 134;
 }
 
 Enemy::~Enemy(){}

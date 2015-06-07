@@ -473,6 +473,7 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 	object->nVertices = nI;
 	object->indices = new UINT[nI];
 	object->input = new InputType[nI];
+	object->nFrames = nF;
 
 	for (int j = 0; j < nI / 3; j++)
 	{
@@ -520,44 +521,30 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 		object->input[(j * 3 + 2)] = InputType(x, y, z, u, v, nx, ny, nz);
 	}
 
-	for (int f = 0; f < nF; f++)
-	{
-		for (int j = 0; j < nI / 3; j++)
-		{
-			iV = temp->faces[j].vIndex1 - 1;
-			object->fx.push_back(temp->frames[f].vertex[iV].x);
-			object->fy.push_back(temp->frames[f].vertex[iV].y);
-			object->fz.push_back(temp->frames[f].vertex[iV].z);
-
-			iV = temp->faces[j].vIndex2 - 1;
-			object->fx.push_back(temp->frames[f].vertex[iV].x);
-			object->fy.push_back(temp->frames[f].vertex[iV].y);
-			object->fz.push_back(temp->frames[f].vertex[iV].z);
-
-			iV = temp->faces[j].vIndex3 - 1;
-			object->fx.push_back(temp->frames[f].vertex[iV].x);
-			object->fy.push_back(temp->frames[f].vertex[iV].y);
-			object->fz.push_back(temp->frames[f].vertex[iV].z);
-		}
-	}
-
-
-	if (object == m_objPlayer)
+	if (object == m_objPlayer || object == m_objEnemies)
 	{
 		for (int f = 0; f < nF; f++)
 		{
-			for (int v = 0; v < nV; v++)
+			for (int j = 0; j < nI / 3; j++)
 			{
-				//object->fx.push_back (temp->frames[f].vertex[v].x);
-				//object->fy.push_back (temp->frames[f].vertex[v].y);
-				//object->fz.push_back (temp->frames[f].vertex[v].z);
+				iV = temp->faces[j].vIndex1 - 1;
+				object->fx.push_back (temp->frames[f].vertex[iV].x);
+				object->fy.push_back (temp->frames[f].vertex[iV].y);
+				object->fz.push_back (temp->frames[f].vertex[iV].z);
 
-				//fx = temp->frames[f].vertex[v].x;
-				//fy = temp->frames[f].vertex[v].y;
-				//fz = temp->frames[f].vertex[v].z;
+				iV = temp->faces[j].vIndex2 - 1;
+				object->fx.push_back (temp->frames[f].vertex[iV].x);
+				object->fy.push_back (temp->frames[f].vertex[iV].y);
+				object->fz.push_back (temp->frames[f].vertex[iV].z);
+
+				iV = temp->faces[j].vIndex3 - 1;
+				object->fx.push_back (temp->frames[f].vertex[iV].x);
+				object->fy.push_back (temp->frames[f].vertex[iV].y);
+				object->fz.push_back (temp->frames[f].vertex[iV].z);
 			}
 		}
 	}
+
 
 
 
@@ -783,27 +770,36 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 		memcpy(cb.pData, &cbPerObject, sizeof(constBufferPerObject));
 		rDeviceContext->Unmap(cbPerObjectBuffer, 0);
 
-
-		if (obj == m_objPlayer && framecount > 0)
+		if ((obj == m_objPlayer || obj == m_objEnemies) && obj->nFrames > 0)
 		{
-
-			//for (int j = 0; j < obj->nVertices; j++)
-			//{
-			//	obj->input[j].pos.x = obj->fx.at(j + framecount * (obj->nVertices));
-			//	obj->input[j].pos.y = obj->fy.at(j + framecount * (obj->nVertices));
-			//	obj->input[j].pos.z = obj->fz.at(j + framecount * (obj->nVertices));
-			//}
-			//framecount < 191 ? framecount++ : framecount = 0;
-
+			if (obj == m_objPlayer)
+			{
+				for (int j = 0; j < obj->nVertices; j++)
+				{
+					obj->input[j].pos.x = obj->fx.at (j + game->GetPlayerFrame() * (obj->nVertices));
+					obj->input[j].pos.y = obj->fy.at (j + game->GetPlayerFrame() * (obj->nVertices));
+					obj->input[j].pos.z = obj->fz.at (j + game->GetPlayerFrame() * (obj->nVertices));
+				}
+			}
+			else
+			{
+				int test = game->GetEnemyFrame (i);
+				for (int j = 0; j < obj->nVertices; j++)
+				{
+					obj->input[j].pos.x = obj->fx.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
+					obj->input[j].pos.y = obj->fy.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
+					obj->input[j].pos.z = obj->fz.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
+				}
+			}
 
 			D3D11_MAPPED_SUBRESOURCE vb;
-			ZeroMemory(&vb, sizeof(D3D11_MAPPED_SUBRESOURCE));
-			rDeviceContext->Map(obj->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
-			memcpy(vb.pData, obj->input, sizeof(InputType) * m_objPlayer->nVertices);
-			rDeviceContext->Unmap(obj->vertexBuffer, 0);
+			ZeroMemory (&vb, sizeof (D3D11_MAPPED_SUBRESOURCE));
+			rDeviceContext->Map (obj->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &vb);
+			memcpy (vb.pData, obj->input, sizeof (InputType) * obj->nVertices);
+			rDeviceContext->Unmap (obj->vertexBuffer, 0);
 
-			rDeviceContext->IASetVertexBuffers(0, 1, &obj->vertexBuffer, &stride, &offset);
-			rDeviceContext->IASetIndexBuffer(obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
+			rDeviceContext->IASetVertexBuffers (0, 1, &obj->vertexBuffer, &stride, &offset);
+			rDeviceContext->IASetIndexBuffer (obj->indexBuffer, DXGI_FORMAT_R32_UINT, offset);
 		}
 
 		// Pass data to shaders.
