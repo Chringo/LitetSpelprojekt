@@ -517,18 +517,21 @@ void Enemy::updateMoveOrder()
 	}
 }
 
-Obstacle::Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend)
+Obstacle::Obstacle(float xPosition, float zPosition, float xExtend, float zExtend, float rot)
 {
 	// Create boundingbox.
 	m_Bounds.Center = XMFLOAT3(xPosition, 0.f, zPosition);
 	m_Bounds.Extents = XMFLOAT3(xExtend, 10.f, zExtend);
 
 	// Rotation not needed.
-	//XMVECTOR orientation = XMQuaternionRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XM_PIDIV4);
-	//XMStoreFloat4(&m_Bounds.Orientation, orientation);
+	float rad = (2 * XM_PI);
+	rad *= rot;
+	XMVECTOR orientation = XMVectorSet(0.f, rad, 0.f, 0.f);
+	//XMStoreFloat4(&m_Bounds.Orientation, orientation);// If collision should be rotated
 
 	// Create world matrix.
-	m_Matrix = XMMatrixTranslation(xPosition, 0.f, zPosition);
+	m_Matrix = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(orientation))
+		* XMMatrixTranslation(xPosition, 0.f, zPosition);
 };
 
 Obstacle::~Obstacle() {};
