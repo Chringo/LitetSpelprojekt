@@ -2,6 +2,9 @@
 
 using namespace DirectX;
 
+/**********************************************************************************/
+/*********************************** Game Stuff ***********************************/
+
 GameDummy::GameDummy()
 {
 	player = nullptr;
@@ -132,48 +135,6 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	return S_OK;
 }
 
-void GameDummy::CheckPlayerAttack()
-{
-	if (player->GetAttackValue() > 0)
-	{
-		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-		{
-			hitData[0][i] = false;
-		}
-	}
-	else return;
-
-	XMVECTOR atkPos = player->GetAttackPosition();
-	float d = 0.f;
-	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-	{
-		d = XMVector3Length(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
-		if (d < 5.f && !hitData[0][i])
-		{
-			hitData[0][i] = true;
-			enemyArr[i]->DecreaseHealth(player->GetAttackValue());
-		}
-	}
-}
-
-void GameDummy::CheckEnemyAttack(int index)
-{
-	Ent::Action action = enemyArr[index]->GetCurrentAction();
-	int frame = enemyArr[index]->GetCurrentActionFrame();
-
-	if (enemyArr[index]->GetAttackValue() > 0)
-		hitData[1][index] = false;
-	else return;
-
-	XMVECTOR atkPos = enemyArr[index]->GetAttackPosition();
-	float d = XMVector3LengthEst(player->GetPosition() - atkPos).m128_f32[0];
-	if (d < 5.f && !hitData[1][index])
-	{
-		hitData[1][index] = true;
-		player->DecreaseHealth(enemyArr[index]->GetAttackValue());
-	}
-}
-
 void GameDummy::Update(float deltaTime)
 {
 	// Output (total average) fps.
@@ -199,7 +160,7 @@ void GameDummy::Update(float deltaTime)
 		if (enemyArr[index]->IsDead())
 		{
 			delete enemyArr[index];
-			enemyArr[index] = enemyArr[enemyArrSize-1];
+			enemyArr[index] = enemyArr[enemyArrSize - 1];
 			enemyArrSize--;
 		}
 		else index++;
@@ -315,6 +276,54 @@ void GameDummy::Update(float deltaTime)
 	}
 }
 
+/**********************************************************************************/
+/************************************* Attack *************************************/
+
+void GameDummy::CheckPlayerAttack()
+{
+	if (player->GetAttackValue() > 0)
+	{
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+		{
+			hitData[0][i] = false;
+		}
+	}
+	else return;
+
+	XMVECTOR atkPos = player->GetAttackPosition();
+	float d = 0.f;
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+	{
+		d = XMVector3Length(enemyArr[i]->GetPosition() - atkPos).m128_f32[0];
+		if (d < 5.f && !hitData[0][i])
+		{
+			hitData[0][i] = true;
+			enemyArr[i]->DecreaseHealth(player->GetAttackValue());
+		}
+	}
+}
+
+void GameDummy::CheckEnemyAttack(int index)
+{
+	Ent::Action action = enemyArr[index]->GetCurrentAction();
+	int frame = enemyArr[index]->GetCurrentActionFrame();
+
+	if (enemyArr[index]->GetAttackValue() > 0)
+		hitData[1][index] = false;
+	else return;
+
+	XMVECTOR atkPos = enemyArr[index]->GetAttackPosition();
+	float d = XMVector3LengthEst(player->GetPosition() - atkPos).m128_f32[0];
+	if (d < 5.f && !hitData[1][index])
+	{
+		hitData[1][index] = true;
+		player->DecreaseHealth(enemyArr[index]->GetAttackValue());
+	}
+}
+
+/**********************************************************************************/
+/*********************************** Get Player ***********************************/
+
 XMMATRIX GameDummy::GetPlayerMatrix()
 {
 	return player->GetTransform();
@@ -340,9 +349,14 @@ float GameDummy::GetPlayerHitPoints()
 	return player->GetHitPoints();
 }
 
-/// 
-/// Enemies
-///
+bool GameDummy::IsPlayerHit()
+{
+	return player->GetHitFrameCount() || player->IsDead();
+}
+
+/**********************************************************************************/
+/*********************************** Get Enemy  ***********************************/
+
 int GameDummy::GetEnemyArrSize()
 {
 	return enemyArrSize;
@@ -376,13 +390,14 @@ float GameDummy::GetEnemyHitPoints(int index)
 {
 	return enemyArr[index]->GetHitPoints();
 }
-/// 
-/// Enemies
-///
 
-///
-/// Obstacles
-///
+bool GameDummy::IsEnemyHit(int index)
+{
+	return enemyArr[index]->GetHitFrameCount() || enemyArr[index]->IsDead();
+}
+
+/**********************************************************************************/
+/********************************** Get Obstacle **********************************/
 DirectX::XMMATRIX* GameDummy::GetObsMatrices()
 {
 	for (size_t i = 0; i < (size_t)obsArrSize; i++)
@@ -395,8 +410,9 @@ int GameDummy::GetObsArrSize() const
 {
 	return this->obsArrSize;
 }
-///
 
+/**********************************************************************************/
+/************************************ Get Map  ************************************/
 DirectX::XMMATRIX GameDummy::GetMapMatrix() const
 {
 	return map->setMapPlane();
@@ -406,15 +422,8 @@ int GameDummy::GetNrOfTiles() const
 	return map->getNrOfTiles();
 }
 
-bool GameDummy::IsPlayerHit()
-{
-	return player->GetHitFrameCount() || player->IsDead();
-}
-
-bool GameDummy::IsEnemyHit(int index)
-{
-	return enemyArr[index]->GetHitFrameCount() || enemyArr[index]->IsDead();
-}
+/**********************************************************************************/
+/************************************* Other  *************************************/
 
 GameState GameDummy::GetGameState() const
 {
