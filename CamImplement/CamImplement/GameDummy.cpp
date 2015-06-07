@@ -276,6 +276,11 @@ void GameDummy::Update(float deltaTime)
 	}
 }
 
+GameState GameDummy::GetGameState() const
+{
+	return gameState;
+}
+
 /**********************************************************************************/
 /************************************* Attack *************************************/
 
@@ -423,11 +428,5 @@ int GameDummy::GetNrOfTiles() const
 }
 
 /**********************************************************************************/
-/************************************* Other  *************************************/
 
-GameState GameDummy::GetGameState() const
-{
-	return gameState;
-}
 
-void GameDummy::ReleaseCOM(){}
