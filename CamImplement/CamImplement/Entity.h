@@ -146,7 +146,7 @@ namespace Ent
 	class Obstacle
 	{
 	public:
-		Obstacle(float xPosition, float zPosition, float mass, float xExtend, float zExtend);
+		Obstacle(float xPosition, float zPosition, float xExtend, float zExtend, float rotation);
 		~Obstacle();
 
 		DirectX::BoundingOrientedBox GetBoundingBox();
