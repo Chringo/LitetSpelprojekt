@@ -254,11 +254,17 @@ void Map::DiamondSquare(float range, float decrease)
 //TODO Set tile type
 void Map::EvaluateTile(TileClass& tile)
 {
-	if (tile.getHeight() < 50)
+	if (tile.getHeight() < 48)
 	{
 		tile.setObstacle(true);
 		tile.setType(1);
 		water++;
+	}
+	else if (tile.getHeight() > 74 && tile.getHeight() < 76)
+	{
+		tile.setObstacle(true);
+		tile.setType(2);
+		peak++;
 	}
 	else if (tile.getHeight() > 82 && tile.getHeight() < 84)
 	{
@@ -266,13 +272,13 @@ void Map::EvaluateTile(TileClass& tile)
 		tile.setType(2);
 		peak++;
 	}
-	else if (tile.getHeight() > 75 && tile.getHeight() < 77)
+	else if (tile.getHeight() > 120 && tile.getHeight() < 125)
 	{
 		tile.setObstacle(true);
 		tile.setType(2);
 		peak++;
 	}
-	else if (tile.getHeight() > 125)
+	else if (tile.getHeight() > 145)
 	{
 		tile.setObstacle(true);
 		tile.setType(2);

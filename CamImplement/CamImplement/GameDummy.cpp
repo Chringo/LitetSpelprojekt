@@ -44,7 +44,7 @@ void GameDummy::NewGame()
 		delete player;
 	}
 
-	player = new Ent::Player(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
+	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
 	player->SetMovementSpeed(9.f);
 
 	lastX = -1;
@@ -104,13 +104,17 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
 
+	worldBounds = new Ent::Obstacle(62.f, 62.f, 63.f, 63.f, 0.f);
 	/************************************** Map  **************************************/
 
-	map = new Map(3, 5, 60.0f);
+	map = new Map(5, 5, 68.f);//One
+	//map = new Map(8, 5, 80.f);//Two
+	//map = new Map(3, 5, 73.f);//Three
+	//map = new Map(21, 5, 85.f);//Four
+	//map = new Map(9, 5, 70.f);//Five
 
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
-	worldBounds = new Ent::Obstacle(62.f, 62.f, 63.f, 63.f, 0.f);
 
 	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
@@ -129,6 +133,7 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 			}
 		}
 	}
+	/**********************************************************************************/
 
 	NewGame();
 

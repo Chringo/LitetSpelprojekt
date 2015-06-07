@@ -542,9 +542,10 @@ Obstacle::Obstacle(float xPosition, float zPosition, float xExtend, float zExten
 	m_Bounds.Center = XMFLOAT3(xPosition, 0.f, zPosition);
 	m_Bounds.Extents = XMFLOAT3(xExtend, 10.f, zExtend);
 
-	// Rotation not needed.
+	// Rotation
 	float rad = (2 * XM_PI);
 	rad *= rot;
+
 	XMVECTOR orientation = XMVectorSet(0.f, rad, 0.f, 0.f);
 	//XMStoreFloat4(&m_Bounds.Orientation, orientation);// If collision should be rotated
 
