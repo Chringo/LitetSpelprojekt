@@ -861,6 +861,28 @@ void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 
 /*************************************************Stuff *************************************************/
 
+void Graphics::UpdateObjectInstance(ObjectInstance* obj)
+{
+	//if (m_objObstacles)
+	//{
+	//	m_objObstacles->Delete();
+	//	delete m_objObstacles;
+	//}
+
+	//CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objObstacles);
+
+	//InitInstances(Obstacle, m_objObstacles);
+
+	//for (INT i = 0; i < game->GetObsArrSize(); i++)
+	//	m_objObstacles->world.push_back(mat);
+
+	//SetWorlds(game->GetObsMatrices(), m_objObstacles);
+
+	//RenderInstances(m_objObstacles);
+
+	//RenderInstanceGeometry(m_objObstacles, viewProjection);
+}
+
 bool Graphics::Update(float deltaTime)
 {
 	/********************************** Gamestate handling **********************************/
