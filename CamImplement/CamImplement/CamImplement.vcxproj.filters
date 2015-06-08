@@ -46,7 +46,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,10 +99,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -118,13 +118,13 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{8424382b-123d-48c9-a0a3-62772c4df320}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
+    <Filter Include="Source Files\Resource Files">
       <UniqueIdentifier>{5925251d-13cf-4b65-9d2e-d9fd697ef148}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CamImplement.rc">
-      <Filter>Resource Files</Filter>
+      <Filter>Source Files\Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

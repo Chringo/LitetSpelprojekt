@@ -41,12 +41,21 @@ HRESULT Entity::Update(float deltaTime)
 	if (m_HitFrameCount > 0)
 		m_HitFrameCount < 20 ? m_HitFrameCount++ : m_HitFrameCount = 0;
 
-	m_currentFrame++;
-	if (m_currentFrame == m_totalFrames)
+	if (m_isAnimating == true)
 	{
-		m_currentFrame = 0;
+		m_currentFrame++;
+		if (m_currentFrame == m_totalFrames)
+		{
+			m_currentFrame = 0;
+		}
 	}
 
+	if (m_CurrentAction == Idle && m_currentFrame > 98)
+	{
+		m_isAnimating = false;
+		m_currentFrame = 0;
+	}
+	
 	return S_OK;
 }
 
@@ -176,30 +185,34 @@ void Entity::PerformAction(Action action)
 		// Issue moves.
 	case MoveUp:
 		m_Move.m128_f32[2] = 1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < 41 || m_currentFrame > 98)
 		{
 			m_currentFrame = 41;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveDown:
 		m_Move.m128_f32[2] = -1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < 41 || m_currentFrame > 98)
 		{
 			m_currentFrame = 41;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveRight:
 		m_Move.m128_f32[0] = 1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < 41 || m_currentFrame > 98)
 		{
 			m_currentFrame = 41;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveLeft:
 		m_Move.m128_f32[0] = -1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < 41 || m_currentFrame > 98)
 		{
 			m_currentFrame = 41;
+			m_isAnimating = true;
 		}
 		break;
 	}
@@ -213,7 +226,7 @@ Action Entity::GetCurrentAction()
 float Entity::GetAttackValue()
 {
 	float attackValue = 0.0f;
-	if (m_CurrentAction == Ent::Attack1 && m_CurrentActionFrame == 40)
+	if (m_CurrentAction == Ent::Attack1 && m_CurrentActionFrame == 30)
 	{
 		attackValue = 40.0f;
 	}
@@ -338,18 +351,37 @@ HRESULT Player::Update(float deltaTime)
 		int frameLimit = 0;
 		switch (m_CurrentAction)
 		{
+		//Combat moves
 		case Attack1:
-			frameLimit = 50;
+			frameLimit = 38;
+			m_isAnimating = true;
 			break;
 		case Attack2:
 			frameLimit = 70;
+			m_isAnimating = true;
 			break;
 		case Block:
-			frameLimit = 30;
+			frameLimit = 27;
+			m_isAnimating = true;
 			break;
 		case Dodge:
-			frameLimit = 40;
+			frameLimit = 65;
+			m_isAnimating = true;
 			break;
+
+		//Movement
+		case MoveUp:
+			frameLimit = 5;
+			m_isAnimating = true;
+		case MoveDown:
+			frameLimit = 5;
+			m_isAnimating = true;
+		case MoveRight:
+			frameLimit = 5;
+			m_isAnimating = true;
+		case MoveLeft:
+			frameLimit = 5;
+			m_isAnimating = true;
 		default:
 			break;
 		}
@@ -358,6 +390,7 @@ HRESULT Player::Update(float deltaTime)
 		{
 			m_CurrentAction = Idle;
 			m_CurrentActionFrame = 0;
+			m_isAnimating = false;
 		}
 	}
 

@@ -94,6 +94,7 @@ namespace Ent
 		// Animation data.
 		int m_currentFrame = 0;
 		int m_totalFrames;
+		bool m_isAnimating = false;
 
 		int floatToIntSpace(float floatCoord, const float TILESIZE, const float TILEAMOUNT);
 
