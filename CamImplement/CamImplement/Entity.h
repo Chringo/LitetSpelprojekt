@@ -96,6 +96,15 @@ namespace Ent
 		int m_totalFrames;
 		bool m_isAnimating = false;
 
+		// Frame data per animation
+		int m_animAttack;
+		int m_animBlock;
+		int m_animDodge;
+		int m_animMove;
+		int m_animMoveStart;
+		int m_animMoveEnd;
+		int m_animDeath;
+
 		int floatToIntSpace(float floatCoord, const float TILESIZE, const float TILEAMOUNT);
 
 	private:
