@@ -881,6 +881,13 @@ void Graphics::UpdateObjectInstance(ObjectInstance* obj)
 	//RenderInstances(m_objObstacles);
 
 	//RenderInstanceGeometry(m_objObstacles, viewProjection);
+
+	// Remove old world-matrices.
+	obj->world.clear();
+
+	// Set new.
+	obj->world.resize(game->GetObsArrSize());
+	SetWorlds(game->GetObsMatrices(), m_objObstacles);
 }
 
 bool Graphics::Update(float deltaTime)
@@ -907,7 +914,9 @@ bool Graphics::Update(float deltaTime)
 			{
 				gamePaused = false;
 				renderMenu = gamePaused;
+				game->ResetMap();
 				game->NewGame();
+				UpdateObjectInstance(m_objObstacles);
 			}
 			else
 			{
@@ -941,7 +950,9 @@ bool Graphics::Update(float deltaTime)
 	}
 	else if (game->GetGameState() == gNextLevel)
 	{
+		game->NewGame();
 		UpdateObjectInstance(m_objObstacles);
+		gamePaused = false;
 	}
 
 	/****************************************************************************************/

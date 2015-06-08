@@ -27,12 +27,19 @@ GameDummy::~GameDummy()
 	}
 	delete[] enemyArr;
 
-	delete map;
+	//levels.~LinkedList();
+	if (map != nullptr)
+		delete map;
 
 	delete[] hitData[0];
 	delete[] hitData[1];
 }
 
+void GameDummy::ResetMap()
+{
+	currentLevel = 0;
+	map = levels.elementAt(currentLevel);
+}
 void GameDummy::NewGame()
 {
 	gameState = gOngoing;
@@ -50,6 +57,35 @@ void GameDummy::NewGame()
 	lastX = -1;
 	lastZ = -1;
 
+	/**********************************************************************************/
+	/************************************ Obstacle ************************************/
+	if (obsArr != nullptr)
+	{
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+		{
+			delete obsArr[i];
+		}
+		delete[] obsArr;
+		delete[] obsMatrixArr;
+	}
+
+	obsArrSize = map->getObstacles();
+	obsMatrixArr = new XMMATRIX[obsArrSize];
+	obsArr = new Ent::Obstacle*[obsArrSize];
+	int cSize = map->getChunkSize();
+	int index = 0;
+	for (int h = 0; h < cSize; h++)
+	{
+		for (int w = 0; w < cSize; w++)
+		{
+			if (map->getBaseTiles()[h][w].obstacle)
+			{
+				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 2.f, 2.f, map->getRandom());
+				obsMatrixArr[index] = XMMatrixIdentity();
+				index++;
+			}
+		}
+	}
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
 	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
@@ -73,7 +109,7 @@ void GameDummy::NewGame()
 		delete[] enemyArr;
 	}
 
-	enemyArrSize = 3;
+	enemyArrSize = 1;
 	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	hitData[0] = new bool[enemyArrSize];
@@ -104,35 +140,22 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	clientSize.x = r.right - r.left;
 	clientSize.y = r.bottom - r.top;
 
-	worldBounds = new Ent::Obstacle(62.f, 62.f, 63.f, 63.f, 0.f);
 	/************************************** Map  **************************************/
 
-	map = new Map(5, 5, 68.f);//One
-	//map = new Map(8, 5, 80.f);//Two
-	//map = new Map(3, 5, 73.f);//Three
-	//map = new Map(21, 5, 85.f);//Four
-	//map = new Map(9, 5, 70.f);//Five
+	levels.insertLast(new Map(5, 5, 68.f));
+	levels.insertLast(new Map(8, 5, 80.f));
+	levels.insertLast(new Map(3, 5, 73.f));
+	levels.insertLast(new Map(21, 5, 85.f));
+	levels.insertLast(new Map(9, 5, 70.f));
+
+	ResetMap();
 
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
 
-	obsArrSize = map->getObstacles();
-	obsMatrixArr = new XMMATRIX[obsArrSize];
-	obsArr = new Ent::Obstacle*[obsArrSize];
-	int cSize = map->getChunkSize();
-	int index = 0;
-	for (int h = 0; h < cSize; h++)
-	{
-		for (int w = 0; w < cSize; w++)
-		{
-			if (map->getBaseTiles()[h][w].obstacle)
-			{
-				obsArr[index] = new Ent::Obstacle(map->getBaseTiles()[h][w].worldpos.x, map->getBaseTiles()[h][w].worldpos.z, 2.f, 2.f, map->getRandom());
-				obsMatrixArr[index] = XMMatrixIdentity();
-				index++;
-			}
-		}
-	}
+	// Static Obstacles - Dynamic Obstacles which is updated after each level is in NewGame()
+	worldBounds = new Ent::Obstacle(62.f, 62.f, 64.f, 64.f, 0.f);
+
 	/**********************************************************************************/
 
 	NewGame();
@@ -178,14 +201,19 @@ void GameDummy::Update(float deltaTime)
 		{
 			gameWon = false;
 		}
-	} // Player won
-	if (gameWon) gameState = gWon;
+	}
 
-	// player won
-	//if (enemyArrSize == 0)
-	//{
-	//	gameState = gWon;
-	//}
+	if (gameWon && levels.size() == currentLevel + 1)// Player won
+	{
+		currentLevel = 0;
+		gameState = gWon;
+	}
+	else if (gameWon)// Next level
+	{
+		currentLevel++;
+		map = levels.elementAt(currentLevel);
+		gameState = gNextLevel;
+	}
 
 	/************************************* Pathfinding *************************************/
 

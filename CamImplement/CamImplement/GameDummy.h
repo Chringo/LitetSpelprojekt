@@ -24,6 +24,8 @@ enum GameState
 class GameDummy
 {
 private:
+	int currentLevel;
+	LinkedList<Map*> levels;
 	Map* map;
 
 	unsigned int obsArrSize;
@@ -61,6 +63,7 @@ public:
 	GameDummy();
 	~GameDummy();
 
+	void ResetMap();
 	void NewGame();
 
 	HRESULT Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport);
