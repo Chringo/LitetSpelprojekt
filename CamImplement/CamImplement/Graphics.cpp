@@ -671,10 +671,13 @@ void Graphics::Render()
 	//IMPORTANT: If you put two planes in the same matrix pos,
 	//the one that is called first (Arrow vs Menu for example)
 	//gets rendered over the other one.
-	RenderInstances(m_objPlayer);
-	RenderInstances(m_objEnemies);
-	RenderInstances(m_objObstacles);
-	RenderInstances(m_objMap);
+	if (!gamePaused)
+	{
+		RenderInstances(m_objPlayer);
+		RenderInstances(m_objEnemies);
+		RenderInstances(m_objObstacles);
+		RenderInstances(m_objMap);
+	}
 	if (renderMenu)
 	{
 		RenderInstances(m_objArrow);
@@ -863,25 +866,6 @@ void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 
 void Graphics::UpdateObjectInstance(ObjectInstance* obj)
 {
-	//if (m_objObstacles)
-	//{
-	//	m_objObstacles->Delete();
-	//	delete m_objObstacles;
-	//}
-
-	//CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objObstacles);
-
-	//InitInstances(Obstacle, m_objObstacles);
-
-	//for (INT i = 0; i < game->GetObsArrSize(); i++)
-	//	m_objObstacles->world.push_back(mat);
-
-	//SetWorlds(game->GetObsMatrices(), m_objObstacles);
-
-	//RenderInstances(m_objObstacles);
-
-	//RenderInstanceGeometry(m_objObstacles, viewProjection);
-
 	// Remove old world-matrices.
 	obj->world.clear();
 
@@ -914,7 +898,7 @@ bool Graphics::Update(float deltaTime)
 			{
 				gamePaused = false;
 				renderMenu = gamePaused;
-				game->ResetMap();
+				game->InitLevels();
 				game->NewGame();
 				UpdateObjectInstance(m_objObstacles);
 			}

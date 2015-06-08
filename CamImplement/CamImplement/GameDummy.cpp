@@ -35,29 +35,105 @@ GameDummy::~GameDummy()
 	delete[] hitData[1];
 }
 
-void GameDummy::ResetMap()
+void GameDummy::InitLevels()
 {
 	currentLevel = 0;
 	map = levels.elementAt(currentLevel);
 }
+void GameDummy::spawnEnemies(int amount, int type)
+{
+	Ent::Enemy* base = new Ent::Enemy(regular);
+	switch (type)
+	{
+	case 0:
+		//base = new Ent::Enemy(regular);
+		break;
+	case 1:
+		base = new Ent::Enemy(runner);
+		break;
+	case 2:
+		base = new Ent::Enemy(elite);
+		break;
+	case 3:
+		base = new Ent::Enemy(giant);
+		break;
+	}
+
+	/**********************************************************************************/
+	/************************************* Enemy  *************************************/
+	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
+	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
+	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
+
+	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
+
+	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
+	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, 0.6f, green);
+	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, 1.0f, yellow);
+	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, 1.3f, blue);
+
+	if (enemyArr != nullptr)
+	{
+		delete[] lastEnemyCoord;
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+		{
+			delete enemyArr[i];
+		}
+		delete[] enemyArr;
+	}
+
+	enemyArrSize = amount;
+	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
+	enemyMatrixArr = new XMMATRIX[enemyArrSize];
+	hitData[0] = new bool[enemyArrSize];
+	hitData[1] = new bool[enemyArrSize];
+	enemyArr = new Ent::Enemy*[enemyArrSize];
+	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+	{
+		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
+
+		enemyArr[i] = new Ent::Enemy(*base);
+
+		int corner = i % 4;
+		int max = map->getChunkSize() - 3;
+		switch (corner)
+		{
+		case 0:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][2].worldpos);
+			break;
+		case 1:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][max].worldpos);
+			break;
+		case 2:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][2].worldpos);
+			break;
+		case 3:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][max].worldpos);
+			break;
+		}
+
+		enemyMatrixArr[i] = XMMatrixIdentity();
+		hitData[0][i] = false;
+		hitData[1][i] = false;
+	}
+
+	delete base;
+}
+
 void GameDummy::NewGame()
 {
 	gameState = gOngoing;
-
-	/************************************* Player *************************************/
 
 	if (player != nullptr)
 	{
 		delete player;
 	}
 
-	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
-	player->SetMovementSpeed(9.f);
+	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), SCALE_MEDIUM, 9.0f);
 
 	lastX = -1;
 	lastZ = -1;
 
-	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
 	if (obsArr != nullptr)
 	{
@@ -87,49 +163,8 @@ void GameDummy::NewGame()
 		}
 	}
 	/**********************************************************************************/
-	/************************************* Enemy  *************************************/
-	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
-	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
-	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
 
-	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
-
-	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, 0.6f, green);
-	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, 1.0f, yellow);
-	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, 1.3f, blue);
-
-	if (enemyArr != nullptr)
-	{
-		delete[] lastEnemyCoord;
-		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-		{
-			delete enemyArr[i];
-		}
-		delete[] enemyArr;
-	}
-
-	enemyArrSize = 1;
-	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
-	enemyMatrixArr = new XMMATRIX[enemyArrSize];
-	hitData[0] = new bool[enemyArrSize];
-	hitData[1] = new bool[enemyArrSize];
-	enemyArr = new Ent::Enemy*[enemyArrSize];
-	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-	{
-		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
-
-		if (i == 0) enemyArr[i] = new Ent::Enemy(runner);
-		else if (i == 1) enemyArr[i] = new Ent::Enemy(elite);
-		else enemyArr[i] = new Ent::Enemy(giant);
-
-		enemyArr[i]->SetPosition(map->getBaseTiles()[1][i * 10 + 3].worldpos);
-
-		enemyMatrixArr[i] = XMMatrixIdentity();
-		hitData[0][i] = false;
-		hitData[1][i] = false;
-	}
-	/**********************************************************************************/
+	spawnEnemies(1, 1);
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -144,11 +179,12 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 
 	levels.insertLast(new Map(5, 5, 68.f));
 	levels.insertLast(new Map(8, 5, 80.f));
-	levels.insertLast(new Map(3, 5, 73.f));
+	//levels.insertLast(new Map(3, 5, 73.f));
 	levels.insertLast(new Map(21, 5, 85.f));
-	levels.insertLast(new Map(9, 5, 70.f));
+	//levels.insertLast(new Map(9, 5, 70.f));
+	//levels.insertLast(new Map(25, 5, 70.f));
 
-	ResetMap();
+	InitLevels();
 
 	/**********************************************************************************/
 	/************************************ Obstacle ************************************/
@@ -245,7 +281,7 @@ void GameDummy::Update(float deltaTime)
 	{
 		if (!enemyArr[i]->IsDead())
 		{
-			disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
+			//disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
 			PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
 			if (c != lastEnemyCoord[i])
 			{
