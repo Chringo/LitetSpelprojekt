@@ -41,6 +41,7 @@ HRESULT Entity::Update(float deltaTime)
 	if (m_HitFrameCount > 0)
 		m_HitFrameCount < 20 ? m_HitFrameCount++ : m_HitFrameCount = 0;
 
+	// Update animation if we're supposed to.
 	if (m_isAnimating == true)
 	{
 		m_currentFrame++;
@@ -50,11 +51,11 @@ HRESULT Entity::Update(float deltaTime)
 		}
 	}
 
-	if (m_CurrentAction == Idle && m_currentFrame > 98)
+	if (XMVector3Equal (m_Move, XMVectorZero ()) && m_CurrentAction == Idle)
 	{
-		m_isAnimating = false;
-		m_currentFrame = 0;
-	}
+		m_isAnimating = false;		//If the player isn't moving we want to
+		m_currentFrame = 0;			//stop the animation, regardless of if the
+	}								//walk animation actually finished or not.
 	
 	return S_OK;
 }
