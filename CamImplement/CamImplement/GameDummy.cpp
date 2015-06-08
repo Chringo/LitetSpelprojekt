@@ -33,34 +33,24 @@ GameDummy::~GameDummy()
 	delete[] hitData[1];
 }
 
-void GameDummy::NewGame()
+void GameDummy::spawnEnemies(int amount, int type)
 {
-	gameState = gOngoing;
-
-	/************************************* Player *************************************/
-
-	if (player != nullptr)
+	Ent::Enemy* base = new Ent::Enemy(regular);
+	switch (type)
 	{
-		delete player;
+	case 0:
+		//base = new Ent::Enemy(regular);
+		break;
+	case 1:
+		base = new Ent::Enemy(runner);
+		break;
+	case 2:
+		base = new Ent::Enemy(elite);
+		break;
+	case 3:
+		base = new Ent::Enemy(giant);
+		break;
 	}
-
-	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), SCALE_MEDIUM, 9.0f);
-
-	lastX = -1;
-	lastZ = -1;
-
-	/**********************************************************************************/
-	/************************************* Enemy  *************************************/
-	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
-	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
-	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
-
-	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
-
-	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, 0.6f, green);
-	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, 1.0f, yellow);
-	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, 1.3f, blue);
 
 	if (enemyArr != nullptr)
 	{
@@ -72,7 +62,7 @@ void GameDummy::NewGame()
 		delete[] enemyArr;
 	}
 
-	enemyArrSize = 3;
+	enemyArrSize = amount;
 	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	hitData[0] = new bool[enemyArrSize];
@@ -82,17 +72,49 @@ void GameDummy::NewGame()
 	{
 		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
 
-		if (i == 0) enemyArr[i] = new Ent::Enemy(runner);
-		else if (i == 1) enemyArr[i] = new Ent::Enemy(elite);
-		else enemyArr[i] = new Ent::Enemy(giant);
+		enemyArr[i] = new Ent::Enemy(*base);
 
-		enemyArr[i]->SetPosition(map->getBaseTiles()[1][i * 10 + 3].worldpos);
+		int corner = i % 4;
+		int max = map->getChunkSize() - 3;
+		switch (corner)
+		{
+		case 0:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][2].worldpos);
+			break;
+		case 1:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][max].worldpos);
+			break;
+		case 2:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][2].worldpos);
+			break;
+		case 3:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][max].worldpos);
+			break;
+		}
 
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
 		hitData[1][i] = false;
 	}
-	/**********************************************************************************/
+
+	delete base;
+}
+
+void GameDummy::NewGame()
+{
+	gameState = gOngoing;
+
+	if (player != nullptr)
+	{
+		delete player;
+	}
+
+	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), SCALE_MEDIUM, 9.0f);
+
+	lastX = -1;
+	lastZ = -1;
+
+	spawnEnemies(4, 1);
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -216,7 +238,7 @@ void GameDummy::Update(float deltaTime)
 	{
 		if (!enemyArr[i]->IsDead())
 		{
-			disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
+			//disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
 			PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
 			if (c != lastEnemyCoord[i])
 			{

@@ -13,6 +13,10 @@
 #define SCALE_MEDIUM	1.0f
 #define SCALE_LARGE		1.2f
 
+#define BLUE DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f)
+#define GREEN DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f)
+#define YELLOW DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f)
+
 enum GameState
 {
 	gOngoing,
@@ -24,6 +28,14 @@ enum GameState
 class GameDummy
 {
 private:
+
+	//---------- Enemy types -----
+	const Ent::Enemy regular = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
+	const Ent::Enemy runner = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_SMALL, 12.f, 80.0f, 0.6f, GREEN);
+	const Ent::Enemy elite = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 8.f, 120.0f, 1.0f, YELLOW);
+	const Ent::Enemy giant = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_LARGE, 6.f, 200.0f, 1.3f, BLUE);
+	//----------------------------
+
 	Map* map;
 
 	unsigned int obsArrSize;
@@ -48,6 +60,8 @@ private:
 	// The array of enemies
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
+
+	void spawnEnemies(int amount, int type);
 
 	POINT clientSize;
 	HWND windowHandle;
