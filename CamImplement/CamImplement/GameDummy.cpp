@@ -159,23 +159,33 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
-	size_t index = 0;
-	while (index < (size_t)enemyArrSize)
+	//size_t index = 0;
+	//while (index < (size_t)enemyArrSize)
+	//{
+	//	if (enemyArr[index]->IsDead())
+	//	{
+	//		delete enemyArr[index];
+	//		enemyArr[index] = enemyArr[enemyArrSize - 1];
+	//		enemyArrSize--;
+	//	}
+	//	else index++;
+	//}
+
+	bool gameWon = true;
+	for (int i = 0; i < enemyArrSize; i++)
 	{
-		if (enemyArr[index]->IsDead())
+		if (!enemyArr[i]->IsDead())
 		{
-			delete enemyArr[index];
-			enemyArr[index] = enemyArr[enemyArrSize - 1];
-			enemyArrSize--;
+			gameWon = false;
 		}
-		else index++;
-	}
+	} // Player won
+	if (gameWon) gameState = gWon;
 
 	// player won
-	if (enemyArrSize == 0)
-	{
-		gameState = gWon;
-	}
+	//if (enemyArrSize == 0)
+	//{
+	//	gameState = gWon;
+	//}
 
 	/************************************* Pathfinding *************************************/
 
@@ -205,12 +215,15 @@ void GameDummy::Update(float deltaTime)
 	// Block and update if an Enemy moves
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
-		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
-		if (c != lastEnemyCoord[i])
+		if (!enemyArr[i]->IsDead())
 		{
-			lastEnemyCoord[i] = c;
-			update = true;
+			disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
+			PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
+			if (c != lastEnemyCoord[i])
+			{
+				lastEnemyCoord[i] = c;
+				update = true;
+			}
 		}
 	}
 
@@ -228,17 +241,20 @@ void GameDummy::Update(float deltaTime)
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		// Update path if a player or Enemy have moved from a tile to another
-		if (update)
+		if (!enemyArr[i]->IsDead())
 		{
-			enemyArr[i]->setPathfinding
-				(
-				map,
-				pfMap,
-				player->GetPosition().m128_f32[0],
-				player->GetPosition().m128_f32[2]
-				);
+			if (update)
+			{
+				enemyArr[i]->setPathfinding
+					(
+					map,
+					pfMap,
+					player->GetPosition().m128_f32[0],
+					player->GetPosition().m128_f32[2]
+					);
+			}
+			enemyArr[i]->updateMoveOrder();
 		}
-		enemyArr[i]->updateMoveOrder();
 	}
 
 	delete pfMap;
@@ -264,19 +280,22 @@ void GameDummy::Update(float deltaTime)
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+		if (!enemyArr[i]->IsDead())
 		{
-			enemyArr[i]->SetAttackDirection(player->GetPosition());
-			enemyArr[i]->PerformAction(Ent::Attack1);
-		}
-		//CheckEnemyAttack(i);
+			if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+			{
+				enemyArr[i]->SetAttackDirection(player->GetPosition());
+				enemyArr[i]->PerformAction(Ent::Attack1);
+			}
+			//CheckEnemyAttack(i);
 
-		enemyArr[i]->Update(deltaTime);
-		enemyArr[i]->Intersect(worldBounds);
-		player->Intersect(enemyArr[i]);
-		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
-		{
-			if (i != j) enemyArr[i]->Intersect(enemyArr[j]);
+			enemyArr[i]->Update(deltaTime);
+			enemyArr[i]->Intersect(worldBounds);
+			player->Intersect(enemyArr[i]);
+			for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
+			{
+				if (i != j) enemyArr[i]->Intersect(enemyArr[j]);
+			}
 		}
 	}
 }
