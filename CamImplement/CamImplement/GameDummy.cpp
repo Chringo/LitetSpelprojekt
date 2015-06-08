@@ -44,8 +44,7 @@ void GameDummy::NewGame()
 		delete player;
 	}
 
-	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
-	player->SetMovementSpeed(9.f);
+	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), SCALE_MEDIUM, 9.0f);
 
 	lastX = -1;
 	lastZ = -1;

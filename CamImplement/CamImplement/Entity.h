@@ -106,8 +106,8 @@ namespace Ent
 	class Player : public Entity
 	{
 	public:
-		Player(DirectX::XMVECTOR position, DirectX::XMVECTOR rotation, float scale);
-		Player( DirectX::XMVECTOR position, DirectX::XMVECTOR rotation, DirectX::XMFLOAT4 color, float scale );
+		Player(DirectX::XMVECTOR position, float scale, float moveSpeed);
+		Player(DirectX::XMVECTOR position, DirectX::XMFLOAT4 color, float scale, float moveSpeed);
 		virtual ~Player();
 
 		HRESULT Update(float deltaTime) override;
