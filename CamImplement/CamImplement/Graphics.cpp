@@ -929,7 +929,6 @@ bool Graphics::Update(float deltaTime)
 
 	if (game->GetGameState() != gOngoing && !gamePaused)
 	{
-		GameState asfd = game->GetGameState();
 		gamePaused = true;
 		if (game->GetGameState() == gWon)
 		{
@@ -939,6 +938,10 @@ bool Graphics::Update(float deltaTime)
 		{
 			renderLost = gamePaused;
 		}
+	}
+	else if (game->GetGameState() == gNextLevel)
+	{
+		UpdateObjectInstance(m_objObstacles);
 	}
 
 	/****************************************************************************************/
