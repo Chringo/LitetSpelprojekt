@@ -368,22 +368,6 @@ HRESULT Player::Update(float deltaTime)
 			frameLimit = 65;
 			m_isAnimating = true;
 			break;
-
-		//Movement
-		case MoveUp:
-			frameLimit = 5;
-			m_isAnimating = true;
-		case MoveDown:
-			frameLimit = 5;
-			m_isAnimating = true;
-		case MoveRight:
-			frameLimit = 5;
-			m_isAnimating = true;
-		case MoveLeft:
-			frameLimit = 5;
-			m_isAnimating = true;
-		default:
-			break;
 		}
 			
 		if (m_CurrentActionFrame == frameLimit)
