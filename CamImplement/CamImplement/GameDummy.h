@@ -34,7 +34,7 @@ private:
 
 	//---------- Enemy types -----
 	const Ent::Enemy regular = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	const Ent::Enemy runner = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_SMALL, 12.f, 80.0f, 0.6f, GREEN);
+	const Ent::Enemy runner = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_SMALL, 20.f, 80.0f, 0.6f, GREEN);
 	const Ent::Enemy elite = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 8.f, 120.0f, 1.0f, YELLOW);
 	const Ent::Enemy giant = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_LARGE, 6.f, 200.0f, 1.3f, BLUE);
 	//----------------------------
@@ -56,11 +56,10 @@ private:
 	int lastZ;
 
 	unsigned int enemyArrSize;
-	// Stores the last tile coords of the enemies (necessary for updating path of enemies)
-	PF::Pathfinding::Coordinate* lastEnemyCoord;
 	// The array of enemies
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
+	bool pathsUpdated;
 
 	void spawnEnemies(int amount, int type);
 
