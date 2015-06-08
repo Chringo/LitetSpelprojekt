@@ -46,10 +46,6 @@ HRESULT Entity::Update(float deltaTime)
 	{
 		m_currentFrame = 0;
 	}
-	if (m_currentFrame >= m_totalFrames)
-	{
-		int asdf = 0;
-	}
 
 	return S_OK;
 }
@@ -163,29 +159,48 @@ void Entity::PerformAction(Action action)
 	{
 	case Attack1:
 		// Move sword.
+		m_currentFrame = 2;
 		break;
 	case Attack2:
 		// Move sword.
 		break;
 	case Block:
 		// Move shield.
+		m_currentFrame = 99;
 		break;
 	case Dodge:
 		// Tumble away.
+		m_currentFrame = 127;
 		break;
 
 		// Issue moves.
 	case MoveUp:
 		m_Move.m128_f32[2] = 1.0f;
+		if (m_currentFrame < 41 || m_currentFrame > 80)
+		{
+			m_currentFrame = 41;
+		}
 		break;
 	case MoveDown:
 		m_Move.m128_f32[2] = -1.0f;
+		if (m_currentFrame < 41 || m_currentFrame > 80)
+		{
+			m_currentFrame = 41;
+		}
 		break;
 	case MoveRight:
 		m_Move.m128_f32[0] = 1.0f;
+		if (m_currentFrame < 41 || m_currentFrame > 80)
+		{
+			m_currentFrame = 41;
+		}
 		break;
 	case MoveLeft:
 		m_Move.m128_f32[0] = -1.0f;
+		if (m_currentFrame < 41 || m_currentFrame > 80)
+		{
+			m_currentFrame = 41;
+		}
 		break;
 	}
 }
