@@ -555,7 +555,6 @@ HRESULT Enemy::Update(float deltaTime)
 	{
 		m_Dead = true;
 		m_isAnimating = false;
-		m_currentFrame = 134;
 	}
 
 	return S_OK;
