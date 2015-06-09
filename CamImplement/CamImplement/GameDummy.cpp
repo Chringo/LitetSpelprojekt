@@ -11,6 +11,7 @@ GameDummy::GameDummy()
 
 	enemyArr = nullptr;
 	enemyMatrixArr = nullptr;
+	pfMap = nullptr;
 
 	map = nullptr;
 }
@@ -28,6 +29,8 @@ GameDummy::~GameDummy()
 	//levels.~LinkedList();
 	if (map != nullptr)
 		delete map;
+
+	delete pfMap;
 
 	delete[] hitData[0];
 	delete[] hitData[1];
@@ -59,16 +62,6 @@ void GameDummy::spawnEnemies(int amount, int type)
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
-	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
-	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
-	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
-
-	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
-
-	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, 0.6f, green);
-	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, 1.0f, yellow);
-	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, 1.3f, blue);
 
 	if (enemyArr != nullptr)
 	{
@@ -159,16 +152,40 @@ void GameDummy::NewGame()
 		}
 	}
 	/**********************************************************************************/
+	/************************************* Pathfinding *************************************/
+
+	if (pfMap != nullptr) delete pfMap;
+
+	// Allocates 2D bool array used for marking tiles as blocked
+	bool** disable = new bool*[map->getChunkSize()];
+	for (int i = 0; i < map->getChunkSize(); i++)
+	{
+		disable[i] = new bool[map->getChunkSize()];
+		for (int j = 0; j < map->getChunkSize(); j++)
+		{
+			disable[i][j] = false;
+		}
+	}
+
+	for (size_t i = 0; i < (size_t)obsArrSize; i++)
+	{
+		disable[obsArr[i]->getXTileSpace(map->TILESIZE)][obsArr[i]->getZTileSpace(map->TILESIZE)] = true;
+	}
+
+	// Makes handling of A* easier. Deallocates the 2D bool array
+	pfMap = new PF::Map(disable, map->getChunkSize());
+
+	/**********************************************************************************/
 	switch (currentLevel)
 	{
 	case 0:
-		spawnEnemies(14, 1);
+		spawnEnemies(2, 1);
 		break;
 	case 1:
-		spawnEnemies(6, 3);
+		spawnEnemies(4, 3);
 		break;
 	case 2:
-		spawnEnemies(10, 2);
+		spawnEnemies(4, 2);
 		break;
 	default:
 		spawnEnemies(29, 0);
@@ -249,27 +266,8 @@ void GameDummy::Update(float deltaTime)
 
 	/************************************* Pathfinding *************************************/
 
-	// Allocates 2D bool array used for marking tiles as blocked
-	bool** disable = new bool*[map->getChunkSize()];
-	for (int i = 0; i < map->getChunkSize(); i++)
-	{
-		disable[i] = new bool[map->getChunkSize()];
-		for (int j = 0; j < map->getChunkSize(); j++)
-		{
-			disable[i][j] = false;
-		}
-	}
-
 	const float ts = map->TILESIZE;
 	const int cs = map->getChunkSize();
-
-	for (size_t i = 0; i < (size_t)obsArrSize; i++)
-	{
-		// This should be reworked since obstacle pos are static
-		int x = obsArr[i]->getXTileSpace(ts);
-		int z = obsArr[i]->getZTileSpace(ts);
-		disable[x][z] = true;
-	}
 
 	// Update if player moves
 	if (lastX != player->getXTileSpace(ts, cs) || lastZ != player->getZTileSpace(ts, cs))
@@ -285,10 +283,7 @@ void GameDummy::Update(float deltaTime)
 		}
 	}
 
-	// Makes handling of A* easier. Deallocates the 2D bool array
-	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
-
-	int maxPath = 4;
+	int maxPath = 2;
 	int pathCount = 0;
 
 	if (pathUpdate.Size() > 0 && pathCount < maxPath)
@@ -303,16 +298,7 @@ void GameDummy::Update(float deltaTime)
 		pathCount++;
 	}
 
-	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-	{
-		// Update path if a player or Enemy have moved from a tile to another
-		if (!enemyArr[i]->IsDead())
-		{
-			enemyArr[i]->updateMoveOrder();
-		}
-	}
-
-	delete pfMap;
+	
 
 	/***************************************************************************************/
 	/************************************** Collision **************************************/
@@ -337,6 +323,7 @@ void GameDummy::Update(float deltaTime)
 	{
 		if (!enemyArr[i]->IsDead())
 		{
+			enemyArr[i]->updateMoveOrder();
 			if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
 			{
 				enemyArr[i]->SetAttackDirection(player->GetPosition());

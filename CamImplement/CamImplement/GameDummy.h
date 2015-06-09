@@ -60,6 +60,7 @@ private:
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 	LQueue<int> pathUpdate;
+	PF::Map* pfMap;
 
 	void spawnEnemies(int amount, int type);
 
