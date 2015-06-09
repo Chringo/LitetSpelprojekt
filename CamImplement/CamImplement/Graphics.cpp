@@ -869,9 +869,17 @@ void Graphics::UpdateObjectInstance(ObjectInstance* obj)
 	// Remove old world-matrices.
 	obj->world.clear();
 
-	// Set new.
-	obj->world.resize(game->GetObsArrSize());
-	SetWorlds(game->GetObsMatrices(), m_objObstacles);
+	if (obj == m_objObstacles)
+	{
+		// Set new.
+		obj->world.resize(game->GetObsArrSize());
+		SetWorlds(game->GetObsMatrices(), m_objObstacles);
+	}
+	else if (obj == m_objEnemies)
+	{
+		obj->world.resize(game->GetEnemyArrSize());
+		SetWorlds(game->GetEnemyMatrices(), m_objEnemies);
+	}
 }
 
 bool Graphics::Update(float deltaTime)
@@ -901,6 +909,10 @@ bool Graphics::Update(float deltaTime)
 				game->InitLevels();
 				game->NewGame();
 				UpdateObjectInstance(m_objObstacles);
+				
+				UpdateObjectInstance(m_objEnemies);
+				cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
+				pointLight->Initialize(cbPerFrame.nLights);
 			}
 			else
 			{
@@ -936,6 +948,11 @@ bool Graphics::Update(float deltaTime)
 	{
 		game->NewGame();
 		UpdateObjectInstance(m_objObstacles);
+		
+		UpdateObjectInstance(m_objEnemies);
+		cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
+		pointLight->Initialize(cbPerFrame.nLights);
+		
 		gamePaused = false;
 	}
 
