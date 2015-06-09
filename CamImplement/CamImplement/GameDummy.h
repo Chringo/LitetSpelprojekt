@@ -60,6 +60,7 @@ private:
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
 	LQueue<int> pathUpdate;
+	PF::Map* pfMap;
 
 	void spawnEnemies(int amount, int type);
 
@@ -97,6 +98,7 @@ public:
 	float GetEnemyHitPoints(int index);
 
 	DirectX::XMMATRIX* GetObsMatrices();
+	DirectX::BoundingOrientedBox GetObsBoundingBox(int index);
 	int GetObsArrSize() const;
 
 	DirectX::XMMATRIX GetMapMatrix() const;

@@ -118,6 +118,8 @@ private:
 
 	ShadowMap*				shadowMap;
 	DirectX::XMMATRIX		shadowViewProjection;
+
+	DirectX::BoundingFrustum m_frustum;
 	
 	bool gamePaused;
 
