@@ -115,6 +115,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="SplashImage.h" />
     <ClInclude Include="TileClass.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
@@ -134,6 +135,10 @@
     <ResourceCompile Include="CamImplement.rc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="LOADING_PNG.ico" />
+    <Image Include="Meshes\Textures\won.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

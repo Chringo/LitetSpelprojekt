@@ -291,6 +291,7 @@ void Graphics::CreateBuffers()
 	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objArrow);
 	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objWon);
 	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objLost);
+	CreateEntityBuffer(vertexBufferDesc, indexBufferDesc, vData, iData, m_objBackground);
 }
 
 void Graphics::CreateCamera()
@@ -395,6 +396,9 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	m_objArrowPosState[1] = DirectX::XMFLOAT2(0.3f, -0.9f);
 	currentState = 1;
 
+	//Background
+	InitBackground();
+
 	// Create instances.
 	XMFLOAT4X4 mat;
 	XMStoreFloat4x4(&mat, XMMatrixIdentity());
@@ -416,6 +420,7 @@ HRESULT Graphics::Initialize(HWND &wndHandle, HINSTANCE &hInstance, int width, i
 	m_objArrow->world.push_back(mat);
 	m_objWon->world.push_back(mat);
 	m_objLost->world.push_back(mat);
+	m_objBackground->world.push_back(mat);
 
 	XMStoreFloat4x4(&cbPerObject.World, XMMatrixIdentity());
 	XMStoreFloat4x4(&cbPerObject.WVP, XMMatrixIdentity());
@@ -554,6 +559,28 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 	object->indexBuffer = nullptr;
 }
 
+void Graphics::InitBackground()
+{
+	m_objBackground = new ObjectInstance();
+	m_objBackground->textureIndex = 4;
+	m_objBackground->nVertices = 4;
+	m_objBackground->nIndices = 6;
+	m_objBackground->indices = new UINT[4];
+	m_objBackground->input = new InputType[6];
+	m_objBackground->nNormals = 1;
+
+	m_objBackground->input[0] = InputType(-20.f, -1.f, 220.f, 0.f, 0.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[1] = InputType(220.f, -1.f, 220.f, 1.f, 0.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[2] = InputType(-50.f, -1.f, -50.f, 0.f, 1.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[3] = InputType(220.f, -1.f, -50.f, 1.f, 1.f, 0.f, -1.f, 0.f);
+	m_objBackground->indices[0] = 0;
+	m_objBackground->indices[1] = 1;
+	m_objBackground->indices[2] = 2;
+	m_objBackground->indices[3] = 1;
+	m_objBackground->indices[4] = 2;
+	m_objBackground->indices[5] = 3;
+}
+
 /********************************************************************************************************/
 
 /********************************************************************************************************/
@@ -646,7 +673,7 @@ void Graphics::Render()
 	CreateShadowMap();
 
 	// Draw scene using shadow map data.
-	float col[4] = { 0, 0, 0, 0 };
+	float col[4] = { 0, 0, 1, 0 };
 	rDeviceContext->ClearRenderTargetView(rBackbufferRTV, col);
 	rDeviceContext->ClearDepthStencilView(rDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -677,6 +704,7 @@ void Graphics::Render()
 		RenderInstances(m_objEnemies);
 		RenderInstances(m_objObstacles);
 		RenderInstances(m_objMap);
+		RenderInstances(m_objBackground);
 	}
 	if (renderMenu)
 	{

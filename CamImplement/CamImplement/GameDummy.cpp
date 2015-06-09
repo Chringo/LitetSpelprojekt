@@ -401,7 +401,7 @@ void GameDummy::CheckEnemyAttack(int index)
 	if (d < 5.f && !hitData[1][index])
 	{
 		hitData[1][index] = true;
-		player->DecreaseHealth(enemyArr[index]->GetAttackValue());
+		//player->DecreaseHealth(enemyArr[index]->GetAttackValue());
 	}
 }
 

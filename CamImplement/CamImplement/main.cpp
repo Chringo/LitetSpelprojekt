@@ -15,12 +15,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	if (wndHandle)
 	{
+		ShowWindow(wndHandle, nCmdShow);
+
 		if (FAILED(d3d_Graphics.Initialize(wndHandle, hInstance, width, height, 1.0f, 200.0f, false)))
 		{
 			msg.message = WM_QUIT;
 		}
-
-		ShowWindow(wndHandle, nCmdShow);
 
 		// Time keeping.
 		INT64 tickPerSecond = 0;
@@ -86,7 +86,7 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	
 	HWND handle = CreateWindow(
 		L"BasicWindow",
-		L"BTH BasicWindow",
+		L"Loading...",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

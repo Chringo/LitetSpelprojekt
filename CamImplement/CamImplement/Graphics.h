@@ -132,6 +132,7 @@ private:
 	ObjectInstance*		m_objObstacles;
 	ObjectInstance*		m_objMap;
 	ObjectInstance*		m_objTiles;
+	ObjectInstance*		m_objBackground;
 
 	// GUI
 	ObjectInstance*		m_objMenu;
@@ -146,6 +147,8 @@ private:
 
 	ObjectInstance*		m_objLost;
 	bool renderLost;
+
+	ID3D11ShaderResourceView* m_loadingScreen;
 	//
 
 	ID3D11Buffer*		cbPerObjectBuffer;
@@ -168,6 +171,7 @@ private:
 	void CreateShadowMap();	
 
 	void InitInstances(Object obj, ObjectInstance *&object);
+	void InitBackground();
 
 	void RenderInstances(ObjectInstance* obj);
 	void RenderInstanceGeometry(ObjectInstance *object, const DirectX::XMMATRIX &viewProjection);
