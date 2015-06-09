@@ -289,11 +289,11 @@ void Loader::LoadTextures(ID3D11Device* device)
 	CoInitialize(NULL);
 	WCHAR* filename[TEXTURE_COUNT] = 
 	{ 
-		L"Meshes/Textures/playerTexture.png", 
-		L"Meshes/Textures/dummyEnemyTexture.png", 
-		L"Meshes/Textures/newTreeTexture.png", 
-		L"Meshes/Textures/backgroundTile.png", 
-		L"Meshes/Textures/titlescreen.png", 
+		L"Meshes/Textures/playerTexture.png",
+		L"Meshes/Textures/dummyEnemyTexture.png",
+		L"Meshes/Textures/newTreeTexture.png",
+		L"Meshes/Textures/groundTile.png",
+		L"Meshes/Textures/titlescreen.png",
 		L"Meshes/Textures/arrow.png",
 		L"Meshes/Textures/won.png",
 		L"Meshes/Textures/lost.png"
