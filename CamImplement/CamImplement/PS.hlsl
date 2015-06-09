@@ -94,7 +94,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	depth = (input.shadowPos.xyz / input.shadowPos.w).z;
 
 	if (shadowMapValue < depth)
-		return float4(0, 0, 0, 1);
+		return float4(saturate(finalColor * diffuse), diffuse.a) / 2;
 	
 	finalColor = saturate((finalColor + dirColor) * diffuse + finalAmbient);
 

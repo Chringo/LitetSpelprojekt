@@ -569,10 +569,10 @@ void Graphics::InitBackground()
 	m_objBackground->input = new InputType[6];
 	m_objBackground->nNormals = 1;
 
-	m_objBackground->input[0] = InputType(-20.f, -1.f, 220.f, 0.f, 0.f, 0.f, -1.f, 0.f);
-	m_objBackground->input[1] = InputType(220.f, -1.f, 220.f, 1.f, 0.f, 0.f, -1.f, 0.f);
-	m_objBackground->input[2] = InputType(-50.f, -1.f, -50.f, 0.f, 1.f, 0.f, -1.f, 0.f);
-	m_objBackground->input[3] = InputType(220.f, -1.f, -50.f, 1.f, 1.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[0] = InputType(-20.f, 0.f, 220.f, 0.f, 0.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[1] = InputType(220.f, 0.f, 220.f, 1.f, 0.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[2] = InputType(-50.f, 0.f, -50.f, 0.f, 1.f, 0.f, -1.f, 0.f);
+	m_objBackground->input[3] = InputType(220.f, 0.f, -50.f, 1.f, 1.f, 0.f, -1.f, 0.f);
 	m_objBackground->indices[0] = 0;
 	m_objBackground->indices[1] = 1;
 	m_objBackground->indices[2] = 2;
@@ -673,7 +673,7 @@ void Graphics::Render()
 	CreateShadowMap();
 
 	// Draw scene using shadow map data.
-	float col[4] = { 0, 0, 1, 0 };
+	float col[4] = { 0, 0, 0, 0 };
 	rDeviceContext->ClearRenderTargetView(rBackbufferRTV, col);
 	rDeviceContext->ClearDepthStencilView(rDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
