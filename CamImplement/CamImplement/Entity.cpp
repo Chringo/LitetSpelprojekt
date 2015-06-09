@@ -51,12 +51,17 @@ HRESULT Entity::Update(float deltaTime)
 		}
 	}
 
-	if (XMVector3Equal (m_Move, XMVectorZero()) && (m_CurrentAction == Idle))
+	if (!IsDead ())
 	{
-		m_isAnimating = false;		//If the entity isn't moving anymore we want
-		m_currentFrame = 0;			//to stop the animation, regardless of if the
-	}								//walk animation actually finished or not.
-	
+		if (XMVector3Equal (m_Move, XMVectorZero ()) && (m_CurrentAction == Idle))
+		{
+			m_isAnimating = false;		//If the entity isn't moving anymore we want
+			m_currentFrame = 0;			//to stop the walk animation, regardless of if
+		}								//the walk animation actually finished or not.
+	}
+
+
+
 	return S_OK;
 }
 
@@ -102,7 +107,7 @@ void Entity::SetScale(float uniformScale)
 
 void Entity::SetRotation(float x, float y, float z)
 {
-	m_Rotation = XMVectorSet(x, y, z, 1.f);
+	m_Rotation = XMVectorSet(x, 90.0f, z, 1.f);
 }
 
 bool Entity::Intersect(Entity *entity)
@@ -241,7 +246,11 @@ float Entity::GetAttackValue()
 void Entity::DecreaseHealth(float damage)
 {
 	m_HitPoints -= damage;
-	m_Dead = m_HitPoints <= 0.f;
+	if (m_HitPoints <= 0.f)
+	{
+		m_currentFrame = 96;
+		m_isAnimating = true;
+	}
 }
 
 int Entity::GetCurrentActionFrame()
@@ -490,50 +499,64 @@ Enemy::~Enemy(){}
 
 HRESULT Enemy::Update(float deltaTime)
 {
-	m_Move = XMVectorZero();
-
-	while (orders.Size() != 0)
+	if (m_currentFrame < 96)
 	{
-		PerformAction(dequeueAction());
-	}
+		m_Move = XMVectorZero ();
 
-	if (m_CurrentAction != Idle)
-	{
-		m_CurrentActionFrame++;
-
-		int frameLimit = 0;
-		switch (m_CurrentAction)
+		while (orders.Size () != 0)
 		{
-		case Attack1:
-			frameLimit = 39;
-			break;
-		case Attack2:
-			frameLimit = 70;
-			break;
-		case Block:
-			frameLimit = 30;
-			break;
-		case Dodge:
-			frameLimit = 40;
-			break;
-		default:
-			break;
+			PerformAction (dequeueAction ());
 		}
 
-		if (m_CurrentActionFrame == frameLimit)
+		if (m_CurrentAction != Idle)
 		{
-			m_CurrentAction = Idle;
-			m_CurrentActionFrame = 0;
+			m_CurrentActionFrame++;
+
+			int frameLimit = 0;
+			switch (m_CurrentAction)
+			{
+			case Attack1:
+				frameLimit = 39;
+				break;
+			case Attack2:
+				frameLimit = 70;
+				break;
+			case Block:
+				frameLimit = 30;
+				break;
+			case Dodge:
+				frameLimit = 40;
+				break;
+			default:
+				break;
+			}
+
+			if (m_CurrentActionFrame == frameLimit)
+			{
+				m_CurrentAction = Idle;
+				m_CurrentActionFrame = 0;
+			}
 		}
+
+		// Rotate to match move vector.
+		float a = m_Move.m128_f32[0];
+		float b = m_Move.m128_f32[2];
+		m_Rotation.m128_f32[1] = -atan2 (a, b);
+
+		// Apply movement vector.
+		Entity::Update (deltaTime);
+	}
+	else
+	{
+		m_currentFrame++;
 	}
 
-	// Rotate to match move vector.
-	float a = m_Move.m128_f32[0];
-	float b = m_Move.m128_f32[2];
-	m_Rotation.m128_f32[1] = -atan2(a, b);
-
-	// Apply movement vector.
-	Entity::Update(deltaTime);
+	if (m_currentFrame == 134)
+	{
+		m_Dead = true;
+		m_isAnimating = false;
+		m_currentFrame = 134;
+	}
 
 	return S_OK;
 }
