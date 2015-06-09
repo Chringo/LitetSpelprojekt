@@ -298,11 +298,11 @@ int Entity::GetFrame ()
 /**********************************************************************************/
 /************************************* Player *************************************/
 
-Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
-	: Entity(position, DEFAULT_COLOR, 2.f, scale, 1.f, 1.f)
+Player::Player(XMVECTOR position, float scale, float moveSpeed)
+	: Entity(position, DEFAULT_COLOR, moveSpeed, scale, 1.f, 1.f)
 {
 	Entity::m_Position = position;
-	Entity::m_Rotation = rotation;
+	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 
 	m_Controls[Attack1] = VK_LBUTTON;
 	m_Controls[Attack2] = VK_RBUTTON;
@@ -324,11 +324,11 @@ Player::Player(XMVECTOR position, XMVECTOR rotation, float scale)
 	m_animMoveEnd = 98;
 }
 
-Player::Player(XMVECTOR position, XMVECTOR rotation, XMFLOAT4 color, float scale)
-	: Entity(position, color, 2.f, scale, 1.f, 1.f)
+Player::Player(XMVECTOR position, XMFLOAT4 color, float scale, float moveSpeed)
+	: Entity(position, color, moveSpeed, scale, 1.f, 1.f)
 {
 	Entity::m_Position = position;
-	Entity::m_Rotation = rotation;
+	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 
 	m_Controls[Attack1] = VK_LBUTTON;
 	m_Controls[Attack2] = VK_RBUTTON;

@@ -174,6 +174,8 @@ private:
 	void SetWorld(const DirectX::XMMATRIX &world, ObjectInstance* obj);
 	void SetWorlds(const DirectX::XMMATRIX* arr, ObjectInstance* obj);
 
+	void UpdateObjectInstance(ObjectInstance* obj);
+
 	void SetPlayerHit(bool hit);
 	void SetEnemyHit(int index, bool hit);
 	void IncreaseMenuState();

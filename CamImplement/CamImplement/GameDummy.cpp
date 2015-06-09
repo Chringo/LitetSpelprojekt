@@ -9,7 +9,6 @@ GameDummy::GameDummy()
 {
 	player = nullptr;
 
-	lastEnemyCoord = nullptr;
 	enemyArr = nullptr;
 	enemyMatrixArr = nullptr;
 
@@ -20,35 +19,43 @@ GameDummy::~GameDummy()
 {
 	delete player;
 
-	delete[] lastEnemyCoord;
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		delete enemyArr[i];
 	}
 	delete[] enemyArr;
 
-	delete map;
+	//levels.~LinkedList();
+	if (map != nullptr)
+		delete map;
 
 	delete[] hitData[0];
 	delete[] hitData[1];
 }
 
-void GameDummy::NewGame()
+void GameDummy::InitLevels()
 {
-	gameState = gOngoing;
-
-	/************************************* Player *************************************/
-
-	if (player != nullptr)
+	currentLevel = 0;
+	map = levels.elementAt(currentLevel);
+}
+void GameDummy::spawnEnemies(int amount, int type)
+{
+	Ent::Enemy* base = new Ent::Enemy(regular);
+	switch (type)
 	{
-		delete player;
+	case 0:
+		//base = new Ent::Enemy(regular);
+		break;
+	case 1:
+		base = new Ent::Enemy(runner);
+		break;
+	case 2:
+		base = new Ent::Enemy(elite);
+		break;
+	case 3:
+		base = new Ent::Enemy(giant);
+		break;
 	}
-
-	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), SCALE_MEDIUM);
-	player->SetMovementSpeed(9.f);
-
-	lastX = -1;
-	lastZ = -1;
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
@@ -65,7 +72,6 @@ void GameDummy::NewGame()
 
 	if (enemyArr != nullptr)
 	{
-		delete[] lastEnemyCoord;
 		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 		{
 			delete enemyArr[i];
@@ -73,48 +79,67 @@ void GameDummy::NewGame()
 		delete[] enemyArr;
 	}
 
-	enemyArrSize = 3;
-	lastEnemyCoord = new PF::Pathfinding::Coordinate[enemyArrSize];
+	LQueue<int> pathUpdate = LQueue<int>();
+
+	enemyArrSize = amount;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	hitData[0] = new bool[enemyArrSize];
 	hitData[1] = new bool[enemyArrSize];
 	enemyArr = new Ent::Enemy*[enemyArrSize];
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		lastEnemyCoord[i] = PF::Pathfinding::Coordinate(-1, -1);
+		enemyArr[i] = new Ent::Enemy(*base);
 
-		if (i == 0) enemyArr[i] = new Ent::Enemy(runner);
-		else if (i == 1) enemyArr[i] = new Ent::Enemy(elite);
-		else enemyArr[i] = new Ent::Enemy(giant);
-
-		enemyArr[i]->SetPosition(map->getBaseTiles()[1][i * 10 + 3].worldpos);
+		int corner = i % 4;
+		int max = map->getChunkSize() - 3;
+		switch (corner)
+		{
+		case 0:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][2].worldpos);
+			break;
+		case 1:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[2][max].worldpos);
+			break;
+		case 2:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][2].worldpos);
+			break;
+		case 3:
+			enemyArr[i]->SetPosition(map->getBaseTiles()[max][max].worldpos);
+			break;
+		}
 
 		enemyMatrixArr[i] = XMMatrixIdentity();
 		hitData[0][i] = false;
 		hitData[1][i] = false;
 	}
-	/**********************************************************************************/
+
+	delete base;
 }
 
-HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
+void GameDummy::NewGame()
 {
-	RECT r;
-	windowHandle = wndHandle;
-	GetWindowRect(wndHandle, &r);
-	clientSize.x = r.right - r.left;
-	clientSize.y = r.bottom - r.top;
+	gameState = gOngoing;
 
-	worldBounds = new Ent::Obstacle(62.f, 62.f, 63.f, 63.f, 0.f);
-	/************************************** Map  **************************************/
+	if (player != nullptr)
+	{
+		delete player;
+	}
 
-	map = new Map(5, 5, 68.f);//One
-	//map = new Map(8, 5, 80.f);//Two
-	//map = new Map(3, 5, 73.f);//Three
-	//map = new Map(21, 5, 85.f);//Four
-	//map = new Map(9, 5, 70.f);//Five
+	player = new Ent::Player(XMVectorSet(64.f, 0.f, 64.f, 1.f), SCALE_MEDIUM, 9.0f);
 
-	/**********************************************************************************/
+	lastX = -1;
+	lastZ = -1;
+
 	/************************************ Obstacle ************************************/
+	if (obsArr != nullptr)
+	{
+		for (size_t i = 0; i < (size_t)enemyArrSize; i++)
+		{
+			delete obsArr[i];
+		}
+		delete[] obsArr;
+		delete[] obsMatrixArr;
+	}
 
 	obsArrSize = map->getObstacles();
 	obsMatrixArr = new XMMATRIX[obsArrSize];
@@ -134,7 +159,49 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 		}
 	}
 	/**********************************************************************************/
+	switch (currentLevel)
+	{
+	case 0:
+		spawnEnemies(14, 1);
+		break;
+	case 1:
+		spawnEnemies(6, 3);
+		break;
+	case 2:
+		spawnEnemies(10, 2);
+		break;
+	default:
+		spawnEnemies(29, 0);
+		break;
+	}
+}
 
+HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
+{
+	RECT r;
+	windowHandle = wndHandle;
+	GetWindowRect(wndHandle, &r);
+	clientSize.x = r.right - r.left;
+	clientSize.y = r.bottom - r.top;
+
+	/************************************** Map  **************************************/
+
+	levels.insertLast(new Map(5, 5, 68.f));
+	levels.insertLast(new Map(8, 5, 80.f));
+	//levels.insertLast(new Map(3, 5, 73.f));
+	levels.insertLast(new Map(21, 5, 85.f));
+	//levels.insertLast(new Map(9, 5, 70.f));
+	//levels.insertLast(new Map(25, 5, 70.f));
+
+	InitLevels();
+
+	/**********************************************************************************/
+	/************************************ Obstacle ************************************/
+
+	// Static Obstacles - Dynamic Obstacles which is updated after each level is in NewGame()
+	worldBounds = new Ent::Obstacle(62.f, 62.f, 64.f, 64.f, 0.f);
+
+	/**********************************************************************************/
 	NewGame();
 
 	return S_OK;
@@ -159,22 +226,25 @@ void GameDummy::Update(float deltaTime)
 	cursor.x -= (LONG)(clientSize.x * 0.5f - 8);
 	cursor.y -= (LONG)(clientSize.y * 0.5f - 16);
 
-	size_t index = 0;
-	while (index < (size_t)enemyArrSize)
+	bool gameWon = true;
+	for (int i = 0; i < enemyArrSize; i++)
 	{
-		if (enemyArr[index]->IsDead())
+		if (!enemyArr[i]->IsDead())
 		{
-			delete enemyArr[index];
-			enemyArr[index] = enemyArr[enemyArrSize - 1];
-			enemyArrSize--;
+			gameWon = false;
 		}
-		else index++;
 	}
 
-	// player won
-	if (enemyArrSize == 0)
+	if (gameWon && levels.size() == currentLevel + 1)// Player won
 	{
+		currentLevel = 0;
 		gameState = gWon;
+	}
+	else if (gameWon)// Next level
+	{
+		currentLevel++;
+		map = levels.elementAt(currentLevel);
+		gameState = gNextLevel;
 	}
 
 	/************************************* Pathfinding *************************************/
@@ -195,50 +265,51 @@ void GameDummy::Update(float deltaTime)
 
 	for (size_t i = 0; i < (size_t)obsArrSize; i++)
 	{
+		// This should be reworked since obstacle pos are static
 		int x = obsArr[i]->getXTileSpace(ts);
 		int z = obsArr[i]->getZTileSpace(ts);
 		disable[x][z] = true;
 	}
 
-	bool update = false;
-
-	// Block and update if an Enemy moves
-	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
-	{
-		disable[enemyArr[i]->getXTileSpace(ts, cs)][enemyArr[i]->getZTileSpace(ts, cs)] = true;
-		PF::Pathfinding::Coordinate c(enemyArr[i]->getXTileSpace(ts, cs), enemyArr[i]->getZTileSpace(ts, cs));
-		if (c != lastEnemyCoord[i])
-		{
-			lastEnemyCoord[i] = c;
-			update = true;
-		}
-	}
-
 	// Update if player moves
 	if (lastX != player->getXTileSpace(ts, cs) || lastZ != player->getZTileSpace(ts, cs))
 	{
+		// Save current player pos for comparison
 		lastX = player->getXTileSpace(ts, cs);
 		lastZ = player->getZTileSpace(ts, cs);
-		update = true;
+		
+		// Enqueue paths that needs to be updated
+		for (int i = 0; i < enemyArrSize; i++)
+		{
+			pathUpdate.Enqueue(i);
+		}
 	}
 
 	// Makes handling of A* easier. Deallocates the 2D bool array
 	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
 
+	int maxPath = 4;
+	int pathCount = 0;
+
+	if (pathUpdate.Size() > 0 && pathCount < maxPath)
+	{
+		enemyArr[pathUpdate.Dequeue()]->setPathfinding
+			(
+			map,
+			pfMap,
+			player->GetPosition().m128_f32[0],
+			player->GetPosition().m128_f32[2]
+			);
+		pathCount++;
+	}
+
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		// Update path if a player or Enemy have moved from a tile to another
-		if (update)
+		if (!enemyArr[i]->IsDead())
 		{
-			enemyArr[i]->setPathfinding
-				(
-				map,
-				pfMap,
-				player->GetPosition().m128_f32[0],
-				player->GetPosition().m128_f32[2]
-				);
+			enemyArr[i]->updateMoveOrder();
 		}
-		enemyArr[i]->updateMoveOrder();
 	}
 
 	delete pfMap;
@@ -264,19 +335,22 @@ void GameDummy::Update(float deltaTime)
 	// Update game objects.
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
-		if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+		if (!enemyArr[i]->IsDead())
 		{
-			enemyArr[i]->SetAttackDirection(player->GetPosition());
-			enemyArr[i]->PerformAction(Ent::Attack1);
-		}
-		//CheckEnemyAttack(i);
+			if (XMVector3LengthEst(player->GetPosition() - enemyArr[i]->GetPosition()).m128_f32[0] < 6.f)
+			{
+				enemyArr[i]->SetAttackDirection(player->GetPosition());
+				enemyArr[i]->PerformAction(Ent::Attack1);
+			}
+			CheckEnemyAttack(i);
 
-		enemyArr[i]->Update(deltaTime);
-		enemyArr[i]->Intersect(worldBounds);
-		player->Intersect(enemyArr[i]);
-		for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
-		{
-			if (i != j) enemyArr[i]->Intersect(enemyArr[j]);
+			enemyArr[i]->Update(deltaTime);
+			enemyArr[i]->Intersect(worldBounds);
+			player->Intersect(enemyArr[i]);
+			for (size_t j = i + 1; j < (size_t)enemyArrSize; j++)
+			{
+				if (i != j) enemyArr[i]->Intersect(enemyArr[j]);
+			}
 		}
 	}
 }

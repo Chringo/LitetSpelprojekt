@@ -671,10 +671,13 @@ void Graphics::Render()
 	//IMPORTANT: If you put two planes in the same matrix pos,
 	//the one that is called first (Arrow vs Menu for example)
 	//gets rendered over the other one.
-	RenderInstances(m_objPlayer);
-	RenderInstances(m_objEnemies);
-	RenderInstances(m_objObstacles);
-	RenderInstances(m_objMap);
+	if (!gamePaused)
+	{
+		RenderInstances(m_objPlayer);
+		RenderInstances(m_objEnemies);
+		RenderInstances(m_objObstacles);
+		RenderInstances(m_objMap);
+	}
 	if (renderMenu)
 	{
 		RenderInstances(m_objArrow);
@@ -861,6 +864,24 @@ void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 
 /*************************************************Stuff *************************************************/
 
+void Graphics::UpdateObjectInstance(ObjectInstance* obj)
+{
+	// Remove old world-matrices.
+	obj->world.clear();
+
+	if (obj == m_objObstacles)
+	{
+		// Set new.
+		obj->world.resize(game->GetObsArrSize());
+		SetWorlds(game->GetObsMatrices(), m_objObstacles);
+	}
+	else if (obj == m_objEnemies)
+	{
+		obj->world.resize(game->GetEnemyArrSize());
+		SetWorlds(game->GetEnemyMatrices(), m_objEnemies);
+	}
+}
+
 bool Graphics::Update(float deltaTime)
 {
 	/********************************** Gamestate handling **********************************/
@@ -885,7 +906,13 @@ bool Graphics::Update(float deltaTime)
 			{
 				gamePaused = false;
 				renderMenu = gamePaused;
+				game->InitLevels();
 				game->NewGame();
+				UpdateObjectInstance(m_objObstacles);
+				
+				UpdateObjectInstance(m_objEnemies);
+				cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
+				pointLight->Initialize(cbPerFrame.nLights);
 			}
 			else
 			{
@@ -907,7 +934,6 @@ bool Graphics::Update(float deltaTime)
 
 	if (game->GetGameState() != gOngoing && !gamePaused)
 	{
-		GameState asfd = game->GetGameState();
 		gamePaused = true;
 		if (game->GetGameState() == gWon)
 		{
@@ -917,6 +943,17 @@ bool Graphics::Update(float deltaTime)
 		{
 			renderLost = gamePaused;
 		}
+	}
+	else if (game->GetGameState() == gNextLevel)
+	{
+		game->NewGame();
+		UpdateObjectInstance(m_objObstacles);
+		
+		UpdateObjectInstance(m_objEnemies);
+		cbPerFrame.nLights = 1 + game->GetEnemyArrSize();
+		pointLight->Initialize(cbPerFrame.nLights);
+		
+		gamePaused = false;
 	}
 
 	/****************************************************************************************/
