@@ -59,7 +59,7 @@ private:
 	// The array of enemies
 	Ent::Enemy** enemyArr;
 	DirectX::XMMATRIX* enemyMatrixArr;
-	bool pathsUpdated;
+	LQueue<int> pathUpdate;
 
 	void spawnEnemies(int amount, int type);
 

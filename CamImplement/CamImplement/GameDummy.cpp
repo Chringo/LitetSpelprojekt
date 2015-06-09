@@ -79,6 +79,8 @@ void GameDummy::spawnEnemies(int amount, int type)
 		delete[] enemyArr;
 	}
 
+	LQueue<int> pathUpdate = LQueue<int>();
+
 	enemyArrSize = amount;
 	enemyMatrixArr = new XMMATRIX[enemyArrSize];
 	hitData[0] = new bool[enemyArrSize];
@@ -158,7 +160,7 @@ void GameDummy::NewGame()
 	}
 	/**********************************************************************************/
 
-	spawnEnemies(16, 1);
+	spawnEnemies(8, 0);
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
@@ -187,7 +189,6 @@ HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11
 	worldBounds = new Ent::Obstacle(62.f, 62.f, 64.f, 64.f, 0.f);
 
 	/**********************************************************************************/
-	pathsUpdated = false;
 	NewGame();
 
 	return S_OK;
@@ -251,6 +252,7 @@ void GameDummy::Update(float deltaTime)
 
 	for (size_t i = 0; i < (size_t)obsArrSize; i++)
 	{
+		// This should be reworked since obstacle pos are static
 		int x = obsArr[i]->getXTileSpace(ts);
 		int z = obsArr[i]->getZTileSpace(ts);
 		disable[x][z] = true;
@@ -259,39 +261,42 @@ void GameDummy::Update(float deltaTime)
 	// Update if player moves
 	if (lastX != player->getXTileSpace(ts, cs) || lastZ != player->getZTileSpace(ts, cs))
 	{
+		// Save current player pos for comparison
 		lastX = player->getXTileSpace(ts, cs);
 		lastZ = player->getZTileSpace(ts, cs);
-		pathsUpdated = false;
+		
+		// Enqueue paths that needs to be updated
+		for (int i = 0; i < enemyArrSize; i++)
+		{
+			pathUpdate.Enqueue(i);
+		}
 	}
 
 	// Makes handling of A* easier. Deallocates the 2D bool array
 	PF::Map* pfMap = new PF::Map(disable, map->getChunkSize());
 
 	int maxPath = 4;
-	int pathCount = 0;;
+	int pathCount = 0;
+
+	if (pathUpdate.Size() > 0 && pathCount < maxPath)
+	{
+		enemyArr[pathUpdate.Dequeue()]->setPathfinding
+			(
+			map,
+			pfMap,
+			player->GetPosition().m128_f32[0],
+			player->GetPosition().m128_f32[2]
+			);
+		pathCount++;
+	}
+
 	for (size_t i = 0; i < (size_t)enemyArrSize; i++)
 	{
 		// Update path if a player or Enemy have moved from a tile to another
 		if (!enemyArr[i]->IsDead())
 		{
-			if ( /*!pathsUpdated &&*/ pathCount < maxPath)
-			{
-				enemyArr[i]->setPathfinding
-					(
-					map,
-					pfMap,
-					player->GetPosition().m128_f32[0],
-					player->GetPosition().m128_f32[2]
-					);
-				pathCount++;
-			}
 			enemyArr[i]->updateMoveOrder();
 		}
-	}
-
-	if (pathCount < maxPath - 1)
-	{
-		pathsUpdated = true;
 	}
 
 	delete pfMap;
@@ -324,7 +329,7 @@ void GameDummy::Update(float deltaTime)
 				enemyArr[i]->SetAttackDirection(player->GetPosition());
 				enemyArr[i]->PerformAction(Ent::Attack1);
 			}
-			//CheckEnemyAttack(i);
+			CheckEnemyAttack(i);
 
 			enemyArr[i]->Update(deltaTime);
 			enemyArr[i]->Intersect(worldBounds);
