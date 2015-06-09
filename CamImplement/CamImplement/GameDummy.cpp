@@ -59,16 +59,6 @@ void GameDummy::spawnEnemies(int amount, int type)
 
 	/**********************************************************************************/
 	/************************************* Enemy  *************************************/
-	const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0.5f, 0.5f, 2.f, 1.f);
-	const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0.5f, 2.f, 0.5f, 1.f);
-	const DirectX::XMFLOAT4 yellow = DirectX::XMFLOAT4(2.f, 2.f, 0.5f, 1.f);
-
-	const XMFLOAT3 startpos = map->getBaseTiles()[0][0].worldpos;
-
-	Ent::Enemy regular = Ent::Enemy(startpos, SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	Ent::Enemy runner = Ent::Enemy(startpos, SCALE_SMALL, 12.f, 80.0f, 0.6f, green);
-	Ent::Enemy elite = Ent::Enemy(startpos, SCALE_MEDIUM, 8.f, 120.0f, 1.0f, yellow);
-	Ent::Enemy giant = Ent::Enemy(startpos, SCALE_LARGE, 6.f, 200.0f, 1.3f, blue);
 
 	if (enemyArr != nullptr)
 	{

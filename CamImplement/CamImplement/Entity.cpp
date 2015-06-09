@@ -41,12 +41,22 @@ HRESULT Entity::Update(float deltaTime)
 	if (m_HitFrameCount > 0)
 		m_HitFrameCount < 20 ? m_HitFrameCount++ : m_HitFrameCount = 0;
 
-	m_currentFrame++;
-	if (m_currentFrame == m_totalFrames)
+	// Update animation if we're supposed to.
+	if (m_isAnimating == true)
 	{
-		m_currentFrame = 0;
+		m_currentFrame++;
+		if (m_currentFrame == m_totalFrames)
+		{
+			m_currentFrame = 0;
+		}
 	}
 
+	if (XMVector3Equal (m_Move, XMVectorZero()) && (m_CurrentAction == Idle))
+	{
+		m_isAnimating = false;		//If the entity isn't moving anymore we want
+		m_currentFrame = 0;			//to stop the animation, regardless of if the
+	}								//walk animation actually finished or not.
+	
 	return S_OK;
 }
 
@@ -159,47 +169,51 @@ void Entity::PerformAction(Action action)
 	{
 	case Attack1:
 		// Move sword.
-		m_currentFrame = 2;
+		m_currentFrame = m_animAttack;
 		break;
 	case Attack2:
 		// Move sword.
 		break;
 	case Block:
 		// Move shield.
-		m_currentFrame = 99;
+		m_currentFrame = m_animBlock;
 		break;
 	case Dodge:
 		// Tumble away.
-		m_currentFrame = 127;
+		m_currentFrame = m_animDodge;
 		break;
 
 		// Issue moves.
 	case MoveUp:
 		m_Move.m128_f32[2] = 1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
 		{
-			m_currentFrame = 41;
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveDown:
 		m_Move.m128_f32[2] = -1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
 		{
-			m_currentFrame = 41;
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveRight:
 		m_Move.m128_f32[0] = 1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
 		{
-			m_currentFrame = 41;
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
 		}
 		break;
 	case MoveLeft:
 		m_Move.m128_f32[0] = -1.0f;
-		if (m_currentFrame < 41 || m_currentFrame > 80)
+		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
 		{
-			m_currentFrame = 41;
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
 		}
 		break;
 	}
@@ -213,7 +227,7 @@ Action Entity::GetCurrentAction()
 float Entity::GetAttackValue()
 {
 	float attackValue = 0.0f;
-	if (m_CurrentAction == Ent::Attack1 && m_CurrentActionFrame == 40)
+	if (m_CurrentAction == Ent::Attack1 && m_CurrentActionFrame == 30)
 	{
 		attackValue = 40.0f;
 	}
@@ -299,7 +313,15 @@ Player::Player(XMVECTOR position, float scale, float moveSpeed)
 	m_Controls[MoveRight] = 'D';
 	m_Controls[MoveLeft] = 'A';
 
+	// Set animation frame data (where frames start)
 	m_totalFrames = 191;
+	m_currentFrame = 0;
+	m_animAttack = 2;
+	m_animBlock = 99;
+	m_animDodge = 127;
+	m_animMove = 41;
+	m_animMoveStart = 41;
+	m_animMoveEnd = 98;
 }
 
 Player::Player(XMVECTOR position, XMFLOAT4 color, float scale, float moveSpeed)
@@ -317,7 +339,15 @@ Player::Player(XMVECTOR position, XMFLOAT4 color, float scale, float moveSpeed)
 	m_Controls[MoveRight] = 'D';
 	m_Controls[MoveLeft] = 'A';
 
+	// Set animation frame data (where frames start)
 	m_totalFrames = 191;
+	m_currentFrame = 0;
+	m_animAttack = 2;
+	m_animBlock = 99;
+	m_animDodge = 127;
+	m_animMove = 41;
+	m_animMoveStart = 41;
+	m_animMoveEnd = 98;
 }
 
 Player::~Player(){}
@@ -338,19 +368,22 @@ HRESULT Player::Update(float deltaTime)
 		int frameLimit = 0;
 		switch (m_CurrentAction)
 		{
+		//Combat moves
 		case Attack1:
-			frameLimit = 50;
+			frameLimit = 38;
+			m_isAnimating = true;
 			break;
 		case Attack2:
 			frameLimit = 70;
+			m_isAnimating = true;
 			break;
 		case Block:
-			frameLimit = 30;
+			frameLimit = 27;
+			m_isAnimating = true;
 			break;
 		case Dodge:
-			frameLimit = 40;
-			break;
-		default:
+			frameLimit = 65;
+			m_isAnimating = true;
 			break;
 		}
 			
@@ -358,6 +391,7 @@ HRESULT Player::Update(float deltaTime)
 		{
 			m_CurrentAction = Idle;
 			m_CurrentActionFrame = 0;
+			m_isAnimating = false;
 		}
 	}
 
@@ -408,7 +442,14 @@ Enemy::Enemy(float x, float z, DirectX::XMFLOAT4 color, float scale)
 	orders = LQueue<Action>();
 	path = LinkedList<DirectX::XMFLOAT3>();
 
+	// Set animation frame data (where frames start)
 	m_totalFrames = 134;
+	m_currentFrame = 0;
+	m_animAttack = 56;
+	m_animMove = 1;
+	m_animMoveStart = 1;
+	m_animMoveEnd = 55;
+	m_animDeath = 96;
 }
 
 Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength)
@@ -418,7 +459,14 @@ Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints
 	m_HitPoints = healthPoints;
 	m_AttackStrength = attackStrength;
 
+	// Set animation frame data (where frames start)
 	m_totalFrames = 134;
+	m_currentFrame = 0;
+	m_animAttack = 56;
+	m_animMove = 1;
+	m_animMoveStart = 1;
+	m_animMoveEnd = 55;
+	m_animDeath = 96;
 }
 
 Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints, float attackStrength, DirectX::XMFLOAT4 color)
@@ -428,7 +476,14 @@ Enemy::Enemy(XMFLOAT3 position, float scale, float moveSpeed, float healthPoints
 	m_HitPoints = healthPoints;
 	m_AttackStrength = attackStrength;
 
+	// Set animation frame data (where frames start)
 	m_totalFrames = 134;
+	m_currentFrame = 0;
+	m_animAttack = 56;
+	m_animMove = 1;
+	m_animMoveStart = 1;
+	m_animMoveEnd = 55;
+	m_animDeath = 96;
 }
 
 Enemy::~Enemy(){}
@@ -450,7 +505,7 @@ HRESULT Enemy::Update(float deltaTime)
 		switch (m_CurrentAction)
 		{
 		case Attack1:
-			frameLimit = 50;
+			frameLimit = 39;
 			break;
 		case Attack2:
 			frameLimit = 70;
