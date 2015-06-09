@@ -562,7 +562,7 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 void Graphics::InitBackground()
 {
 	m_objBackground = new ObjectInstance();
-	m_objBackground->textureIndex = 4;
+	m_objBackground->textureIndex = 8;
 	m_objBackground->nVertices = 4;
 	m_objBackground->nIndices = 6;
 	m_objBackground->indices = new UINT[4];
