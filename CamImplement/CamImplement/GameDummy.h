@@ -33,10 +33,10 @@ private:
 	Map* map;
 
 	//---------- Enemy types -----
-	const Ent::Enemy regular = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 7.f, 100.0f, 0.9f);
-	const Ent::Enemy runner = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_SMALL, 20.f, 80.0f, 0.6f, GREEN);
-	const Ent::Enemy elite = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 8.f, 120.0f, 1.0f, YELLOW);
-	const Ent::Enemy giant = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_LARGE, 6.f, 200.0f, 1.3f, BLUE);
+	const Ent::Enemy regular = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 8.f, 100.0f, 0.9f);
+	const Ent::Enemy runner = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_SMALL, 14.f, 80.0f, 0.6f, GREEN);
+	const Ent::Enemy elite = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_MEDIUM, 8.5f, 140.0f, 1.0f, YELLOW);
+	const Ent::Enemy giant = Ent::Enemy(DirectX::XMFLOAT3(0, 0, 0), SCALE_LARGE, 7.f, 200.0f, 1.3f, BLUE);
 	//----------------------------
 
 	unsigned int obsArrSize;

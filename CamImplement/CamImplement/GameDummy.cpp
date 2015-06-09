@@ -159,8 +159,21 @@ void GameDummy::NewGame()
 		}
 	}
 	/**********************************************************************************/
-
-	spawnEnemies(8, 0);
+	switch (currentLevel)
+	{
+	case 0:
+		spawnEnemies(14, 1);
+		break;
+	case 1:
+		spawnEnemies(6, 3);
+		break;
+	case 2:
+		spawnEnemies(10, 2);
+		break;
+	default:
+		spawnEnemies(29, 0);
+		break;
+	}
 }
 
 HRESULT GameDummy::Initialize(HWND &wndHandle, HINSTANCE &hInstance, const D3D11_VIEWPORT &viewport)
