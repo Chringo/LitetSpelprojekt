@@ -500,6 +500,12 @@ DirectX::XMMATRIX* GameDummy::GetObsMatrices()
 	}
 	return obsMatrixArr;
 }
+
+DirectX::BoundingOrientedBox GameDummy::GetObsBoundingBox(int index)
+{
+	return obsArr[index]->GetBoundingBox();
+}
+
 int GameDummy::GetObsArrSize() const
 {
 	return this->obsArrSize;

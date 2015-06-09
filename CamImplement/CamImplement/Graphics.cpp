@@ -740,8 +740,11 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 	// Draw buffers for each world matrix.
 	for (UINT i = 0; i < obj->world.size(); i++)
 	{
-		// Update buffers & textures.
+		//Check for culling
+		if (obj == m_objObstacles && !m_frustum.Contains(game->GetObsBoundingBox(i)))
+			continue;
 
+		// Update buffers & textures.
 		if (!guiInstance)
 		{
 			world = XMLoadFloat4x4(&obj->world[i]);
@@ -965,6 +968,8 @@ bool Graphics::Update(float deltaTime)
 
 	camera->SetFocus(game->GetPlayerPosition());
 	camera->Update(deltaTime);
+
+	m_frustum = camera->GetFrustum();
 
 	SetWorld(game->GetPlayerMatrix(), m_objPlayer);
 	SetWorlds(game->GetEnemyMatrices(), m_objEnemies);

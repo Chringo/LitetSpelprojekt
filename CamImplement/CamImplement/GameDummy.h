@@ -97,6 +97,7 @@ public:
 	float GetEnemyHitPoints(int index);
 
 	DirectX::XMMATRIX* GetObsMatrices();
+	DirectX::BoundingOrientedBox GetObsBoundingBox(int index);
 	int GetObsArrSize() const;
 
 	DirectX::XMMATRIX GetMapMatrix() const;
