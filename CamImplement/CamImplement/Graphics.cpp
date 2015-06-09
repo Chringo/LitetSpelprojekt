@@ -786,7 +786,6 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 			}
 			else
 			{
-				int test = game->GetEnemyFrame (i);
 				for (int j = 0; j < obj->nVertices; j++)
 				{
 					obj->input[j].pos.x = obj->fx.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
@@ -879,6 +878,9 @@ void Graphics::UpdateObjectInstance(ObjectInstance* obj)
 	{
 		obj->world.resize(game->GetEnemyArrSize());
 		SetWorlds(game->GetEnemyMatrices(), m_objEnemies);
+
+		obj->hit.clear ();
+		obj->hit.resize(game->GetEnemyArrSize ());
 	}
 }
 
