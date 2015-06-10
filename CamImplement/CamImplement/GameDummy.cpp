@@ -179,7 +179,7 @@ void GameDummy::NewGame()
 	switch (currentLevel)
 	{
 	case 0:
-		spawnEnemies(2, 1);
+		spawnEnemies(4, 1);
 		break;
 	case 1:
 		spawnEnemies(4, 3);
@@ -188,7 +188,7 @@ void GameDummy::NewGame()
 		spawnEnemies(4, 2);
 		break;
 	default:
-		spawnEnemies(29, 0);
+		spawnEnemies(5, 0);
 		break;
 	}
 }
