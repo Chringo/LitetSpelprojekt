@@ -59,6 +59,7 @@ struct ObjectInstance
 	int					nNormals;
 	int					textureIndex;
 	int					nFrames;
+	int					cFrame;
 
 	std::vector<float> fx, fy, fz;
 
@@ -154,8 +155,6 @@ private:
 	ID3D11Buffer*		cbPerObjectBuffer;
 	ID3D11SamplerState* samplerState;
 	ID3D11SamplerState* pointSampler;
-
-	int framecount = 0;
 	
 
 private:

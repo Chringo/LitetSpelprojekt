@@ -297,7 +297,7 @@ void Loader::LoadTextures(ID3D11Device* device)
 		L"Meshes/Textures/arrow.png",
 		L"Meshes/Textures/won.png",
 		L"Meshes/Textures/lost.png",
-		L"Meshes/Textures/titlescreen.png"
+		L"Meshes/Textures/groundTile.png"
 	};
 	m_textures = new ID3D11ShaderResourceView*[TEXTURE_COUNT];
 

@@ -808,20 +808,22 @@ void Graphics::RenderInstances(ObjectInstance* obj)
 		{
 			if (obj == m_objPlayer)
 			{
+				obj->cFrame = game->GetPlayerFrame();
 				for (int j = 0; j < obj->nVertices; j++)
 				{
-					obj->input[j].pos.x = obj->fx.at (j + game->GetPlayerFrame() * (obj->nVertices));
-					obj->input[j].pos.y = obj->fy.at (j + game->GetPlayerFrame() * (obj->nVertices));
-					obj->input[j].pos.z = obj->fz.at (j + game->GetPlayerFrame() * (obj->nVertices));
+					obj->input[j].pos.x = obj->fx.at (j + obj->cFrame * (obj->nVertices));
+					obj->input[j].pos.y = obj->fy.at (j + obj->cFrame * (obj->nVertices));
+					obj->input[j].pos.z = obj->fz.at (j + obj->cFrame * (obj->nVertices));
 				}
 			}
-			else
+			else if (obj == m_objEnemies)
 			{
+				obj->cFrame = game->GetEnemyFrame(i);
 				for (int j = 0; j < obj->nVertices; j++)
 				{
-					obj->input[j].pos.x = obj->fx.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
-					obj->input[j].pos.y = obj->fy.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
-					obj->input[j].pos.z = obj->fz.at (j + game->GetEnemyFrame(i) * (obj->nVertices));
+					obj->input[j].pos.x = obj->fx.at (j + obj->cFrame * (obj->nVertices));
+					obj->input[j].pos.y = obj->fy.at (j + obj->cFrame * (obj->nVertices));
+					obj->input[j].pos.z = obj->fz.at (j + obj->cFrame * (obj->nVertices));
 				}
 			}
 
