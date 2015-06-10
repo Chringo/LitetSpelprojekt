@@ -687,7 +687,9 @@ Obstacle::Obstacle(float xPosition, float zPosition, float xExtend, float zExten
 	//XMStoreFloat4(&m_Bounds.Orientation, orientation);// If collision should be rotated
 
 	// Create world matrix.
-	m_Matrix = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(orientation))
+	float s = 0.8f;
+	m_Matrix = XMMatrixScalingFromVector(XMVectorSet(s, s, s, 1.f))
+		* XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(orientation))
 		* XMMatrixTranslation(xPosition, 0.f, zPosition);
 };
 
