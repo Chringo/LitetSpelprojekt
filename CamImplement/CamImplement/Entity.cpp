@@ -193,6 +193,11 @@ void Entity::PerformAction(Action action)
 		m_Move.m128_f32[2] = 1.0f;
 		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
 		{
+			m_currentFrame = m_animMoveStart;
+			m_isAnimating = true;
+		}
+		else if (m_currentFrame == 80)
+		{
 			m_currentFrame = m_animMove;
 			m_isAnimating = true;
 		}
@@ -200,6 +205,11 @@ void Entity::PerformAction(Action action)
 	case MoveDown:
 		m_Move.m128_f32[2] = -1.0f;
 		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
+		{
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
+		}
+		else if (m_currentFrame == 80)
 		{
 			m_currentFrame = m_animMove;
 			m_isAnimating = true;
@@ -212,10 +222,20 @@ void Entity::PerformAction(Action action)
 			m_currentFrame = m_animMove;
 			m_isAnimating = true;
 		}
+		else if (m_currentFrame == 80)
+		{
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
+		}
 		break;
 	case MoveLeft:
 		m_Move.m128_f32[0] = -1.0f;
 		if (m_currentFrame < m_animMoveStart || m_currentFrame > m_animMoveEnd)
+		{
+			m_currentFrame = m_animMove;
+			m_isAnimating = true;
+		}
+		else if (m_currentFrame == 80)
 		{
 			m_currentFrame = m_animMove;
 			m_isAnimating = true;
@@ -314,7 +334,7 @@ Player::Player(XMVECTOR position, float scale, float moveSpeed)
 	Entity::m_Rotation = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 
 	m_Controls[Attack1] = VK_LBUTTON;
-	m_Controls[Attack2] = VK_RBUTTON;
+	//m_Controls[Attack2] = VK_RBUTTON;
 	m_Controls[Block] = VK_CONTROL;
 	m_Controls[Dodge] = VK_SPACE;
 	m_Controls[MoveUp] = 'W';
@@ -328,7 +348,7 @@ Player::Player(XMVECTOR position, float scale, float moveSpeed)
 	m_animAttack = 2;
 	m_animBlock = 99;
 	m_animDodge = 127;
-	m_animMove = 41;
+	m_animMove = 61;
 	m_animMoveStart = 41;
 	m_animMoveEnd = 98;
 }

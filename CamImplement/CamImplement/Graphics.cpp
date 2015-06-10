@@ -526,6 +526,7 @@ void Graphics::InitInstances(Object obj, ObjectInstance *&object)
 		object->input[(j * 3 + 2)] = InputType(x, y, z, u, v, nx, ny, nz);
 	}
 
+	// Store all animation data per frame, per index in animated objects
 	if (object == m_objPlayer || object == m_objEnemies)
 	{
 		for (int f = 0; f < nF; f++)
@@ -882,7 +883,7 @@ void Graphics::RenderGeometry(const XMMATRIX &viewProjection)
 	RenderInstanceGeometry(m_objPlayer, viewProjection);
 
 	// [does not cast shadows properly]
-	RenderInstanceGeometry(m_objEnemies, viewProjection);
+	//RenderInstanceGeometry(m_objEnemies, viewProjection);
 
 	// [does not cast shadows properly]
 	RenderInstanceGeometry(m_objObstacles, viewProjection);
